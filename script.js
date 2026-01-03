@@ -23,6 +23,30 @@ const soaps = {
     "Lavander Soap": new Soap(
         ["Lavander", "Olive Oil", "Lye", "Sugar"],
         4.99
+    ),
+    "Olive Soap": new Soap(
+        ["Olive oil", "Rosemary", "Thyme", "Lye"],
+        7.99
+    ),
+    "Citrus Soap": new Soap(
+        ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"],
+        4.99
+    ),
+    "Rose Soap": new Soap(
+        ["Rose Pedals", "Olive oil", "Rose Essential Oil", "Lye"],
+        6.49
+    ),
+    "Oatmeal Soap": new Soap(
+        ["Oatmeal", "Coconut Oil", "Lye", "Brown Sugar"],
+        5.74
+    ),
+    "Aloe Vera Soap": new Soap(
+        ["Aloe Vera Leaves", "Lye"],
+        6.49
+    ),
+    "Shea Soap": new Soap(
+        ["Shea", "Coconut Butter", "Lye", "Almonds"],
+        5.99
     )
 };
 
