@@ -4,33 +4,52 @@ body {
     font-style: italic;
     margin: 0;
     padding: 20px;
-    background-color: #C8FAF4;
+    background-color: #ffeeb8;          /* MAIN PAGE BACKGROUND */
 }
 
 h1 {
     text-align: center;
 }
 
-.gallery {
+/*.gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 260px));
+    gap: 16px;
+    justify-content: center;
+    max-width: 1000px;
+    margin: 0 auto;
+}*/
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;   /* 👈 centers each row */
     gap: 16px;
     max-width: 1000px;
     margin: 0 auto;
 }
 
+/* Matches your minmax(200px, 260px) */
+.gallery-item {
+    width: 260px;
+    max-width: 100%;
+}
+
+
 .gallery-item {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: center;
-    background-color: rgb(239, 148, 29);
+    background-color: rgb(186, 228, 250);            /* GALLARY BACKGROUND */
     cursor: pointer;
 }
 
 .gallery-item img {
     width: 100%;
-    height: auto;
+    height: 200px;
+    object-fit: cover;
     display: block;
+    border-radius: 6px;
 }
 
 .gallery-item p {
@@ -40,7 +59,7 @@ h1 {
 
 .gallery-item:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .gallery-item:active {
