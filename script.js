@@ -239,34 +239,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("checkout-btn");
-
-    btn.addEventListener("click", async () => {
-        console.log("✅ checkout clicked");
-
-        const items = Object.entries(cart).map(([name, v]) => ({ name, quantity: v.quantity }));
-        console.log("items being sent:", items);
-
-        try {
-            const res = await fetch("/.netlify/functions/create-checkout-session", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items }),
-            });
-
-            console.log("status:", res.status);
-            const data = await res.json();
-            console.log("response:", data);
-
-            if (data.url) window.location.href = data.url;
-            else alert(data.error || "Checkout failed");
-        } catch (e) {
-            console.log("❌ fetch failed:", e);
-            alert("Checkout failed — open Console for details.");
-        }
+document.getElementById("checkout-btn").addEventListener("click", async () => {
+    const items = Object.entries(cart).map(([name, v]) => ({ name, quantity: v.quantity }));
+  
+    const res = await fetch("/.netlify/functions/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
     });
-});
+  
+    const text = await res.text(); // read as text first
+  
+    if (!res.ok) {
+      console.log("Function failed:", res.status, text);
+      alert(`Checkout failed (${res.status}). Open Console for details.`);
+      return;
+    }
+  
+    const data = JSON.parse(text);
+    window.location.href = data.url;
+  });
 
 /*
 document.getElementById("checkout-btn").addEventListener("click", async () => {
