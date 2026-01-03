@@ -146,7 +146,95 @@ document.querySelector(".close-btn").onclick = () => {
 };
 
 // Fake add to cart (for now)
-document.getElementById("add-to-cart").onclick = () => {
+/*document.getElementById("add-to-cart").onclick = () => {
   alert(`Added ${count} to cart!`);
   modal.classList.add("hidden");
-};
+};*/
+document.addEventListener("DOMContentLoaded", () => {
+    // ====== Cart UI elements (these were commented out in yours) ======
+    const cartCountEl = document.getElementById("cart-count");
+    const cartTotalEl = document.getElementById("cart-total");
+  
+    const cartModal = document.getElementById("cart-modal");
+    const cartItemsEl = document.getElementById("cart-items");
+    const closeCartBtn = document.getElementById("close-cart");
+    const cartBtn = document.getElementById("cart-btn");
+    const addToCartBtn = document.getElementById("add-to-cart");
+  
+    // Safety check (helps you catch missing HTML ids)
+    if (!cartCountEl || !cartTotalEl || !cartModal || !cartItemsEl || !cartBtn || !addToCartBtn) {
+      console.log("Cart elements missing — check your HTML ids.");
+      return;
+    }
+  
+    // ====== Cart data ======
+    const cart = {}; // { "Cinnamon Soap": { price: 6.99, quantity: 2 } }
+  
+    function updateCartButton() {
+      let totalItems = 0;
+      let totalPrice = 0;
+  
+      for (const name in cart) {
+        totalItems += cart[name].quantity;
+        totalPrice += cart[name].quantity * cart[name].price;
+      }
+  
+      cartCountEl.textContent = totalItems;
+      cartTotalEl.textContent = totalPrice.toFixed(2);
+    }
+  
+    function renderCart() {
+      cartItemsEl.innerHTML = "";
+  
+      let totalItems = 0;
+      let totalPrice = 0;
+  
+      for (const name in cart) {
+        const item = cart[name];
+        const lineTotal = item.quantity * item.price;
+  
+        totalItems += item.quantity;
+        totalPrice += lineTotal;
+  
+        const row = document.createElement("div");
+        row.className = "cart-row";
+        row.innerHTML = `
+          <span>${name} × ${item.quantity}</span>
+          <span>$${lineTotal.toFixed(2)}</span>
+        `;
+        cartItemsEl.appendChild(row);
+      }
+  
+      document.getElementById("cart-items-total").textContent = totalItems;
+      document.getElementById("cart-price-total").textContent = totalPrice.toFixed(2);
+    }
+  
+    // ====== Add to Cart (from soap modal) ======
+    addToCartBtn.addEventListener("click", () => {
+      const name = nameEl.textContent; // from your soap modal code
+  
+      if (!cart[name]) {
+        cart[name] = { price: currentSoap.price, quantity: 0 };
+      }
+      cart[name].quantity += count;
+  
+      updateCartButton();
+      modal.classList.add("hidden"); // your soap modal
+    });
+  
+    // ====== Open/close Cart modal ======
+    cartBtn.addEventListener("click", () => {
+      renderCart();
+      cartModal.classList.remove("hidden");
+    });
+  
+    closeCartBtn?.addEventListener("click", () => {
+      cartModal.classList.add("hidden");
+    });
+  
+    // Optional: click outside modal to close
+    cartModal.addEventListener("click", (e) => {
+      if (e.target === cartModal) cartModal.classList.add("hidden");
+    });
+  });
+  

@@ -11,9 +11,16 @@
 
 <body>
     <main id="background">
+
+        <button id="cart-btn" class="cart-btn">
+            🛒 Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
+        </button>
+
         <div class="header">
             <img src="images/bee.png" alt="Cute Clean Soaps logo" class="logo">
             <h1>Cute Clean Soaps</h1>
+
+            <!-- <img src="images/cart.jpg" alt="cart" width="40px"> -->
         </div>
 
         <p>Organic Healthy Soaps</p>
@@ -107,12 +114,33 @@
             <button id="add-to-cart">Add to Cart</button>
         </div>
     </div>
-<!--
-    <img src="images/floral1.png" class="corner top-left" alt="">
-    <img src="images/floral2.png" class="corner top-right" alt="">
-    <img src="images/floral3.png" class="corner bottom-left" alt="">
-    <img src="images/floral4.png" class="corner bottom-right" alt="">
--->
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" id="close-cart">&times;</button>
+
+            <h2>Your Cart</h2>
+
+            <div id="cart-items"></div>
+
+            <hr>
+
+            <p>
+                <strong>Total Items:</strong>
+                <span id="cart-items-total">0</span>
+            </p>
+
+            <p>
+                <strong>Total Price:</strong>
+                $<span id="cart-price-total">0.00</span>
+            </p>
+
+            <button id="checkout-btn">Checkout</button>
+        </div>
+    </div>
+
+
 </body>
 
 </html>
