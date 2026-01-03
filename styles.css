@@ -4,7 +4,7 @@ body {
     font-style: italic;
     margin: 0;
     padding: 20px;
-    background-color: #ffeeb8;
+    background-color: #fffaea;
     /* MAIN PAGE BACKGROUND */
 }
 
@@ -126,27 +126,27 @@ h1 {
 .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-  }
-  
-  .modal.hidden {
+}
+
+.modal.hidden {
     display: none;
-  }
-  
-  .modal-content {
+}
+
+.modal-content {
     background: #fff;
     padding: 20px;
     width: 300px;
     border-radius: 10px;
     text-align: center;
     position: relative;
-  }
-  
-  .close-btn {
+}
+
+.close-btn {
     position: absolute;
     top: 8px;
     right: 10px;
@@ -154,18 +154,37 @@ h1 {
     background: none;
     border: none;
     cursor: pointer;
-  }
-  
-  .quantity {
+}
+
+.quantity {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
     margin: 10px 0;
-  }
-  
-  .quantity button {
+}
+
+.quantity button {
     width: 30px;
     height: 30px;
     font-size: 18px;
-  }
+}
+
+body {
+    background-image:
+        url(images/floral1.png),
+        url(images/floral2.png),
+        url(images/floral3.png),
+        url(images/floral4.png);
+
+    background-position:
+        top left,
+        top right,
+        bottom left,
+        bottom right;
+
+    background-repeat: no-repeat;
+
+    background-size: 300px;
+    /* 👈 make them smaller */
+}
