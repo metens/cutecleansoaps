@@ -94,3 +94,59 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+
+const modal = document.getElementById("soap-modal");
+const nameEl = document.getElementById("modal-name");
+const ingredientsEl = document.getElementById("modal-ingredients");
+const priceEl = document.getElementById("modal-price");
+const totalEl = document.getElementById("modal-total");
+const countEl = document.getElementById("count");
+
+let currentSoap = null;
+let count = 1;
+
+// Open modal on soap click
+document.querySelectorAll(".gallery-item").forEach(item => {
+  item.addEventListener("click", () => {
+    const name = item.dataset.name;
+    currentSoap = soaps[name];
+    if (!currentSoap) return;
+
+    count = 1;
+    nameEl.textContent = name;
+    ingredientsEl.textContent =
+      "Ingredients: " + currentSoap.ingredients.join(", ");
+    priceEl.textContent = currentSoap.price.toFixed(2);
+    countEl.textContent = count;
+    totalEl.textContent = (count * currentSoap.price).toFixed(2);
+
+    modal.classList.remove("hidden");
+  });
+});
+
+// Quantity buttons
+document.getElementById("plus").onclick = () => {
+  count++;
+  countEl.textContent = count;
+  totalEl.textContent = (count * currentSoap.price).toFixed(2);
+};
+
+document.getElementById("minus").onclick = () => {
+  if (count > 1) {
+    count--;
+    countEl.textContent = count;
+    totalEl.textContent = (count * currentSoap.price).toFixed(2);
+  }
+};
+
+// Close modal
+document.querySelector(".close-btn").onclick = () => {
+  modal.classList.add("hidden");
+};
+
+// Fake add to cart (for now)
+document.getElementById("add-to-cart").onclick = () => {
+  alert(`Added ${count} to cart!`);
+  modal.classList.add("hidden");
+};

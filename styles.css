@@ -23,7 +23,7 @@ h1 {
 }
 
 .logo {
-    width: 60px;
+    width: 100px;
     /* 👈 controls logo size */
     height: auto;
 }
@@ -122,3 +122,50 @@ h1 {
     font-size: 11px;
     line-height: 1.2;
 }
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal.hidden {
+    display: none;
+  }
+  
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 300px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 22px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .quantity {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  
+  .quantity button {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
