@@ -24,6 +24,7 @@ h1 {
     padding: 10px;
     text-align: center;
     background-color: rgb(239, 148, 29);
+    cursor: pointer;
 }
 
 .gallery-item img {
@@ -35,4 +36,13 @@ h1 {
 .gallery-item p {
     margin-top: 8px;
     font-size: 14px;
+}
+
+.gallery-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.gallery-item:active {
+    transform: scale(0.97);
 }

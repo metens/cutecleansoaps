@@ -7,7 +7,15 @@
     <link rel="stylesheet" href="styles.css">
     <title>Cute Clean Soaps</title>
 </head>
-
+<script>
+    const items = document.querySelectorAll(".gallery-item");
+  
+    items.forEach(item => {
+      item.addEventListener("click", () => {
+        alert("You clicked on " + item.dataset.name);
+      });
+    });
+  </script>
 <body>
     <main id="background">
         <h1>Cute Clean Soaps</h1>
@@ -15,47 +23,47 @@
         <p>Organic Healthy Soaps</p>
 
         <div class="gallery">
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Cinnamon Soap">
                 <img src="images/cinnamon.jpg" alt="Soap 1">
                 <p>Cinnamon Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Coconut Soap">
                 <img src="images/coconut.jpg" alt="Soap 2">
                 <p>Coconut Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Honey Soap">
                 <img src="images/honey.jpg" alt="Soap 3">
                 <p>Honey Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Lavander Soap">
                 <img src="images/lavander.jpg" alt="Soap 4">
                 <p>Lavander Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Oatmeal Soap">
                 <img src="images/oatmeal.jpg" alt="Soap 5">
                 <p>Oatmeal Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Shea Soap">
                 <img src="images/shea.jpg" alt="Soap 6">
                 <p>Shea Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Rose Soap">
                 <img src="images/rose.jpg" alt="Soap 7">
                 <p>Rose Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Citrus Soap">
                 <img src="images/citrus.jpg" alt="Soap 8">
                 <p>Citrus Soap</p>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" data-name="Goat Soap">
                 <img src="images/goat.jpg" alt="Soap 8">
                 <p>Goat Soap</p>
             </div>
