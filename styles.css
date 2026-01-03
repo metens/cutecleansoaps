@@ -1,0 +1,38 @@
+body {
+    text-align: center;
+    font-family: Comic Sans MS, sans-serif;
+    font-style: italic;
+    margin: 0;
+    padding: 20px;
+    background-color: #C8FAF4;
+}
+
+h1 {
+    text-align: center;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.gallery-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    background-color: rgb(239, 148, 29);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.gallery-item p {
+    margin-top: 8px;
+    font-size: 14px;
+}
