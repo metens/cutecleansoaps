@@ -4,44 +4,35 @@ body {
     font-style: italic;
     margin: 0;
     padding: 20px;
-    background-color: #ffeeb8;          /* MAIN PAGE BACKGROUND */
+    background-color: #ffeeb8;
+    /* MAIN PAGE BACKGROUND */
 }
 
 h1 {
     text-align: center;
 }
 
-/*.gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 260px));
-    gap: 16px;
-    justify-content: center;
-    max-width: 1000px;
-    margin: 0 auto;
-}*/
-
 .gallery {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;   /* 👈 centers each row */
+    justify-content: center;
+    /* 👈 centers each row */
     gap: 16px;
     max-width: 1000px;
     margin: 0 auto;
 }
-
-/* Matches your minmax(200px, 260px) */
-.gallery-item {
-    width: 260px;
-    max-width: 100%;
-}
-
 
 .gallery-item {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: center;
-    background-color: rgb(186, 228, 250);            /* GALLARY BACKGROUND */
+    background-color: rgb(186, 228, 250);
+    /* GALLARY BACKGROUND */
     cursor: pointer;
+    width: 260px;
+    max-width: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
 .gallery-item img {
@@ -64,4 +55,54 @@ h1 {
 
 .gallery-item:active {
     transform: scale(0.97);
+}
+
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.gallery-item .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    /* same as image height */
+    padding: 12px;
+
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* Desktop hover (only when hover is supported) */
+@media (hover: hover) and (pointer: fine) {
+    .gallery-item:hover .overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile tap-to-open class */
+.gallery-item.is-open .overlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.overlay span {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.overlay small {
+    font-size: 11px;
+    line-height: 1.2;
 }
