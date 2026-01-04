@@ -55,8 +55,8 @@ exports.handler = async (event) => {
             mode: "payment",
             payment_method_types: ["card"],
             line_items,
-            success_url: `${YOUR_ORIGIN}/success.html`,
-            cancel_url: `${YOUR_ORIGIN}/cancel.html`,
+            success_url: `${origin}/success.html`,
+            cancel_url: `${origin}/cancel.html`,
           });
 
         return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
