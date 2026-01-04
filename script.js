@@ -81,13 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const overlay = item.querySelector(".overlay");
         if (!soap || !overlay) return;
 
-        /*overlay.innerHTML = `
-        <strong>${name}</strong>
-        <span>Ingredients:</span>
-        <small>${soap.ingredients.join(", ")}</small>
-        <span>Price: $${soap.price.toFixed(2)}</span>
-      `;*/
-
         overlay.innerHTML = `
         <strong>${name}</strong>
         <small>${soap.ingredients.join(", ")}</small>

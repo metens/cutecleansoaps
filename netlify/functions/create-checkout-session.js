@@ -25,7 +25,7 @@ exports.handler = async (event) => {
             "Cinnamon Soap": 400,
             "Coconut Soap": 400,
             "Honey Soap": 500,
-            "Lavander Soap": 500,
+            "Lavender Soap": 500,
             "Olive Soap": 600,
             "Citrus Soap": 400,
             "Rose Soap": 400,
@@ -53,10 +53,11 @@ exports.handler = async (event) => {
 
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
+            payment_method_types: ["card"],
             line_items,
-            success_url: `${origin}/success.html`,
-            cancel_url: `${origin}/cancel.html`,
-        });
+            success_url: `${YOUR_ORIGIN}/success.html`,
+            cancel_url: `${YOUR_ORIGIN}/cancel.html`,
+          });
 
         return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
     } catch (err) {
