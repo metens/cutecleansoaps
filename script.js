@@ -144,23 +144,7 @@ document.querySelectorAll(".gallery-item").forEach(item => {
       modal.classList.remove("hidden");
     });
   });
-/*document.querySelectorAll(".gallery-item").forEach(item => {
-    item.addEventListener("click", () => {
-        const name = item.dataset.name;
-        currentSoap = soaps[name];
-        if (!currentSoap) return;
 
-        count = 1;
-        nameEl.textContent = name;
-        ingredientsEl.textContent =
-            "Ingredients: " + currentSoap.ingredients.join(", ");
-        priceEl.textContent = currentSoap.price.toFixed(2);
-        countEl.textContent = count;
-        totalEl.textContent = (count * currentSoap.price).toFixed(2);
-
-        modal.classList.remove("hidden");
-    });
-});*/
 
 // Quantity buttons
 document.getElementById("plus").onclick = () => {
@@ -311,27 +295,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("checkout-btn").addEventListener("click", async () => {
     const items = Object.entries(cart).map(([name, v]) => ({
-        name,
-        quantity: v.quantity
+      name,
+      quantity: v.quantity,
     }));
-
-    //const FUNCTION_BASE = "https://tubular-centaur-3dbb72.netlify.app";
-    const FUNCTION_BASE = "https://cutecleansoaps-c8y8apcpv-nathans-projects-65101eba.vercel.app/";
-
-    const res = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
-      });
-
-    const text = await res.text();
-
-    if (!res.ok) {
-        console.log("Function failed:", res.status, text);
-        alert(`Checkout failed (${res.status}). Open Console for details.`);
-        return;
+  
+    if (items.length === 0) {
+      alert("Your cart is empty!");
+      return;
     }
-
+  
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+  
+    const text = await res.text();
+  
+    if (!res.ok) {
+      console.log("Function failed:", res.status, text);
+      alert(`Checkout failed (${res.status}). Open Console for details.`);
+      return;
+    }
+  
     const data = JSON.parse(text);
     window.location.href = data.url;
-});
+  });
