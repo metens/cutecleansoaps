@@ -189,7 +189,7 @@ body {
     /* 👈 make them smaller */
 }
 
-.cart-btn{
+.cart-btn {
     position: fixed;
     top: 12px;
     right: 12px;
@@ -198,23 +198,23 @@ body {
     border-radius: 999px;
     cursor: pointer;
     z-index: 2000;
-  }
+}
 
-  #cart-items {
+#cart-items {
     text-align: left;
     margin: 10px 0;
-  }
-  
-  .cart-row {
+}
+
+.cart-row {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
     margin-bottom: 6px;
-  }
-  
-  #checkout-btn {
+}
+
+#checkout-btn {
     margin-top: 10px;
     padding: 10px;
     width: 100%;
     cursor: pointer;
-  }
+}

@@ -97,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-
 const modal = document.getElementById("soap-modal");
 const nameEl = document.getElementById("modal-name");
 const ingredientsEl = document.getElementById("modal-ingredients");
@@ -147,11 +146,6 @@ document.querySelector(".close-btn").onclick = () => {
     modal.classList.add("hidden");
 };
 
-// Fake add to cart (for now)
-/*document.getElementById("add-to-cart").onclick = () => {
-  alert(`Added ${count} to cart!`);
-  modal.classList.add("hidden");
-};*/
 document.addEventListener("DOMContentLoaded", () => {
     // ====== Cart UI elements (these were commented out in yours) ======
     const cartCountEl = document.getElementById("cart-count");
@@ -241,26 +235,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("checkout-btn").addEventListener("click", async () => {
     const items = Object.entries(cart).map(([name, v]) => ({
-      name,
-      quantity: v.quantity
+        name,
+        quantity: v.quantity
     }));
-  
+
     const FUNCTION_BASE = "https://tubular-centaur-3dbb72.netlify.app";
-  
+
     const res = await fetch(`${FUNCTION_BASE}/.netlify/functions/create-checkout-session`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
     });
-  
+
     const text = await res.text();
-  
+
     if (!res.ok) {
-      console.log("Function failed:", res.status, text);
-      alert(`Checkout failed (${res.status}). Open Console for details.`);
-      return;
+        console.log("Function failed:", res.status, text);
+        alert(`Checkout failed (${res.status}). Open Console for details.`);
+        return;
     }
-  
+
     const data = JSON.parse(text);
     window.location.href = data.url;
-  });
+});
