@@ -80,23 +80,26 @@ h1 {
 
 .gallery-item .overlay {
     position: absolute;
-    inset: 0;              /* fills the entire image */
+    inset: 0;
+    /* fills the entire image */
     background: rgba(0, 0, 0, 0.55);
     color: white;
-  
+
     display: flex;
     flex-direction: column;
-    justify-content: center; /* vertical center */
-    align-items: center;     /* horizontal center */
+    justify-content: center;
+    /* vertical center */
+    align-items: center;
+    /* horizontal center */
     text-align: center;
-  
+
     padding: 12px;
-  
+
     opacity: 0;
     transform: translateY(0);
     transition: opacity 0.25s ease;
-  }
-  
+}
+
 /* Desktop hover (only when hover is supported) */
 @media (hover: hover) and (pointer: fine) {
     .gallery-item:hover .overlay {
@@ -215,4 +218,22 @@ body {
     padding: 10px;
     width: 100%;
     cursor: pointer;
+}
+
+.out-of-stock {
+    margin-top: 8px;
+    padding: 4px 10px;
+    background: #c0392b;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 12px;
+}
+
+.gallery-item.out {
+    opacity: 0.6;
+}
+
+.gallery-item.out {
+    cursor: not-allowed;
 }

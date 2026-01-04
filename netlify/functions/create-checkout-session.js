@@ -22,16 +22,17 @@ exports.handler = async (event) => {
         const { items } = JSON.parse(event.body || "{}");
 
         const PRICE_LOOKUP = {
-            "Cinnamon Soap": 699,
-            "Coconut Soap": 599,
-            "Honey Soap": 649,
-            "Lavander Soap": 499,
-            "Olive Soap": 799,
-            "Citrus Soap": 499,
-            "Rose Soap": 649,
-            "Oatmeal Soap": 574,
-            "Aloe Vera Soap": 649,
-            "Shea Soap": 599,
+            "Cinnamon Soap": 400,
+            "Coconut Soap": 400,
+            "Honey Soap": 500,
+            "Lavander Soap": 500,
+            "Olive Soap": 600,
+            "Citrus Soap": 400,
+            "Rose Soap": 400,
+            "Oatmeal Soap": 500,
+            "Aloe Vera Soap": 400,
+            "Shea Soap": 400,
+            "Vanilla Chai Soap": 500,
         };
 
         const line_items = (items || []).map((i) => {

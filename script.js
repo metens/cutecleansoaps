@@ -2,9 +2,10 @@ const cart = {}; // { "Cinnamon Soap": { price: 6.99, quantity: 2 } }
 
 // Soap class
 class Soap {
-    constructor(ingredients, price) {
+    constructor(ingredients, price, inStock = true) {
         this.ingredients = ingredients;
         this.price = price;
+        this.inStock = inStock;
     }
 }
 
@@ -12,47 +13,58 @@ class Soap {
 const soaps = {
     "Cinnamon Soap": new Soap(
         ["Olive oil", "Coconut oil", "Cinnamon", "Lye"],
-        4.00 
+        4.00,
+        false
     ),
     "Coconut Soap": new Soap(
         ["Coconut oil", "Shea butter", "Lye"],
-        4.00 
+        4.00,
+        false
     ),
     "Honey Soap": new Soap(
         ["Honey", "Olive oil", "Oat milk", "Lye"],
-        5.00 
+        5.00,
+        false
     ),
     "Lavender Soap": new Soap(
         ["Lavender", "Olive Oil", "Lye", "Sugar"],
-        5.00 
+        5.00,
+        true
     ),
     "Olive Soap": new Soap(
         ["Olive oil", "Rosemary", "Thyme", "Lye"],
-        6.00 
+        6.00,
+        false
     ),
     "Citrus Soap": new Soap(
         ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"],
-        4.00 
+        4.00,
+        false
     ),
     "Rose Soap": new Soap(
         ["Rose Pedals", "Olive oil", "Rose Essential Oil", "Lye"],
-        4.00 
+        4.00,
+        false
     ),
     "Oatmeal Soap": new Soap(
         ["Oatmeal", "Goat Milk", "Lye", "Brown Sugar", "Coconut Oil"],
-        5.00 
+        5.00,
+        true
     ),
     "Aloe Vera Soap": new Soap(
         ["Aloe Vera Leaves", "Lye"],
-        4.00 
+        4.00,
+        false
     ),
     "Shea Soap": new Soap(
         ["Shea", "Coconut Butter", "Lye", "Almonds"],
-        4.00 
+        4.00,
+        false
     ),
     "Vanilla Chai Soap": new Soap(
         ["Vanilla Oil", "Nutmeg", "Ground Ginger", "Cinnamon Oil", "Lye"],
-        5.00 
+        5.00,
+        false
     ),
 };
 
@@ -69,12 +81,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const overlay = item.querySelector(".overlay");
         if (!soap || !overlay) return;
 
-        overlay.innerHTML = `
+        /*overlay.innerHTML = `
         <strong>${name}</strong>
         <span>Ingredients:</span>
         <small>${soap.ingredients.join(", ")}</small>
         <span>Price: $${soap.price.toFixed(2)}</span>
-      `;
+      `;*/
+
+        overlay.innerHTML = `
+        <strong>${name}</strong>
+        <small>${soap.ingredients.join(", ")}</small>
+        <span>Price: $${soap.price.toFixed(2)}</span>
+        ${!soap.inStock
+            ? `<span class="out-of-stock">Out of Stock</span>`
+            : ``
+        }
+`;
     });
 
     // Tap-to-toggle for touch devices
@@ -114,6 +136,23 @@ let count = 1;
 // Open modal on soap click
 document.querySelectorAll(".gallery-item").forEach(item => {
     item.addEventListener("click", () => {
+      const name = item.dataset.name;
+      const soap = soaps[name];
+  
+      if (!soap || !soap.inStock) return; // 🚫 block click
+  
+      currentSoap = soap;
+      count = 1;
+      nameEl.textContent = name;
+      ingredientsEl.textContent = "Ingredients: " + soap.ingredients.join(", ");
+      priceEl.textContent = soap.price.toFixed(2);
+      countEl.textContent = count;
+      totalEl.textContent = (count * soap.price).toFixed(2);
+      modal.classList.remove("hidden");
+    });
+  });
+/*document.querySelectorAll(".gallery-item").forEach(item => {
+    item.addEventListener("click", () => {
         const name = item.dataset.name;
         currentSoap = soaps[name];
         if (!currentSoap) return;
@@ -128,7 +167,7 @@ document.querySelectorAll(".gallery-item").forEach(item => {
 
         modal.classList.remove("hidden");
     });
-});
+});*/
 
 // Quantity buttons
 document.getElementById("plus").onclick = () => {
@@ -149,6 +188,13 @@ document.getElementById("minus").onclick = () => {
 document.querySelector(".close-btn").onclick = () => {
     modal.classList.add("hidden");
 };
+
+document.querySelectorAll(".gallery-item").forEach(item => {
+    const soap = soaps[item.dataset.name];
+    if (soap && !soap.inStock) {
+      item.classList.add("out");
+    }
+  });
 
 document.addEventListener("DOMContentLoaded", () => {
     // ====== Cart UI elements (these were commented out in yours) ======
@@ -210,6 +256,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ====== Add to Cart (from soap modal) ======
     addToCartBtn.addEventListener("click", () => {
+        if (!currentSoap?.inStock) return;
+
         const name = nameEl.textContent; // from your soap modal code
 
         if (!cart[name]) {
