@@ -206,6 +206,26 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    cartItemsEl.addEventListener("click", (e) => {
+        const btn = e.target.closest("button.qty-btn");
+        if (!btn) return;
+      
+        const name = btn.dataset.name;
+        const action = btn.dataset.action;
+      
+        if (!cart[name]) return;
+      
+        if (action === "inc") cart[name].quantity += 1;
+      
+        if (action === "dec") {
+          cart[name].quantity -= 1;
+          if (cart[name].quantity <= 0) delete cart[name]; // remove item when it hits 0
+        }
+      
+        renderCart(); // re-draw rows + totals
+      });
+
+
     // ====== Cart data ======
 
     function updateCartButton() {
@@ -223,30 +243,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderCart() {
         cartItemsEl.innerHTML = "";
-
+      
         let totalItems = 0;
         let totalPrice = 0;
-
+      
         for (const name in cart) {
-            const item = cart[name];
-            const lineTotal = item.quantity * item.price;
-
-            totalItems += item.quantity;
-            totalPrice += lineTotal;
-
-            const row = document.createElement("div");
-            row.className = "cart-row";
-            row.innerHTML = `
-          <span>${name} × ${item.quantity}</span>
-          <span>$${lineTotal.toFixed(2)}</span>
-        `;
-            cartItemsEl.appendChild(row);
+          const item = cart[name];
+          const lineTotal = item.quantity * item.price;
+      
+          totalItems += item.quantity;
+          totalPrice += lineTotal;
+      
+          const row = document.createElement("div");
+          row.className = "cart-row";
+      
+          row.innerHTML = `
+            <span class="cart-name">${name}</span>
+      
+            <div class="cart-qty-controls">
+              <button class="qty-btn" data-action="dec" data-name="${name}">−</button>
+              <span class="cart-qty">${item.quantity}</span>
+              <button class="qty-btn" data-action="inc" data-name="${name}">+</button>
+            </div>
+      
+            <span class="cart-line-total">$${lineTotal.toFixed(2)}</span>
+          `;
+      
+          cartItemsEl.appendChild(row);
         }
-
+      
         document.getElementById("cart-items-total").textContent = totalItems;
         document.getElementById("cart-price-total").textContent = totalPrice.toFixed(2);
-    }
-
+      
+        updateCartButton();
+      }
+      
     // ====== Add to Cart (from soap modal) ======
     addToCartBtn.addEventListener("click", () => {
         if (!currentSoap?.inStock) return;
