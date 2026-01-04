@@ -53,11 +53,18 @@ exports.handler = async (event) => {
 
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
-            payment_method_types: ["card"],
             line_items,
+          
+            // Collect shipping info on the Stripe-hosted checkout page
+            shipping_address_collection: {
+              allowed_countries: ["US"], // add more if you ship internationally
+            },
+            phone_number_collection: { enabled: true },
+          
             success_url: `${origin}/success.html`,
             cancel_url: `${origin}/cancel.html`,
           });
+          
 
         return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
     } catch (err) {
