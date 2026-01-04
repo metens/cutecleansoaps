@@ -315,13 +315,14 @@ document.getElementById("checkout-btn").addEventListener("click", async () => {
         quantity: v.quantity
     }));
 
-    const FUNCTION_BASE = "https://tubular-centaur-3dbb72.netlify.app";
+    //const FUNCTION_BASE = "https://tubular-centaur-3dbb72.netlify.app";
+    const FUNCTION_BASE = "https://cutecleansoaps-c8y8apcpv-nathans-projects-65101eba.vercel.app/";
 
-    const res = await fetch(`${FUNCTION_BASE}/.netlify/functions/create-checkout-session`, {
+    const res = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),
-    });
+      });
 
     const text = await res.text();
 
