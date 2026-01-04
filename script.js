@@ -12,44 +12,48 @@ class Soap {
 const soaps = {
     "Cinnamon Soap": new Soap(
         ["Olive oil", "Coconut oil", "Cinnamon", "Lye"],
-        6.99
+        4.00 
     ),
     "Coconut Soap": new Soap(
         ["Coconut oil", "Shea butter", "Lye"],
-        5.99
+        4.00 
     ),
     "Honey Soap": new Soap(
         ["Honey", "Olive oil", "Oat milk", "Lye"],
-        6.49
+        5.00 
     ),
-    "Lavander Soap": new Soap(
-        ["Lavander", "Olive Oil", "Lye", "Sugar"],
-        4.99
+    "Lavender Soap": new Soap(
+        ["Lavender", "Olive Oil", "Lye", "Sugar"],
+        5.00 
     ),
     "Olive Soap": new Soap(
         ["Olive oil", "Rosemary", "Thyme", "Lye"],
-        7.99
+        6.00 
     ),
     "Citrus Soap": new Soap(
         ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"],
-        4.99
+        4.00 
     ),
     "Rose Soap": new Soap(
         ["Rose Pedals", "Olive oil", "Rose Essential Oil", "Lye"],
-        6.49
+        4.00 
     ),
     "Oatmeal Soap": new Soap(
-        ["Oatmeal", "Coconut Oil", "Lye", "Brown Sugar"],
-        5.74
+        ["Oatmeal", "Goat Milk", "Lye", "Brown Sugar", "Coconut Oil"],
+        5.00 
     ),
     "Aloe Vera Soap": new Soap(
         ["Aloe Vera Leaves", "Lye"],
-        6.49
+        4.00 
     ),
     "Shea Soap": new Soap(
         ["Shea", "Coconut Butter", "Lye", "Almonds"],
-        5.99
-    )
+        4.00 
+    ),
+    "Vanilla Chai Soap": new Soap(
+        ["Vanilla Oil", "Nutmeg", "Ground Ginger", "Cinnamon Oil", "Lye"],
+        5.00 
+    ),
 };
 
 // Click handlers
