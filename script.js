@@ -240,15 +240,23 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById("checkout-btn").addEventListener("click", async () => {
-    const items = Object.entries(cart).map(([name, v]) => ({ name, quantity: v.quantity }));
+    const items = Object.entries(cart).map(([name, v]) => ({
+      name,
+      quantity: v.quantity
+    }));
   
-    const res = await fetch("/.netlify/functions/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
-    });
+    const FUNCTION_BASE = "https://tubular-centaur-3dbb72.netlify.app";
   
-    const text = await res.text(); // read as text first
+    const res = await fetch(
+      `${FUNCTION_BASE}/.netlify/functions/create-checkout-session`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      }
+    );
+  
+    const text = await res.text();
   
     if (!res.ok) {
       console.log("Function failed:", res.status, text);
