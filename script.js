@@ -259,19 +259,3 @@ document.getElementById("checkout-btn").addEventListener("click", async () => {
     const data = JSON.parse(text);
     window.location.href = data.url;
   });
-
-/*
-document.getElementById("checkout-btn").addEventListener("click", async () => {
-  const items = Object.entries(cart).map(([name, v]) => ({ name, quantity: v.quantity }));
- 
-  const res = await fetch("/.netlify/functions/create-checkout-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
-  });
- 
-  const data = await res.json();
-  if (data.url) window.location.href = data.url;
-  else alert(data.error || "Checkout failed");
-});
-*/

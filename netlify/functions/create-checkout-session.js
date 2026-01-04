@@ -1,9 +1,21 @@
 const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+const headers = {
+  "Access-Control-Allow-Origin": "*", // or "https://YOURNAME.github.io" for stricter
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Content-Type": "application/json",
+};
+
 exports.handler = async (event) => {
+  // ✅ Handle preflight
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers, body: "" };
+  }
+
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: JSON.stringify({ error: "Method Not Allowed" }) };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method Not Allowed" }) };
   }
 
   try {
@@ -12,7 +24,14 @@ exports.handler = async (event) => {
     const PRICE_LOOKUP = {
       "Cinnamon Soap": 699,
       "Coconut Soap": 599,
-      // add the rest...
+      "Honey Soap": 649,
+      "Lavander Soap": 499,
+      "Olive Soap": 799,
+      "Citrus Soap": 499,
+      "Rose Soap": 649,
+      "Oatmeal Soap": 574,
+      "Aloe Vera Soap": 649,
+      "Shea Soap": 599,
     };
 
     const line_items = (items || []).map((i) => {
@@ -29,7 +48,7 @@ exports.handler = async (event) => {
       };
     });
 
-    const origin = `${event.headers["x-forwarded-proto"] || "http"}://${event.headers.host}`;
+    const origin = `${event.headers["x-forwarded-proto"] || "https"}://${event.headers.host}`;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -38,16 +57,8 @@ exports.handler = async (event) => {
       cancel_url: `${origin}/cancel.html`,
     });
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: session.url }),
-    };
+    return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: err.message }),
-    };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 };
