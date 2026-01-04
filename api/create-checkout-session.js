@@ -1,74 +1,55 @@
-
 const Stripe = require("stripe");
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const headers = {
-    "Access-Control-Allow-Origin": "*", // or "https://YOURNAME.github.io" for stricter
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Content-Type": "application/json",
-};
+export default async function handler(req, res) {
+  if (req.method === "OPTIONS") return res.status(200).send(""); // optional
+  if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
 
-exports.handler = async (event) => {
-    // Handle preflight
-    if (event.httpMethod === "OPTIONS") {
-        return { statusCode: 200, headers, body: "" };
-    }
+  try {
+    const { items } = req.body || {};
 
-    if (event.httpMethod !== "POST") {
-        return { statusCode: 405, headers, body: JSON.stringify({ error: "Method Not Allowed" }) };
-    }
+    const PRICE_LOOKUP = {
+      "Cinnamon Soap": 400,
+      "Coconut Soap": 400,
+      "Honey Soap": 500,
+      "Lavender Soap": 500,
+      "Olive Soap": 600,
+      "Citrus Soap": 400,
+      "Rose Soap": 400,
+      "Oatmeal Soap": 500,
+      "Aloe Vera Soap": 400,
+      "Shea Soap": 400,
+      "Vanilla Chai Soap": 500,
+    };
 
-    try {
-        const { items } = JSON.parse(event.body || "{}");
+    const line_items = (items || []).map((i) => {
+      const unit_amount = PRICE_LOOKUP[i.name];
+      if (!unit_amount) throw new Error("Unknown item: " + i.name);
 
-        const PRICE_LOOKUP = {
-            "Cinnamon Soap": 400,
-            "Coconut Soap": 400,
-            "Honey Soap": 500,
-            "Lavender Soap": 500,
-            "Olive Soap": 600,
-            "Citrus Soap": 400,
-            "Rose Soap": 400,
-            "Oatmeal Soap": 500,
-            "Aloe Vera Soap": 400,
-            "Shea Soap": 400,
-            "Vanilla Chai Soap": 500,
-        };
+      return {
+        quantity: i.quantity,
+        price_data: {
+          currency: "usd",
+          unit_amount,
+          product_data: { name: i.name },
+        },
+      };
+    });
 
-        const line_items = (items || []).map((i) => {
-            const unit_amount = PRICE_LOOKUP[i.name];
-            if (!unit_amount) throw new Error("Unknown item: " + i.name);
+    const origin = `https://${req.headers.host}`;
 
-            return {
-                quantity: i.quantity,
-                price_data: {
-                    currency: "usd",
-                    unit_amount,
-                    product_data: { name: i.name },
-                },
-            };
-        });
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items,
+      success_url: `${origin}/success.html`,
+      cancel_url: `${origin}/cancel.html`,
+      // shipping_address_collection: { allowed_countries: ["US"] }, // if you want shipping
+    });
 
-        const origin = `${event.headers["x-forwarded-proto"] || "https"}://${event.headers.host}`;
-
-        const session = await stripe.checkout.sessions.create({
-            mode: "payment",
-            line_items,
-          
-            // Collect shipping info on the Stripe-hosted checkout page
-            shipping_address_collection: {
-              allowed_countries: ["US"], // add more if you ship internationally
-            },
-            phone_number_collection: { enabled: true },
-          
-            success_url: `${origin}/success.html`,
-            cancel_url: `${origin}/cancel.html`,
-          });
-          
-
-        return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
-    } catch (err) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
-    }
-};
+    return res.status(200).json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+}
