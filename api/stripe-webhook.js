@@ -78,14 +78,16 @@ Phone: ${shipping?.phone || "N/A"}
       console.log("ORDER_EMAILS:", process.env.ORDER_EMAILS ? "set" : "MISSING");
       console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY ? "set" : "MISSING");
 
-      await resend.emails.send({
-        from: "Cute Clean Soaps <onboarding@resend.dev>",
+      const result = await resend.emails.send({
+        from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
         to: process.env.ORDER_EMAILS.split(",").map((s) => s.trim()),
         subject: "🧼 New Soap Order",
         text: message,
       });
-      console.log("Resend: email sent to", process.env.ORDER_EMAILS);
-    }
+      
+      console.log("Resend result:", result);
+
+      }
   } catch (err) {
     console.error("Webhook processing failed:", err);
   }
