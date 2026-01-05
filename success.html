@@ -14,7 +14,6 @@
       padding: 20px;
       background-color: #fffaea;
 
-      /* floral background images (same as homepage) */
       background-image:
         url(images/floral1.png),
         url(images/floral2.png),
@@ -27,41 +26,58 @@
         bottom right;
       background-repeat: no-repeat;
       background-size: 300px;
-      min-height: 100vh;
 
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
+    /* same header style as homepage */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .logo {
+      width: 120px;
+      height: auto;
+    }
+
     .card {
       background: rgb(186, 228, 250);
       border-radius: 14px;
-      padding: 32px 28px;
-      max-width: 420px;
+      padding: 28px 24px;
+      max-width: 460px;
       width: 100%;
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+
+      /* animation */
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+      animation: popIn 450ms ease-out forwards;
+    }
+
+    @keyframes popIn {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .icon {
-      font-size: 3rem;
-      margin-bottom: 10px;
+      font-size: 2.6rem;
+      margin: 6px 0 10px;
     }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: 1.9rem;
-    }
-
-    p {
-      margin: 10px 0;
-      font-size: 15px;
-      line-height: 1.4;
-    }
+    h1 { margin: 0 0 10px; font-size: 1.9rem; }
+    p { margin: 10px 0; font-size: 15px; line-height: 1.4; }
 
     .button {
       display: inline-block;
-      margin-top: 18px;
+      margin-top: 16px;
       padding: 10px 18px;
       background: #6b8e7f;
       color: white;
@@ -70,29 +86,71 @@
       font-weight: bold;
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
-
     .button:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    /* lightweight confetti */
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .confetti i {
+      position: absolute;
+      top: -10vh;
+      width: 10px;
+      height: 14px;
+      border-radius: 2px;
+      opacity: 0.9;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(120vh) rotate(720deg); }
     }
   </style>
 </head>
 
 <body>
+  <div class="confetti" id="confetti"></div>
+
   <div class="card">
+    <div class="header">
+      <img class="logo" src="images/logo.png" alt="Cute Clean Soaps logo">
+      <h1>Order confirmed!</h1>
+    </div>
+
     <div class="icon">🧼</div>
-    <h1>Payment Successful!</h1>
 
-    <p>
-      Thank you for your order! We’ve received your payment and will begin
-      preparing your soaps with care.
-    </p>
-
-    <p>
-      A confirmation email with shipping details is on its way 💌
-    </p>
+    <p>Payment successful ✅ We’ll start preparing your soaps with care.</p>
+    <p>You’ll receive a confirmation email with shipping details shortly 💌</p>
 
     <a class="button" href="/">Back to Shop</a>
   </div>
+
+  <script>
+    // Tell homepage to clear cart (and clear saved cart immediately too)
+    localStorage.setItem("ccs_clear_cart_on_home", "1");
+    localStorage.removeItem("ccs_cart_v1");
+    localStorage.removeItem("ccs_resume_checkout");
+
+    // Confetti (lightweight, no libraries)
+    const confetti = document.getElementById("confetti");
+    const pieces = 60;
+    for (let i = 0; i < pieces; i++) {
+      const p = document.createElement("i");
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.animationDuration = (1.8 + Math.random() * 1.8) + "s";
+      p.style.animationDelay = (Math.random() * 0.25) + "s";
+      p.style.transform = `rotate(${Math.random() * 360}deg)`;
+      // random-ish colors
+      const colors = ["#ff5a7a", "#ffd166", "#06d6a0", "#4ea8de", "#b5179e"];
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confetti.appendChild(p);
+    }
+    setTimeout(() => confetti.remove(), 2600);
+  </script>
 </body>
 </html>
