@@ -78,15 +78,13 @@ Phone: ${shipping?.phone || "N/A"}
       console.log("ORDER_EMAILS:", process.env.ORDER_EMAILS ? "set" : "MISSING");
       console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY ? "set" : "MISSING");
 
-      const result = await resend.emails.send({
-        //from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
-        from: "Cute Clean Soaps <onboarding@resend.dev>",
-
-        to: process.env.ORDER_EMAILS.split(",").map((s) => s.trim()),
+      await resend.emails.send({
+        from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
+        to: process.env.ORDER_EMAILS.split(",").map(s => s.trim()),
         subject: "🧼 New Soap Order",
         text: message,
       });
-      
+     
       console.log("Resend result:", result);
 
       }
