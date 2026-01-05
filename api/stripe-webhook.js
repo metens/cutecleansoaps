@@ -78,6 +78,7 @@ Phone: ${shipping?.phone || "N/A"}
         subject: "🧼 New Soap Order",
         text: message,
       });
+      console.log("Resend: email sent to", process.env.ORDER_EMAILS);
     }
   } catch (err) {
     console.error("Webhook processing failed:", err);
