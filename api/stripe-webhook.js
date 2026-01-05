@@ -1,7 +1,14 @@
 import Stripe from "stripe";
 import { Resend } from "resend";
+import crypto from "crypto";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+function confirmationCode(sessionId) {
+  const salt = process.env.ORDER_CODE_SALT || "ccs_default_salt_change_me";
+  const hex = crypto.createHash("sha256").update(sessionId + salt).digest("hex");
+  return "CCS-" + hex.slice(0, 8).toUpperCase();
+}
 
 export const config = { runtime: "nodejs" };
 
@@ -76,21 +83,25 @@ export default async function handler(req, res) {
         console.error("listLineItems failed:", e);
       }
 
+      const code = confirmationCode(session.id);
       const message = `
-        NEW ORDER 🧼
-
-        Email: ${email}
-
-        Items:
-        ${itemsText}
-
-        Total: $${amount}
-
-        Ship To:
-        ${shipName}
-        ${shipAddress}
-
-        Phone: ${shipPhone}
+      NEW ORDER 🧼
+      
+      Confirmation Code: ${code}
+      Session: ${session.id}
+      
+      Email: ${email}
+      
+      Items:
+      ${itemsText}
+      
+      Total: $${amount}
+      
+      Ship To:
+      ${shipName}
+      ${shipAddress}
+      
+      Phone: ${shipPhone}
       `.trim();
 
 

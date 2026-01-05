@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Order Details • Cute Clean Soaps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{font-family:Comic Sans MS,sans-serif;font-style:italic;background:#fffaea;margin:0;padding:20px;text-align:center}
+    .card{max-width:680px;margin:0 auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 10px 20px rgba(0,0,0,.12);text-align:left}
+    h1{text-align:center;margin:0 0 10px}
+    .row{display:flex;justify-content:space-between;gap:10px;margin:6px 0}
+    .muted{opacity:.8}
+    ul{margin:8px 0 0;padding-left:18px}
+    .buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+    .button{display:inline-block;padding:10px 18px;background:#6b8e7f;color:#fff;text-decoration:none;border-radius:999px;font-weight:bold;border:none;cursor:pointer}
+    .secondary{background:#999}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Order Details</h1>
+
+    <div class="row"><span class="muted">Confirmation Code</span><strong id="code">Loading…</strong></div>
+    <div class="row"><span class="muted">Total</span><strong id="total">Loading…</strong></div>
+    <div class="row"><span class="muted">Email</span><strong id="email">Loading…</strong></div>
+
+    <hr>
+
+    <div style="font-weight:bold;">Items</div>
+    <ul id="items"><li>Loading…</li></ul>
+
+    <hr>
+
+    <div style="font-weight:bold;">Shipping</div>
+    <div id="ship">(Loading…)</div>
+
+    <div class="buttons">
+      <button class="button secondary" onclick="window.print()">Save / Print</button>
+      <a class="button secondary" href="/">Back to Shop</a>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const session_id = params.get("session_id");
+
+    const dollars = (cents) => (cents == null ? "—" : `$${(cents/100).toFixed(2)}`);
+
+    async function load() {
+      if (!session_id) return;
+
+      const res = await fetch(`/api/order-summary?session_id=${encodeURIComponent(session_id)}`);
+      const data = await res.json();
+
+      document.getElementById("code").textContent = data.code || "—";
+      document.getElementById("total").textContent = dollars(data.amount_total);
+      document.getElementById("email").textContent = data.customer_email || "—";
+
+      const itemsEl = document.getElementById("items");
+      itemsEl.innerHTML = "";
+      (data.items || []).forEach(it => {
+        const li = document.createElement("li");
+        li.textContent = `${it.description} × ${it.quantity}`;
+        itemsEl.appendChild(li);
+      });
+
+      const a = data.shipping_address;
+      const name = data.shipping_name || "(no name)";
+      const addrText = a ? `
+        ${a.line1 || ""}<br>
+        ${(a.line2 || "")}<br>
+        ${a.city || ""}, ${a.state || ""} ${a.postal_code || ""}<br>
+        ${a.country || ""}<br>
+      ` : "(no address)";
+
+      document.getElementById("ship").innerHTML = `<strong>${name}</strong><br>${addrText}<span class="muted">Phone: ${data.phone || "N/A"}</span>`;
+    }
+
+    load();
+  </script>
+</body>
+</html>
+

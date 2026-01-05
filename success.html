@@ -1,228 +1,136 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Order Confirmed • Cute Clean Soaps</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Order Confirmed • Cute Clean Soaps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{
+      text-align:center;font-family:Comic Sans MS,sans-serif;font-style:italic;
+      margin:0;padding:20px;background-color:#fffaea;
+      background-image:url(images/floral1.png),url(images/floral2.png),url(images/floral3.png),url(images/floral4.png);
+      background-position:top left,top right,bottom left,bottom right;
+      background-repeat:no-repeat;background-size:300px;min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .header{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:14px}
+    .logo{width:120px;height:auto}
+    .card{
+      background:rgb(186,228,250);border-radius:14px;padding:28px 24px;max-width:520px;width:100%;
+      box-shadow:0 12px 24px rgba(0,0,0,.15);
+      opacity:0;transform:translateY(10px) scale(.98);animation:popIn 450ms ease-out forwards;
+    }
+    @keyframes popIn{to{opacity:1;transform:translateY(0) scale(1)}}
+    h1{margin:0 0 10px;font-size:1.9rem}
+    p{margin:10px 0;font-size:15px;line-height:1.4}
 
-    <style>
-        body {
-            text-align: center;
-            font-family: Comic Sans MS, sans-serif;
-            font-style: italic;
-            margin: 0;
-            padding: 20px;
-            background-color: #fffaea;
+    .receipt{
+      margin-top:14px;padding:14px;border-radius:10px;background:rgba(255,255,255,.75);
+      border:1px dashed #6b8e7f;text-align:left
+    }
+    .receipt h2{margin:0 0 10px;font-size:1.1rem;text-align:center}
+    .row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px;gap:10px}
+    .muted{opacity:.8;font-size:12px;text-align:center;margin-top:8px}
+    ul{margin:8px 0 0;padding-left:18px}
+    li{margin:4px 0;font-size:14px}
 
-            background-image:
-                url(images/floral1.png),
-                url(images/floral2.png),
-                url(images/floral3.png),
-                url(images/floral4.png);
-            background-position:
-                top left,
-                top right,
-                bottom left,
-                bottom right;
-            background-repeat: no-repeat;
-            background-size: 300px;
+    .buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+    .button{
+      display:inline-block;padding:10px 18px;background:#6b8e7f;color:#fff;text-decoration:none;
+      border-radius:999px;font-weight:bold;transition:transform .1s ease,box-shadow .1s ease;border:none;cursor:pointer
+    }
+    .button:hover{transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,0,0,.2)}
+    .secondary{background:#999}
+    .secondary:hover{background:#777}
 
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* same header style as homepage */
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 14px;
-        }
-
-        .logo {
-            width: 120px;
-            height: auto;
-        }
-
-        .card {
-            background: rgb(186, 228, 250);
-            border-radius: 14px;
-            padding: 28px 24px;
-            max-width: 460px;
-            width: 100%;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-
-            /* animation */
-            opacity: 0;
-            transform: translateY(10px) scale(0.98);
-            animation: popIn 450ms ease-out forwards;
-        }
-
-        @keyframes popIn {
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .icon {
-            font-size: 2.6rem;
-            margin: 6px 0 10px;
-        }
-
-        h1 {
-            margin: 0 0 10px;
-            font-size: 1.9rem;
-        }
-
-        p {
-            margin: 10px 0;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-
-        .button {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 10px 18px;
-            background: #6b8e7f;
-            color: white;
-            text-decoration: none;
-            border-radius: 999px;
-            font-weight: bold;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
-        }
-
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        /* lightweight confetti */
-        .confetti {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .confetti i {
-            position: absolute;
-            top: -10vh;
-            width: 10px;
-            height: 14px;
-            border-radius: 2px;
-            opacity: 0.9;
-            animation: fall linear forwards;
-        }
-
-        @keyframes fall {
-            to {
-                transform: translateY(120vh) rotate(720deg);
-            }
-        }
-
-        .receipt {
-            margin-top: 18px;
-            padding: 14px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px dashed #6b8e7f;
-            text-align: left;
-        }
-
-        .receipt h2 {
-            margin: 0 0 10px;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        .receipt-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .receipt-note {
-            margin-top: 8px;
-            font-size: 12px;
-            opacity: 0.8;
-            text-align: center;
-        }
-    </style>
+    .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+    .confetti i{position:absolute;top:-10vh;width:10px;height:14px;border-radius:2px;opacity:.9;animation:fall linear forwards}
+    @keyframes fall{to{transform:translateY(120vh) rotate(720deg)}}
+  </style>
 </head>
-
 <body>
-    <div class="confetti" id="confetti"></div>
+  <div class="confetti" id="confetti"></div>
 
-    <div class="card">
-        <div class="header">
-            <img class="logo" src="images/sticker.png" alt="Cute Clean Soaps logo">
-            <h1>Order confirmed!</h1>
-        </div>
-
-        <div class="icon">🧼</div>
-
-        <p>Payment successful ✅ We’ll start preparing your soaps with care.</p>
-        <p>You’ll receive a confirmation email with shipping details shortly 💌</p>
-
-        <div class="receipt">
-            <h2>Order Receipt</h2>
-
-            <div class="receipt-row">
-                <span>Confirmation Code</span>
-                <strong id="order-code">—</strong>
-            </div>
-
-            <div class="receipt-note">
-                Please save this code for your records.
-            </div>
-        </div>
-
-        <button class="button" onclick="window.print()">Save / Print Receipt</button>
-
-        <a class="button" href="/">Back to Shop</a>
+  <div class="card">
+    <div class="header">
+      <img class="logo" src="images/logo.png" alt="Cute Clean Soaps logo">
+      <h1>Order confirmed!</h1>
     </div>
 
-    <script>
-        // Tell homepage to clear cart (and clear saved cart immediately too)
-        localStorage.setItem("ccs_clear_cart_on_home", "1");
-        localStorage.removeItem("ccs_cart_v1");
-        localStorage.removeItem("ccs_resume_checkout");
+    <p>Payment successful ✅ We’ll start preparing your soaps with care.</p>
 
-        function generateOrderCode() {
-            const part = Math.random().toString(36).substring(2, 8).toUpperCase();
-            return `CCS-${part}`;
-        }
+    <div class="receipt">
+      <h2>Receipt</h2>
 
-        const orderCode = generateOrderCode();
-        document.getElementById("order-code").textContent = orderCode;
+      <div class="row"><span>Confirmation Code</span><strong id="code">Loading…</strong></div>
+      <div class="row"><span>Total</span><strong id="total">Loading…</strong></div>
 
-        // Optional: store it so you can show it again later
-        localStorage.setItem("ccs_last_order_code", orderCode);
+      <div style="margin-top:10px;font-weight:bold;">Items</div>
+      <ul id="items"><li>Loading…</li></ul>
 
+      <div class="muted">Save this page (screenshot or print) for your records.</div>
+    </div>
 
-        // Confetti (lightweight, no libraries)
-        const confetti = document.getElementById("confetti");
-        const pieces = 60;
-        for (let i = 0; i < pieces; i++) {
-            const p = document.createElement("i");
-            p.style.left = Math.random() * 100 + "vw";
-            p.style.animationDuration = (1.8 + Math.random() * 1.8) + "s";
-            p.style.animationDelay = (Math.random() * 0.25) + "s";
-            p.style.transform = `rotate(${Math.random() * 360}deg)`;
-            // random-ish colors
-            const colors = ["#ff5a7a", "#ffd166", "#06d6a0", "#4ea8de", "#b5179e"];
-            p.style.background = colors[Math.floor(Math.random() * colors.length)];
-            confetti.appendChild(p);
-        }
-        setTimeout(() => confetti.remove(), 2600);
-    </script>
+    <div class="buttons">
+      <a class="button" id="detailsLink" href="/">View Order Details</a>
+      <button class="button secondary" onclick="window.print()">Save / Print</button>
+      <a class="button secondary" href="/">Back to Shop</a>
+    </div>
+  </div>
+
+  <script>
+    // Clear cart + flags
+    localStorage.setItem("ccs_clear_cart_on_home","1");
+    localStorage.removeItem("ccs_cart_v1");
+    localStorage.removeItem("ccs_resume_checkout");
+
+    // Confetti (lightweight)
+    const confetti = document.getElementById("confetti");
+    const colors = ["#ff5a7a","#ffd166","#06d6a0","#4ea8de","#b5179e"];
+    for (let i=0;i<60;i++){
+      const p=document.createElement("i");
+      p.style.left=Math.random()*100+"vw";
+      p.style.animationDuration=(1.8+Math.random()*1.8)+"s";
+      p.style.animationDelay=(Math.random()*0.25)+"s";
+      p.style.background=colors[Math.floor(Math.random()*colors.length)];
+      confetti.appendChild(p);
+    }
+    setTimeout(()=>confetti.remove(),2600);
+
+    // Load real order info
+    const params = new URLSearchParams(location.search);
+    const session_id = params.get("session_id");
+
+    const detailsLink = document.getElementById("detailsLink");
+    detailsLink.href = session_id ? `/order.html?session_id=${encodeURIComponent(session_id)}` : "/";
+
+    async function loadSummary() {
+      if (!session_id) {
+        document.getElementById("code").textContent = "Missing session id";
+        document.getElementById("items").innerHTML = "<li>Please return to the shop.</li>";
+        document.getElementById("total").textContent = "—";
+        return;
+      }
+
+      const res = await fetch(`/api/order-summary?session_id=${encodeURIComponent(session_id)}`);
+      const data = await res.json();
+
+      document.getElementById("code").textContent = data.code || "—";
+
+      const dollars = (cents) => (cents == null ? "—" : `$${(cents/100).toFixed(2)}`);
+      document.getElementById("total").textContent = dollars(data.amount_total);
+
+      const itemsEl = document.getElementById("items");
+      itemsEl.innerHTML = "";
+      (data.items || []).forEach(it => {
+        const li = document.createElement("li");
+        li.textContent = `${it.description} × ${it.quantity}`;
+        itemsEl.appendChild(li);
+      });
+      if (!data.items || data.items.length === 0) itemsEl.innerHTML = "<li>(No items found)</li>";
+    }
+
+    loadSummary();
+  </script>
 </body>
-
 </html>
