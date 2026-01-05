@@ -17,6 +17,7 @@ export default async function handler(req, res) {
       "Olive Soap": 600,
       "Citrus Soap": 400,
       "Rose Soap": 400,
+      "Almond Soap": 600,
       "Oatmeal Soap": 500,
       "Aloe Vera Soap": 400,
       "Shea Soap": 400,

@@ -12,14 +12,19 @@ class Soap {
 // Soap database
 const soaps = {
     "Cinnamon Soap": new Soap(
-        ["Olive oil", "Coconut oil", "Cinnamon", "Lye"],
+        ["Coconut oil", "Cinnamon Oil", "Lye"],
         4.00,
-        false
+        true 
     ),
     "Coconut Soap": new Soap(
         ["Coconut oil", "Shea butter", "Lye"],
         4.00,
         false
+    ),
+    "Almond Soap": new Soap(
+        ["Almonds", "Coconut oil", "Cinnamon", "Vanilla", "Lye"],
+        6.00,
+        true 
     ),
     "Honey Soap": new Soap(
         ["Honey", "Olive oil", "Oat milk", "Lye"],
