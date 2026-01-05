@@ -1,21 +1,15 @@
 import Stripe from "stripe";
-
 import { Resend } from "resend";
-
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export const config = {
-  runtime: "nodejs",
-};
+export const config = { runtime: "nodejs" };
 
 export default async function handler(req, res) {
   const sig = req.headers["stripe-signature"];
-
   let event;
 
   try {
-    // ⬇️ read RAW body (this replaces bodyParser:false)
     const rawBody = await new Promise((resolve, reject) => {
       let data = "";
       req.on("data", (chunk) => (data += chunk));
@@ -33,50 +27,61 @@ export default async function handler(req, res) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
+  // Always ack Stripe, even if our processing fails (prevents endless retries)
+  try {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
 
-    const email = session.customer_details?.email;
-    const shipping = session.shipping_details;
-    const amount = (session.amount_total / 100).toFixed(2);
+      const email = session.customer_details?.email || "(no email)";
+      const shipping = session.shipping_details || null;
+      const address = shipping?.address || {};
 
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+      const amount = session.amount_total
+        ? (session.amount_total / 100).toFixed(2)
+        : "0.00";
 
-    const items = lineItems.data
-      .map((item) => `${item.description} × ${item.quantity}`)
-      .join("\n");
+      // Line items can fail sometimes; don’t crash the webhook
+      let itemsText = "(could not load line items)";
+      try {
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+        itemsText = lineItems.data
+          .map((item) => `${item.description} × ${item.quantity}`)
+          .join("\n");
+      } catch (e) {
+        console.error("listLineItems failed:", e);
+      }
 
-    const message = `
+      const message = `
 NEW ORDER 🧼
 
 Email: ${email}
 
 Items:
-${items}
+${itemsText}
 
 Total: $${amount}
 
 Ship To:
-${shipping.name}
-${shipping.address.line1}
-${shipping.address.line2 || ""}
-${shipping.address.city}, ${shipping.address.state} ${shipping.address.postal_code}
-${shipping.address.country}
+${shipping?.name || "(no shipping name)"}
+${address.line1 || ""}
+${address.line2 || ""}
+${address.city || ""}, ${address.state || ""} ${address.postal_code || ""}
+${address.country || ""}
 
-Phone: ${shipping.phone || "N/A"}
-    `;
+Phone: ${shipping?.phone || "N/A"}
+      `.trim();
 
-    //console.log(message); // we’ll email this next
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    await resend.emails.send({
-      from: "Cute Clean Soaps <onboarding@resend.dev>",
-      to: process.env.ORDER_EMAILS.split(",").map(s => s.trim()),
-      subject: "🧼 New Soap Order",
-      text: message,
-    });
-
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: "Cute Clean Soaps <onboarding@resend.dev>",
+        to: process.env.ORDER_EMAILS.split(",").map((s) => s.trim()),
+        subject: "🧼 New Soap Order",
+        text: message,
+      });
+    }
+  } catch (err) {
+    console.error("Webhook processing failed:", err);
   }
 
-  res.json({ received: true });
+  return res.status(200).json({ received: true });
 }
