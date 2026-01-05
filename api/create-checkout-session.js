@@ -45,6 +45,7 @@ export default async function handler(req, res) {
       success_url: `${origin}/success.html`,
       cancel_url: `${origin}/cancel.html`,
       shipping_address_collection: { allowed_countries: ["US"] }, // if you want shipping
+      phone_number_collection: { enabled: true },
     });
 
     return res.status(200).json({ url: session.url });
