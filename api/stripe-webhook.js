@@ -72,6 +72,12 @@ Phone: ${shipping?.phone || "N/A"}
       `.trim();
 
       const resend = new Resend(process.env.RESEND_API_KEY);
+
+      // Testing:
+      console.log("Webhook hit, type:", event.type);
+      console.log("ORDER_EMAILS:", process.env.ORDER_EMAILS ? "set" : "MISSING");
+      console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY ? "set" : "MISSING");
+
       await resend.emails.send({
         from: "Cute Clean Soaps <onboarding@resend.dev>",
         to: process.env.ORDER_EMAILS.split(",").map((s) => s.trim()),
