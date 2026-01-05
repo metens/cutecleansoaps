@@ -33,6 +33,31 @@ export default async function handler(req, res) {
       const session = event.data.object;
 
       const email = session.customer_details?.email || "(no email)";
+
+      // Prefer shipping_details, but fallback to customer_details
+      const shipName =
+        session.shipping_details?.name ||
+        session.customer_details?.name ||
+        "(no name)";
+
+      const shipPhone =
+        session.shipping_details?.phone ||
+        session.customer_details?.phone ||
+        "N/A";
+
+      const addr =
+        session.shipping_details?.address ||
+        session.customer_details?.address ||
+        null;
+
+      const shipAddress = addr
+        ? `${addr.line1 || ""}
+        ${addr.line2 || ""}
+        ${addr.city || ""}, ${addr.state || ""} ${addr.postal_code || ""}
+        ${addr.country || ""}`.trim()
+        : "(no address)";
+
+
       const shipping = session.shipping_details || null;
       const address = shipping?.address || {};
 
@@ -52,24 +77,22 @@ export default async function handler(req, res) {
       }
 
       const message = `
-NEW ORDER 🧼
+        NEW ORDER 🧼
 
-Email: ${email}
+        Email: ${email}
 
-Items:
-${itemsText}
+        Items:
+        ${itemsText}
 
-Total: $${amount}
+        Total: $${amount}
 
-Ship To:
-${shipping?.name || "(no shipping name)"}
-${address.line1 || ""}
-${address.line2 || ""}
-${address.city || ""}, ${address.state || ""} ${address.postal_code || ""}
-${address.country || ""}
+        Ship To:
+        ${shipName}
+        ${shipAddress}
 
-Phone: ${shipping?.phone || "N/A"}
+        Phone: ${shipPhone}
       `.trim();
+
 
       const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -84,10 +107,10 @@ Phone: ${shipping?.phone || "N/A"}
         subject: "🧼 New Soap Order",
         text: message,
       });
-     
+
       console.log("Resend result:", result);
 
-      }
+    }
   } catch (err) {
     console.error("Webhook processing failed:", err);
   }
