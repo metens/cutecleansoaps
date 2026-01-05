@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/metens/cutecleansoaps#readme",
   "dependencies": {
+    "resend": "^6.6.0",
     "stripe": "^20.1.0"
   }
 }

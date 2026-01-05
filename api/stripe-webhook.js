@@ -1,5 +1,8 @@
 import Stripe from "stripe";
 
+import { Resend } from "resend";
+
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const config = {
@@ -63,7 +66,16 @@ ${shipping.address.country}
 Phone: ${shipping.phone || "N/A"}
     `;
 
-    console.log(message); // we’ll email this next
+    //console.log(message); // we’ll email this next
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    await resend.emails.send({
+      from: "Cute Clean Soaps <onboarding@resend.dev>",
+      to: process.env.ORDER_EMAILS.split(",").map(s => s.trim()),
+      subject: "🧼 New Soap Order",
+      text: message,
+    });
+
   }
 
   res.json({ received: true });
