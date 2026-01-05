@@ -1,8 +1,80 @@
 <!doctype html>
-<html>
-  <head><meta charset="utf-8"><title>Canceled</title></head>
-  <body>
-    <h1>Payment canceled</h1>
-    <a href="/">Back to shop</a>
-  </body>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Payment Canceled • Cute Clean Soaps</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #f7efe5, #fff);
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 14px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        p {
+            margin: 0.5rem 0 1.5rem;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #999;
+            color: white;
+            text-decoration: none;
+            border-radius: 999px;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        a.button:hover {
+            background: #777;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon">😕</div>
+        <h1>Payment Canceled</h1>
+        <p>
+            No worries — your payment was not completed and you were not charged.
+        </p>
+        <p>
+            You can return to the shop and try again whenever you’re ready.
+        </p>
+
+        <a class="button" href="/">Back to Shop</a>
+    </div>
+</body>
+
 </html>
