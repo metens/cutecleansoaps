@@ -254,6 +254,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         cartCountEl.textContent = totalItems;
         cartTotalEl.textContent = totalPrice.toFixed(2);
+
+        // ✅ persist cart on every change
+        saveCartToStorage();
     }
 
     function renderCart() {
@@ -339,28 +342,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         localStorage.removeItem(RESUME_FLAG_KEY);
     }
-// Clear cart after "Back to Shop" from cancel page
-if (localStorage.getItem("ccs_clear_cart_on_home") === "1") {
-    for (const k in cart) delete cart[k];
-    localStorage.removeItem(CART_STORAGE_KEY);
-    localStorage.removeItem(RESUME_FLAG_KEY);
-    localStorage.removeItem("ccs_clear_cart_on_home");
-  
-    updateCartButton();
-    cartModal.classList.add("hidden");
-  } else {
-    // Auto-restore cart after cancel "Resume checkout"
-    const shouldResume = localStorage.getItem(RESUME_FLAG_KEY) === "1";
-    if (shouldResume) {
-      const restored = loadCartFromStorage();
-      if (restored) {
+
+    // ✅ restore cart on normal page refresh
+    if (loadCartFromStorage()) {
         updateCartButton();
-        renderCart();
-        cartModal.classList.remove("hidden"); // open cart modal
-      }
-      localStorage.removeItem(RESUME_FLAG_KEY);
     }
-  }
+
+    // Clear cart after "Back to Shop" from cancel page
+    if (localStorage.getItem("ccs_clear_cart_on_home") === "1") {
+        for (const k in cart) delete cart[k];
+        localStorage.removeItem(CART_STORAGE_KEY);
+        localStorage.removeItem(RESUME_FLAG_KEY);
+        localStorage.removeItem("ccs_clear_cart_on_home");
+
+        updateCartButton();
+        cartModal.classList.add("hidden");
+    } else {
+        // Auto-restore cart after cancel "Resume checkout"
+        const shouldResume = localStorage.getItem(RESUME_FLAG_KEY) === "1";
+        if (shouldResume) {
+            const restored = loadCartFromStorage();
+            if (restored) {
+                updateCartButton();
+                renderCart();
+                cartModal.classList.remove("hidden"); // open cart modal
+            }
+            localStorage.removeItem(RESUME_FLAG_KEY);
+        }
+    }
 
 
 });
