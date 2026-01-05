@@ -1,5 +1,28 @@
 const cart = {}; // { "Cinnamon Soap": { price: 6.99, quantity: 2 } }
 
+const CART_STORAGE_KEY = "ccs_cart_v1";
+const RESUME_FLAG_KEY = "ccs_resume_checkout";
+
+function saveCartToStorage() {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+}
+
+function loadCartFromStorage() {
+    try {
+        const raw = localStorage.getItem(CART_STORAGE_KEY);
+        if (!raw) return false;
+        const saved = JSON.parse(raw);
+
+        // clear current cart + copy saved items in
+        for (const k in cart) delete cart[k];
+        for (const name in saved) cart[name] = saved[name];
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+
 // Soap class
 class Soap {
     constructor(ingredients, price, inStock = true) {
@@ -14,7 +37,7 @@ const soaps = {
     "Cinnamon Soap": new Soap(
         ["Coconut oil", "Cinnamon Oil", "Lye"],
         4.00,
-        true 
+        true
     ),
     "Coconut Soap": new Soap(
         ["Coconut oil", "Shea butter", "Lye"],
@@ -24,7 +47,7 @@ const soaps = {
     "Almond Soap": new Soap(
         ["Almonds", "Coconut oil", "Cinnamon", "Vanilla", "Lye"],
         6.00,
-        true 
+        true
     ),
     "Honey Soap": new Soap(
         ["Honey", "Olive oil", "Oat milk", "Lye"],
@@ -91,9 +114,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <small>${soap.ingredients.join(", ")}</small>
         <span>Price: $${soap.price.toFixed(2)}</span>
         ${!soap.inStock
-            ? `<span class="out-of-stock">Out of Stock</span>`
-            : ``
-        }
+                ? `<span class="out-of-stock">Out of Stock</span>`
+                : ``
+            }
 `;
     });
 
@@ -134,21 +157,21 @@ let count = 1;
 // Open modal on soap click
 document.querySelectorAll(".gallery-item").forEach(item => {
     item.addEventListener("click", () => {
-      const name = item.dataset.name;
-      const soap = soaps[name];
-  
-      if (!soap || !soap.inStock) return; // 🚫 block click
-  
-      currentSoap = soap;
-      count = 1;
-      nameEl.textContent = name;
-      ingredientsEl.textContent = "Ingredients: " + soap.ingredients.join(", ");
-      priceEl.textContent = soap.price.toFixed(2);
-      countEl.textContent = count;
-      totalEl.textContent = (count * soap.price).toFixed(2);
-      modal.classList.remove("hidden");
+        const name = item.dataset.name;
+        const soap = soaps[name];
+
+        if (!soap || !soap.inStock) return; // 🚫 block click
+
+        currentSoap = soap;
+        count = 1;
+        nameEl.textContent = name;
+        ingredientsEl.textContent = "Ingredients: " + soap.ingredients.join(", ");
+        priceEl.textContent = soap.price.toFixed(2);
+        countEl.textContent = count;
+        totalEl.textContent = (count * soap.price).toFixed(2);
+        modal.classList.remove("hidden");
     });
-  });
+});
 
 
 // Quantity buttons
@@ -174,9 +197,9 @@ document.querySelector(".close-btn").onclick = () => {
 document.querySelectorAll(".gallery-item").forEach(item => {
     const soap = soaps[item.dataset.name];
     if (soap && !soap.inStock) {
-      item.classList.add("out");
+        item.classList.add("out");
     }
-  });
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     // ====== Cart UI elements (these were commented out in yours) ======
@@ -198,21 +221,21 @@ document.addEventListener("DOMContentLoaded", () => {
     cartItemsEl.addEventListener("click", (e) => {
         const btn = e.target.closest("button.qty-btn");
         if (!btn) return;
-      
+
         const name = btn.dataset.name;
         const action = btn.dataset.action;
-      
+
         if (!cart[name]) return;
-      
+
         if (action === "inc") cart[name].quantity += 1;
-      
+
         if (action === "dec") {
-          cart[name].quantity -= 1;
-          if (cart[name].quantity <= 0) delete cart[name]; // remove item when it hits 0
+            cart[name].quantity -= 1;
+            if (cart[name].quantity <= 0) delete cart[name]; // remove item when it hits 0
         }
-      
+
         renderCart(); // re-draw rows + totals
-      });
+    });
 
 
     // ====== Cart data ======
@@ -232,21 +255,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderCart() {
         cartItemsEl.innerHTML = "";
-      
+
         let totalItems = 0;
         let totalPrice = 0;
-      
+
         for (const name in cart) {
-          const item = cart[name];
-          const lineTotal = item.quantity * item.price;
-      
-          totalItems += item.quantity;
-          totalPrice += lineTotal;
-      
-          const row = document.createElement("div");
-          row.className = "cart-row";
-      
-          row.innerHTML = `
+            const item = cart[name];
+            const lineTotal = item.quantity * item.price;
+
+            totalItems += item.quantity;
+            totalPrice += lineTotal;
+
+            const row = document.createElement("div");
+            row.className = "cart-row";
+
+            row.innerHTML = `
             <span class="cart-name">${name}</span>
       
             <div class="cart-qty-controls">
@@ -257,16 +280,16 @@ document.addEventListener("DOMContentLoaded", () => {
       
             <span class="cart-line-total">$${lineTotal.toFixed(2)}</span>
           `;
-      
-          cartItemsEl.appendChild(row);
+
+            cartItemsEl.appendChild(row);
         }
-      
+
         document.getElementById("cart-items-total").textContent = totalItems;
         document.getElementById("cart-price-total").textContent = totalPrice.toFixed(2);
-      
+
         updateCartButton();
-      }
-      
+    }
+
     // ====== Add to Cart (from soap modal) ======
     addToCartBtn.addEventListener("click", () => {
         if (!currentSoap?.inStock) return;
@@ -296,33 +319,54 @@ document.addEventListener("DOMContentLoaded", () => {
     cartModal.addEventListener("click", (e) => {
         if (e.target === cartModal) cartModal.classList.add("hidden");
     });
+
+    // Auto-restore cart after cancel "Resume checkout"
+    const shouldResume = localStorage.getItem(RESUME_FLAG_KEY) === "1";
+
+    if (shouldResume) {
+        const restored = loadCartFromStorage();
+
+        if (restored) {
+            updateCartButton();
+
+            // Optional: open cart automatically so they see it
+            renderCart();
+            cartModal.classList.remove("hidden");
+        }
+
+        localStorage.removeItem(RESUME_FLAG_KEY);
+    }
+
 });
 
 document.getElementById("checkout-btn").addEventListener("click", async () => {
     const items = Object.entries(cart).map(([name, v]) => ({
-      name,
-      quantity: v.quantity,
+        name,
+        quantity: v.quantity,
     }));
-  
+
     if (items.length === 0) {
-      alert("Your cart is empty!");
-      return;
+        alert("Your cart is empty!");
+        return;
     }
-  
+
+    saveCartToStorage();
+    localStorage.setItem(RESUME_FLAG_KEY, "1");
+
     const res = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
     });
-  
+
     const text = await res.text();
-  
+
     if (!res.ok) {
-      console.log("Function failed:", res.status, text);
-      alert(`Checkout failed (${res.status}). Open Console for details.`);
-      return;
+        console.log("Function failed:", res.status, text);
+        alert(`Checkout failed (${res.status}). Open Console for details.`);
+        return;
     }
-  
+
     const data = JSON.parse(text);
     window.location.href = data.url;
-  });
+});
