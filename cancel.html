@@ -102,8 +102,25 @@
             You can head back to the shop and try again whenever you’re ready 💛
         </p>
 
-        <a class="button" href="/?resume=1">Resume checkout</a>
-        <a class="button secondary" href="/">Back to Shop</a>
+        <button class="button" onclick="resumeCheckout()">Resume checkout</button>
+        <button class="button secondary" onclick="backToShop()">Back to Shop</button>
+
+        <script>
+            function resumeCheckout() {
+                localStorage.setItem("ccs_resume_checkout", "1");
+                window.location.href = "/";
+            }
+
+            function backToShop() {
+                // Clear both the “saved cart” and any resume flags
+                localStorage.removeItem("ccs_cart_v1");
+                localStorage.removeItem("ccs_resume_checkout");
+                localStorage.setItem("ccs_clear_cart_on_home", "1");
+                window.location.href = "/";
+            }
+        </script>
+
+
     </div>
 </body>
 
