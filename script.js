@@ -1,4 +1,4 @@
-import { db, auth } from "./firebase.js";
+import { db, auth, ensureAnonAuth } from "./firebase.js";
 import {
   doc,
   collection,
@@ -90,7 +90,12 @@ class Soap {
 }
 
 const soaps = {
-  "Cinnamon Soap": new Soap(["Coconut oil", "Cinnamon Oil", "Lye"], 6.0, 5, 0, 0),
+  "Cinnamon Soap": new Soap(
+      ["Coconut oil", "Cinnamon Oil", "Lye"], 
+      6.0,  // Price
+      5,    // Quantity in Stock 
+      0,    // Average Rating
+      0),   // Total Ratings
   "Coconut Soap": new Soap(["Coconut oil", "Shea butter", "Lye"], 6.0, 0, 0, 0),
   "Almond Shea Soap": new Soap(
     ["Almonds", "Coconut oil", "Cinnamon", "Vanilla", "Lye"],
@@ -123,6 +128,8 @@ const soaps = {
 ========================= */
 
 document.addEventListener("DOMContentLoaded", () => {
+  ensureAnonAuth();
+  console.log("script running, items:", document.querySelectorAll(".gallery-item").length);
   // ----- Grab elements -----
   const items = document.querySelectorAll(".gallery-item");
 

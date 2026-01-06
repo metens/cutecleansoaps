@@ -1,10 +1,10 @@
-// firebase.js  (ES Modules)
-
+// firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const firebaseConfig = {
+  // paste your config here
   apiKey: "AIzaSyBLaJCXn7aFr1oMN_e8yJV-RN3mz6mMnGA",
   authDomain: "cutecleansoaps.firebaseapp.com",
   projectId: "cutecleansoaps",
@@ -18,6 +18,11 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// anonymous login so anyone can review
-await signInAnonymously(auth);
+// ✅ do NOT top-level await
+export function ensureAnonAuth() {
+  if (auth.currentUser) return;
+  signInAnonymously(auth).catch((e) => {
+    console.error("Anonymous auth failed (enable it in Firebase Console):", e);
+  });
+}
 
