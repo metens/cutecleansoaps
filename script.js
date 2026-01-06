@@ -176,24 +176,6 @@ const countEl = document.getElementById("count");
 const ratingEl = document.getElementById("modal-rating");
 const stockEl = document.getElementById("modal-stock");
 
-const fullStars = Math.round((soap.ratingAvg || 0) * 2) / 2; // 0.5 steps (optional)
-const starText = soap.ratingAvg
-  ? `⭐ ${soap.ratingAvg.toFixed(1)} (${soap.ratingCount})`
-  : "⭐ New";
-
-ratingEl.textContent = starText;
-
-if (soap.stock <= 0) {
-  stockEl.textContent = "Out of stock";
-  stockEl.style.color = "#c0392b";
-} else if (soap.stock <= 3) {
-  stockEl.textContent = `Only ${soap.stock} left!`;
-  stockEl.style.color = "#c0392b";
-} else {
-  stockEl.textContent = `${soap.stock} in stock`;
-  stockEl.style.color = "#333";
-}
-
 
 let currentSoap = null;
 let count = 1;
@@ -201,21 +183,41 @@ let count = 1;
 // Open modal on soap click
 document.querySelectorAll(".gallery-item").forEach(item => {
     item.addEventListener("click", () => {
-        const name = item.dataset.name;
-        const soap = soaps[name];
-
-        if (!soap || !soap.inStock) return; // 🚫 block click
-
-        currentSoap = soap;
-        count = 1;
-        nameEl.textContent = name;
-        ingredientsEl.textContent = "Ingredients: " + soap.ingredients.join(", ");
-        priceEl.textContent = soap.price.toFixed(2);
-        countEl.textContent = count;
-        totalEl.textContent = (count * soap.price).toFixed(2);
-        modal.classList.remove("hidden");
+      const name = item.dataset.name;
+      const soap = soaps[name];
+      if (!soap || !soap.inStock) return;
+  
+      currentSoap = soap;
+      count = 1;
+  
+      nameEl.textContent = name;
+      ingredientsEl.textContent = "Ingredients: " + soap.ingredients.join(", ");
+      priceEl.textContent = soap.price.toFixed(2);
+      countEl.textContent = count;
+      totalEl.textContent = (count * soap.price).toFixed(2);
+  
+      // ✅ update rating + stock INSIDE the click
+      const starText =
+        soap.ratingCount > 0
+          ? `⭐ ${soap.ratingAvg.toFixed(1)} (${soap.ratingCount})`
+          : "⭐ New";
+      ratingEl.textContent = starText;
+  
+      if (soap.stock <= 0) {
+        stockEl.textContent = "Out of stock";
+        stockEl.style.color = "#c0392b";
+      } else if (soap.stock <= 3) {
+        stockEl.textContent = `Only ${soap.stock} left!`;
+        stockEl.style.color = "#c0392b";
+      } else {
+        stockEl.textContent = `${soap.stock} in stock`;
+        stockEl.style.color = "#333";
+      }
+  
+      modal.classList.remove("hidden");
     });
-});
+  });
+  
 
 
 // Quantity buttons
@@ -345,24 +347,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // ====== Add to Cart (from soap modal) ======
     addToCartBtn.addEventListener("click", () => {
         if (!currentSoap?.inStock) return;
-
-        const name = nameEl.textContent; // from your soap modal code
+      
+        const name = nameEl.textContent;
+      
         const available = currentSoap.stock;
         const addQty = Math.min(count, available);
         if (addQty <= 0) return;
+      
+        if (!cart[name]) {
+          cart[name] = { price: currentSoap.price, quantity: 0 };
+        }
+      
         cart[name].quantity += addQty;
         currentSoap.stock -= addQty;
-
-        if (!cart[name]) {
-            cart[name] = { price: currentSoap.price, quantity: 0 };
-        }
-        cart[name].quantity += count;
-
+      
         updateCartButton();
-        modal.classList.add("hidden"); // your soap modal
-    });
-
-    // ====== Open/close Cart modal ======
+        modal.classList.add("hidden");
+      });
+          // ====== Open/close Cart modal ======
     cartBtn.addEventListener("click", () => {
         renderCart();
         cartModal.classList.remove("hidden");
