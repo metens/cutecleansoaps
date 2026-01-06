@@ -315,10 +315,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
       const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
       meta.innerHTML = `
-        <span class="star">${renderStarsHTML(soap.ratingAvg)}</span>
-        ${soap.ratingAvg.toFixed(1)}${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
-        • <span class="${lowStockClass}">${stockText}</span>
-      `;
+  <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
+  <span>${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}${soap.ratingCount ? ` (${soap.ratingCount})` : ""}</span>
+  • <span class="${lowStockClass}">${stockText}</span>
+`;
     }
 
     // block click styling if out
