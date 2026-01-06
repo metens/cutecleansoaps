@@ -271,3 +271,7 @@ body {
     overflow:hidden;
   }
   
+
+  .rating-text{
+    white-space: nowrap;
+  }
