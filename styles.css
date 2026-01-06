@@ -237,3 +237,13 @@ body {
 .gallery-item.out {
     cursor: not-allowed;
 }
+
+.meta-line{
+    margin-top: 6px;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  .meta-line .low{
+    color: #c0392b;
+    font-weight: bold;
+  }

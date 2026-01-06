@@ -106,25 +106,44 @@ const items = document.querySelectorAll(".gallery-item");
 document.addEventListener("DOMContentLoaded", () => {
     const items = document.querySelectorAll(".gallery-item");
 
-    // Fill overlays from JS data
-    items.forEach(item => {
-        const name = item.dataset.name;
-        const soap = soaps[name];
-        const overlay = item.querySelector(".overlay");
-        if (!soap || !overlay) return;
-
-        overlay.innerHTML = `
+    // Fill overlays + meta from JS data
+items.forEach(item => {
+    const name = item.dataset.name;
+    const soap = soaps[name];
+    const overlay = item.querySelector(".overlay");
+    const meta = item.querySelector(".meta-line");
+  
+    if (!soap) return;
+  
+    // Overlay (hover / tap bonus)
+    if (overlay) {
+      overlay.innerHTML = `
         <strong>${name}</strong>
         <small>${soap.ingredients.join(", ")}</small>
         <span>Price: $${soap.price.toFixed(2)}</span>
-        ${!soap.inStock
-                ? `<span class="out-of-stock">Out of Stock</span>`
-                : ``
-            }
-`;
-    });
+      `;
+    }
+  
+    // Meta line (always visible — mobile safe)
+    if (meta) {
+      const stars =
+        soap.ratingCount > 0
+          ? `⭐ ${soap.ratingAvg.toFixed(1)} (${soap.ratingCount})`
+          : "⭐ New";
+  
+      const stockText =
+        soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
+  
+      const lowStockClass =
+        soap.stock > 0 && soap.stock <= 3 ? "low" : "";
+  
+      meta.innerHTML = `
+        ${stars} • <span class="${lowStockClass}">${stockText}</span>
+      `;
+    }
+  });
 
-    // Tap-to-toggle for touch devices
+        // Tap-to-toggle for touch devices
     const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
     if (isTouch) {
@@ -154,6 +173,27 @@ const ingredientsEl = document.getElementById("modal-ingredients");
 const priceEl = document.getElementById("modal-price");
 const totalEl = document.getElementById("modal-total");
 const countEl = document.getElementById("count");
+const ratingEl = document.getElementById("modal-rating");
+const stockEl = document.getElementById("modal-stock");
+
+const fullStars = Math.round((soap.ratingAvg || 0) * 2) / 2; // 0.5 steps (optional)
+const starText = soap.ratingAvg
+  ? `⭐ ${soap.ratingAvg.toFixed(1)} (${soap.ratingCount})`
+  : "⭐ New";
+
+ratingEl.textContent = starText;
+
+if (soap.stock <= 0) {
+  stockEl.textContent = "Out of stock";
+  stockEl.style.color = "#c0392b";
+} else if (soap.stock <= 3) {
+  stockEl.textContent = `Only ${soap.stock} left!`;
+  stockEl.style.color = "#c0392b";
+} else {
+  stockEl.textContent = `${soap.stock} in stock`;
+  stockEl.style.color = "#333";
+}
+
 
 let currentSoap = null;
 let count = 1;
@@ -180,9 +220,11 @@ document.querySelectorAll(".gallery-item").forEach(item => {
 
 // Quantity buttons
 document.getElementById("plus").onclick = () => {
-    count++;
-    countEl.textContent = count;
-    totalEl.textContent = (count * currentSoap.price).toFixed(2);
+    if (count < currentSoap.stock) {
+      count++;
+      countEl.textContent = count;
+      totalEl.textContent = (count * currentSoap.price).toFixed(2);
+    }
 };
 
 document.getElementById("minus").onclick = () => {
@@ -305,6 +347,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!currentSoap?.inStock) return;
 
         const name = nameEl.textContent; // from your soap modal code
+        const available = currentSoap.stock;
+        const addQty = Math.min(count, available);
+        if (addQty <= 0) return;
+        cart[name].quantity += addQty;
+        currentSoap.stock -= addQty;
 
         if (!cart[name]) {
             cart[name] = { price: currentSoap.price, quantity: 0 };
