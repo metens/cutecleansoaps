@@ -238,12 +238,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("click", (e) => {
-    const starLink = e.target.closest(".star-link");
-    if (starLink) {
-      e.stopPropagation(); // prevents gallery-item click handler from opening modal
-      // let the link navigate normally
-    }
+    const link = e.target.closest(".rating-link");
+    if (link) e.stopPropagation();
   });
+
+
 
   ensureAnonAuth();
   console.log("script running, items:", document.querySelectorAll(".gallery-item").length);
