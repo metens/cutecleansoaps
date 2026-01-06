@@ -24,55 +24,79 @@ function loadCartFromStorage() {
 
 
 // Soap class
+
 class Soap {
-    constructor(ingredients, price, inStock = true) {
-        this.ingredients = ingredients;
-        this.price = price;
-        this.inStock = inStock;
+    constructor(ingredients, price, stock = 0, ratingAvg = 0, ratingCount = 0) {
+      this.ingredients = ingredients;
+      this.price = price;
+      this.stock = stock;
+      this.ratingAvg = ratingAvg;
+      this.ratingCount = ratingCount;
     }
-}
+    get inStock() {
+      return this.stock > 0;
+    }
+  }
+
+
 
 // Soap database
 const soaps = {
     "Cinnamon Soap": new Soap(
         ["Coconut oil", "Cinnamon Oil", "Lye"],
-        6.00,
-        true
+        6.00,   // price
+        5,      // stock
+        0,      // average rating
+        0       // total ratings
     ),
     "Coconut Soap": new Soap(
         ["Coconut oil", "Shea butter", "Lye"],
         6.00,
-        false
+        0,
+        0,
+        0
     ),
     "Almond Shea Soap": new Soap(
         ["Almonds", "Coconut oil", "Cinnamon", "Vanilla", "Lye"],
         8.00,
-        true
+        12,
+        5,
+        0
     ),
     "Honey Soap": new Soap(
         ["Honey", "Olive oil", "Oat milk", "Lye"],
         8.00,
-        false
+        0,
+        0,
+        0,
     ),
     "Lavender Soap": new Soap(
         ["Lavender", "Olive Oil", "Lye", "Sugar"],
         8.00,
-        true
+        7,
+        0,
+        0
     ),
     "Citrus Soap": new Soap(
         ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"],
         6.00,
-        false
+        0,
+        0,
+        0
     ),
     "Rose Pedal Soap": new Soap(
         ["Rose Pedals", "Olive oil", "Rose Essential Oil", "Lye"],
         7.00,
-        false
+        0,
+        0,
+        0,
     ),
     "Oatmeal Soap": new Soap(
         ["Oatmeal", "Goat Milk", "Lye", "Brown Sugar", "Coconut Oil"],
         6.00,
-        true
+        10,
+        0,
+        0
     ),
 };
 
