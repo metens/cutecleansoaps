@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/soaps/:slug", "destination": "/soaps/index.html" }]
+}
