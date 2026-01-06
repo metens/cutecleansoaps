@@ -313,7 +313,6 @@ body {
   .gallery-item .meta-line {
     position: relative;
     z-index: 2;
-    background: rgba(255,255,255,0.85); /* optional, improves readability */
     backdrop-filter: blur(2px);
   }
 
@@ -338,4 +337,52 @@ body {
 
   .star-link {
     cursor: pointer;
+  }
+
+  /* rating line should look natural (no white pill/box) */
+.meta-line{
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+
+  .gallery-item{
+    position: relative;
+  }
+  
+  /* keep rating at the bottom in its own layer */
+  .gallery-item .meta-line{
+    position: relative;
+    z-index: 3;
+  }
+  
+  /* hover overlay stops before rating */
+  .gallery-item .overlay{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+  
+    /* 👇 this is the magic: overlay ends before the rating row */
+    bottom: 34px;   /* adjust: 28–44px depending on your design */
+  
+    z-index: 2;
+  }
+  
+  .rating-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    padding: 2px 4px;           /* makes the clickable area bigger */
+    border-radius: 8px;
+  }
+  
+  .rating-link:hover{
+    transform: scale(1.06);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
+  }
+  
+  .rating-link:active{
+    transform: scale(1.02);
   }

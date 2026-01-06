@@ -31,19 +31,19 @@ function updateOneCardUI(soapName) {
 
   const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
   const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
-
   const soapId = soapIdFromName(name);
 
   meta.innerHTML = `
-  <a class="star-link" href="/soaps/${soapId}" aria-label="See reviews for ${name}">
-    <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
-  </a>
-  <span class="rating-text">
-    ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
-    ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
-  </span>
-  • <span class="${lowStockClass}">${stockText}</span>
-`;
+    <a class="rating-link" href="/soaps/${soapId}" aria-label="See reviews for ${name}">
+      <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
+      <span class="rating-text">
+        ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
+        ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
+      </span>
+    </a>
+    • <span class="${lowStockClass}">${stockText}</span>
+  `;
+
 }
 
 function loadCartFromStorage() {
@@ -233,6 +233,11 @@ const soaps = {
 document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("click", (e) => {
+    const link = e.target.closest(".rating-link");
+    if (link) e.stopPropagation();
+  });
+
+  document.addEventListener("click", (e) => {
     const starLink = e.target.closest(".star-link");
     if (starLink) {
       e.stopPropagation(); // prevents gallery-item click handler from opening modal
@@ -329,19 +334,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (meta) {
       const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
       const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
-
       const soapId = soapIdFromName(name);
 
       meta.innerHTML = `
-        <a class="star-link" href="/soaps/${soapId}" aria-label="See reviews for ${name}">
+        <a class="rating-link" href="/soaps/${soapId}" aria-label="See reviews for ${name}">
           <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
+          <span class="rating-text">
+            ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
+            ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
+          </span>
         </a>
-        <span class="rating-text">
-          ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
-          ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
-        </span>
         • <span class="${lowStockClass}">${stockText}</span>
       `;
+
     }
 
     // block click styling if out
