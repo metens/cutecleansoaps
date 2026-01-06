@@ -232,10 +232,10 @@ const soaps = {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  document.addEventListener("click", (e) => {
+  /*document.addEventListener("click", (e) => {
     const link = e.target.closest(".rating-link");
     if (link) e.stopPropagation();
-  });
+  });*/
 
   document.addEventListener("click", (e) => {
     const link = e.target.closest(".rating-link");
