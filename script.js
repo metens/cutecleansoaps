@@ -19,6 +19,27 @@ function saveCartToStorage() {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
 }
 
+function updateOneCardUI(soapName) {
+  const item = document.querySelector(`.gallery-item[data-name="${soapName}"]`);
+  if (!item) return;
+
+  const soap = soaps[soapName];
+  if (!soap) return;
+
+  const meta = item.querySelector(".meta-line");
+  if (!meta) return;
+
+  const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
+  const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
+
+  meta.innerHTML = `
+    <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
+    ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
+    ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
+    • <span class="${lowStockClass}">${stockText}</span>
+  `;
+}
+
 function loadCartFromStorage() {
   try {
     const raw = localStorage.getItem(CART_STORAGE_KEY);
@@ -46,6 +67,20 @@ function renderStars(ratingAvg) {
     stars += rounded >= i ? "★" : "☆";
   }
   return stars; // rating 0 => ☆☆☆☆☆
+}
+
+function renderStarsHTML(ratingAvg) {
+  const v = Math.max(0, Math.min(5, Number(ratingAvg || 0)));
+  const step = 0.25; // quarter stars
+  const snapped = Math.round(v / step) * step;
+
+  let html = `<span class="star-rating" aria-label="${snapped} out of 5">`;
+  for (let i = 1; i <= 5; i++) {
+    const fill = Math.max(0, Math.min(1, snapped - (i - 1))); // 0..1
+    html += `<span class="star" style="--fill:${fill}"></span>`;
+  }
+  html += `</span>`;
+  return html;
 }
 
 async function submitReview(soapName, stars, text) {
@@ -280,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
       const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
       meta.innerHTML = `
-        <span class="star">${renderStars(soap.ratingAvg)}</span>
+        <span class="star">${renderStarsHTML(soap.ratingAvg)}</span>
         ${soap.ratingAvg.toFixed(1)}${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
         • <span class="${lowStockClass}">${stockText}</span>
       `;
@@ -334,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
       soap.stock = stock;
 
       ratingEl.innerHTML = `
-        <span class="star" style="font-size:20px;">${renderStars(avg)}</span>
+        <span class="star" style="font-size:20px;">${renderStarsHTML(avg)}</span>
         <span style="font-size:14px;"> ${avg.toFixed(1)}${cnt ? ` (${cnt})` : ""}</span>
       `;
 
@@ -500,4 +535,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----- Initial render -----
   fillAllCards();
+
+  for (const name of Object.keys(soaps)) {
+    watchSoapDoc(name, ({ avg, count, stock }) => {
+      soaps[name].ratingAvg = avg;
+      soaps[name].ratingCount = count;
+      soaps[name].stock = stock;
+      updateOneCardUI(name); // ✅ live refresh on the gallery
+    });
+  }
 });
