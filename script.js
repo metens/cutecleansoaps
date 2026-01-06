@@ -1,3 +1,11 @@
+import { db, auth } from "./firebase.js";
+import {
+  doc,
+  collection,
+  addDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 const cart = {}; // { "Cinnamon Soap": { price: 6.99, quantity: 2 } }
 
 const CART_STORAGE_KEY = "ccs_cart_v1";
@@ -21,6 +29,34 @@ function loadCartFromStorage() {
         return false;
     }
 }
+
+function soapIdFromName(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+  
+  async function submitReview(soapName, stars, text) {
+    const soapId = soapIdFromName(soapName);
+    await addDoc(collection(db, "soaps", soapId, "reviews"), {
+      stars: Number(stars),
+      text: (text || "").trim(),
+      uid: auth.currentUser?.uid || null,
+      createdAt: serverTimestamp(),
+    });
+  }
+  
+  function watchSoapDoc(soapName, onUpdate) {
+    const soapId = soapIdFromName(soapName);
+    return onSnapshot(doc(db, "soaps", soapId), (snap) => {
+      const d = snap.data();
+      if (!d) return;
+      onUpdate({
+        avg: d.ratingAvg || 0,
+        count: d.ratingCount || 0,
+        stock: d.stock ?? 0,
+      });
+    });
+  }
+
 
 
 // Soap class
@@ -97,18 +133,13 @@ const soaps = {
         0
     ),
 };
-
 function renderStars(ratingAvg) {
-    if (!ratingAvg || ratingAvg <= 0) return "New";
-  
-    const rounded = Math.round(ratingAvg * 2) / 2; // nearest 0.5
+    const rounded = Math.round((ratingAvg || 0) * 2) / 2;
     let stars = "";
   
     for (let i = 1; i <= 5; i++) {
       if (rounded >= i) {
         stars += "★";
-      } else if (rounded >= i - 0.5) {
-        stars += "☆"; // half‑star fallback (simple)
       } else {
         stars += "☆";
       }
@@ -446,6 +477,22 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.removeItem(RESUME_FLAG_KEY);
         }
     }
+
+    // ===== Reviews (Firebase) =====
+const reviewStarsEl = document.getElementById("review-stars");
+const reviewTextEl = document.getElementById("review-text");
+const reviewSubmitBtn = document.getElementById("review-submit");
+
+reviewSubmitBtn?.addEventListener("click", async () => {
+  if (!currentSoap) return;
+
+  const soapName = nameEl.textContent;
+  const stars = reviewStarsEl.value;
+  const text = reviewTextEl.value;
+
+  await submitReview(soapName, stars, text);
+
+  reviewTextEl.value = ""; // clear after submit
 
 
 });
