@@ -36,63 +36,43 @@ class Soap {
 const soaps = {
     "Cinnamon Soap": new Soap(
         ["Coconut oil", "Cinnamon Oil", "Lye"],
-        4.00,
+        6.00,
         true
     ),
     "Coconut Soap": new Soap(
         ["Coconut oil", "Shea butter", "Lye"],
-        4.00,
+        6.00,
         false
     ),
-    "Almond Soap": new Soap(
+    "Almond Shea Soap": new Soap(
         ["Almonds", "Coconut oil", "Cinnamon", "Vanilla", "Lye"],
-        6.00,
+        8.00,
         true
     ),
     "Honey Soap": new Soap(
         ["Honey", "Olive oil", "Oat milk", "Lye"],
-        5.00,
+        8.00,
         false
     ),
     "Lavender Soap": new Soap(
         ["Lavender", "Olive Oil", "Lye", "Sugar"],
-        5.00,
+        8.00,
         true
-    ),
-    "Olive Soap": new Soap(
-        ["Olive oil", "Rosemary", "Thyme", "Lye"],
-        6.00,
-        false
     ),
     "Citrus Soap": new Soap(
         ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"],
-        4.00,
+        6.00,
         false
     ),
-    "Rose Soap": new Soap(
+    "Rose Pedal Soap": new Soap(
         ["Rose Pedals", "Olive oil", "Rose Essential Oil", "Lye"],
-        4.00,
+        7.00,
         false
     ),
     "Oatmeal Soap": new Soap(
         ["Oatmeal", "Goat Milk", "Lye", "Brown Sugar", "Coconut Oil"],
-        5.00,
+        6.00,
         true
-    ),
-    "Aloe Vera Soap": new Soap(
-        ["Aloe Vera Leaves", "Lye"],
-        4.00,
-        false
-    ),
-    "Shea Soap": new Soap(
-        ["Shea", "Coconut Butter", "Lye", "Almonds"],
-        4.00,
-        false
-    ),
-    "Vanilla Chai Soap": new Soap(
-        ["Vanilla Oil", "Nutmeg", "Ground Ginger", "Cinnamon Oil", "Lye"],
-        5.00,
-        false
     ),
 };
 

@@ -10,18 +10,14 @@ export default async function handler(req, res) {
     const { items } = req.body || {};
 
     const PRICE_LOOKUP = {
-      "Cinnamon Soap": 400,
-      "Coconut Soap": 400,
-      "Honey Soap": 500,
-      "Lavender Soap": 500,
-      "Olive Soap": 600,
-      "Citrus Soap": 400,
-      "Rose Soap": 400,
-      "Almond Soap": 600,
-      "Oatmeal Soap": 500,
-      "Aloe Vera Soap": 400,
-      "Shea Soap": 400,
-      "Vanilla Chai Soap": 500,
+      "Cinnamon Soap": 600,
+      "Coconut Soap": 600,
+      "Honey Soap": 800,
+      "Lavender Soap": 800,
+      "Citrus Soap": 600,
+      "Rose Pedal Soap": 700,
+      "Almond Shea Soap": 600,
+      "Oatmeal Soap": 600,
     };
 
     const line_items = (items || []).map((i) => {
