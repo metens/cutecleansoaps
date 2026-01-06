@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <script type="module" src="script.js"></script>
     <title>Cute Clean Soaps</title>
 </head>
 
@@ -88,6 +87,7 @@
     </main>
 
     <!-- Modal -->
+    <!-- Soap Modal -->
     <div id="soap-modal" class="modal hidden">
         <div class="modal-content">
             <button class="close-btn">&times;</button>
@@ -98,9 +98,7 @@
             <div id="modal-rating" style="font-size:18px;margin:6px 0;"></div>
             <div id="modal-stock" style="margin:6px 0;font-weight:bold;"></div>
 
-            <p>
-                Price: $<span id="modal-price"></span>
-            </p>
+            <p>Price: $<span id="modal-price"></span></p>
 
             <div class="quantity">
                 <button id="minus">−</button>
@@ -108,45 +106,30 @@
                 <button id="plus">+</button>
             </div>
 
-            <p>
-                Total: $<span id="modal-total"></span>
-            </p>
+            <p>Total: $<span id="modal-total"></span></p>
 
             <button id="add-to-cart">Add to Cart</button>
-        </div>
-        <!-- Review section -->
-<div id="review-box" style="margin-top:16px; text-align:left;">
 
-    <div style="font-weight:bold; margin-bottom:6px;">
-      Leave a review
-    </div>
-  
-    <!-- ⭐ Star selector -->
-    <select id="review-stars">
-      <option value="5">★★★★★ (5)</option>
-      <option value="4">★★★★☆ (4)</option>
-      <option value="3">★★★☆☆ (3)</option>
-      <option value="2">★★☆☆☆ (2)</option>
-      <option value="1">★☆☆☆☆ (1)</option>
-    </select>
-  
-    <!-- 📝 Review text -->
-    <textarea
-      id="review-text"
-      rows="3"
-      placeholder="Write a quick review…"
-      style="width:100%; margin-top:8px;"
-    ></textarea>
-  
-    <!-- ✅ Submit -->
-    <button
-      id="review-submit"
-      style="margin-top:8px; width:100%;"
-    >
-      Submit review
-    </button>
-  
-  </div>
+            <!-- Review section (INSIDE modal-content) -->
+            <div id="review-box" style="margin-top:16px; text-align:left;">
+                <div style="font-weight:bold; margin-bottom:6px;">Leave a review</div>
+
+                <select id="review-stars">
+                    <option value="5">★★★★★ (5)</option>
+                    <option value="4">★★★★☆ (4)</option>
+                    <option value="3">★★★☆☆ (3)</option>
+                    <option value="2">★★☆☆☆ (2)</option>
+                    <option value="1">★☆☆☆☆ (1)</option>
+                </select>
+
+                <textarea id="review-text" rows="3" placeholder="Write a quick review…"
+                    style="width:100%; margin-top:8px;"></textarea>
+
+                <button id="review-submit" style="margin-top:8px; width:100%;">
+                    Submit review
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Cart Modal -->
@@ -174,6 +157,7 @@
         </div>
     </div>
 
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>
