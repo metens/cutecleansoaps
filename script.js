@@ -91,33 +91,95 @@ class Soap {
 
 const soaps = {
   "Cinnamon Soap": new Soap(
-      ["Coconut oil", "Cinnamon Oil", "Lye"], 
+      [ // Ingredients
+        "Cinnamon", 
+        "Cinnamon Fragrence Oil", 
+        "Vanilla Fragrance Oil", 
+        "Shea Soap Base",
+        "Vitamin-E Oil",
+        "Nutmeg",
+        "Cinnamon Topping",
+        "Vanilla Extract"
+      ], 
       6.0,  // Price
       5,    // Quantity in Stock 
       0,    // Average Rating
-      0),   // Total Ratings
-  "Coconut Soap": new Soap(["Coconut oil", "Shea butter", "Lye"], 6.0, 0, 0, 0),
-  "Almond Shea Soap": new Soap(
-    ["Almonds", "Coconut oil", "Cinnamon", "Vanilla", "Lye"],
-    8.0,
-    12,
-    5,
-    1
+      0     // Total Ratings
+    ),
+  "Coconut Soap": new Soap(
+    [ // Ingredients
+      "Coconut Oil", 
+      "Shea Soap Base", 
+      "Coconut",
+      "Vitamin-E Oil",
+      "Organic Coconut Shreddings"
+    ], 
+    6.0,  // Price
+    0,    // Quantity in Stock
+    0,    // Average Rating
+    0     // Total Ratings
   ),
-  "Honey Soap": new Soap(["Honey", "Olive oil", "Oat milk", "Lye"], 8.0, 0, 0, 0),
-  "Lavender Soap": new Soap(["Lavender", "Olive Oil", "Lye", "Sugar"], 8.0, 7, 0, 0),
-  "Citrus Soap": new Soap(["Olive oil", "Orange Juice", "Lemon Skin", "Lye"], 6.0, 0, 0, 0),
+  "Almond Shea Soap": new Soap(
+    [ // Ingredients
+      "Goat Soap Base", 
+      "Grounded Almonds + Almond Topping", 
+      "Vitamin-E Oil", 
+      "Coconut Oil"
+    ],
+    8.0,  // Price
+    12,   // Total Soaps in Stock
+    5,    // Average Rating
+    1     // Total Ratings
+  ),
+  "Honey Soap": new Soap(
+    [ // Ingredients
+      "Pure Organic Honey", 
+      "Goat Milk Soap Base", 
+      "Vitamin-E Oil", 
+      "Natural Coloring"
+    ], 
+    8.0,  // Price
+    0,    // Total Stock
+    0,    // Average Rating
+    0     // Total Ratings
+  ),
+  "Lavender Soap": new Soap(
+    [ // Ingredients
+      "Dried Lavender Cloves", 
+      "Vitamin-E Oil", 
+      "Clear Soap Base", 
+      "Lavener Essential Oil",
+      "Natural Coloring"
+    ], 
+    8.0,  // Price
+    7,    // Total in Stock
+    0,    // Average Rating
+    0     // Total Ratings
+  ),
+  "Oatmeal Soap": new Soap(
+    [ // Ingredients
+      "Goat Milk Soap Base", 
+      "Shredded Oats + Oat Topping", 
+      "Brown Sugar", 
+      "Vitamin-E Oil",
+      "Oat Milk",
+      "Honey Oil"
+    ],
+    6.0,  // Price
+    10,   // Total in Stock
+    0,    // Average Rating
+    0     // Total Ratings
+  ),
+  "Citrus Soap": new Soap(
+    ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"], 
+    6.0, 
+    0, 
+    0, 
+    0),
   "Rose Pedal Soap": new Soap(
     ["Rose Pedals", "Olive oil", "Rose Essential Oil", "Lye"],
     7.0,
     0,
-    0,
-    0
-  ),
-  "Oatmeal Soap": new Soap(
-    ["Oatmeal", "Goat Milk", "Lye", "Brown Sugar", "Coconut Oil"],
-    6.0,
-    10,
     0,
     0
   ),
