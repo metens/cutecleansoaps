@@ -153,8 +153,11 @@ items.forEach(item => {
       const lowStockClass =
         soap.stock > 0 && soap.stock <= 3 ? "low" : "";
   
-      meta.innerHTML = `
-        ${stars} • <span class="${lowStockClass}">${stockText}</span>
+        meta.innerHTML = `
+        <span class="star">${renderStars(soap.ratingAvg)}</span>
+        ${soap.ratingAvg > 0 ? soap.ratingAvg.toFixed(1) : "New"}
+        ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
+        • <span class="${lowStockClass}">${stockText}</span>
       `;
     }
   });
