@@ -38,8 +38,6 @@ class Soap {
     }
   }
 
-
-
 // Soap database
 const soaps = {
     "Cinnamon Soap": new Soap(
@@ -61,7 +59,7 @@ const soaps = {
         8.00,
         12,
         5,
-        0
+        1 
     ),
     "Honey Soap": new Soap(
         ["Honey", "Olive oil", "Oat milk", "Lye"],
@@ -100,6 +98,25 @@ const soaps = {
     ),
 };
 
+function renderStars(ratingAvg) {
+    if (!ratingAvg || ratingAvg <= 0) return "New";
+  
+    const rounded = Math.round(ratingAvg * 2) / 2; // nearest 0.5
+    let stars = "";
+  
+    for (let i = 1; i <= 5; i++) {
+      if (rounded >= i) {
+        stars += "★";
+      } else if (rounded >= i - 0.5) {
+        stars += "☆"; // half‑star fallback (simple)
+      } else {
+        stars += "☆";
+      }
+    }
+  
+    return stars;
+  }
+
 // Click handlers
 const items = document.querySelectorAll(".gallery-item");
 
@@ -126,12 +143,11 @@ items.forEach(item => {
   
     // Meta line (always visible — mobile safe)
     if (meta) {
-      const stars =
-        soap.ratingCount > 0
-          ? `⭐ ${soap.ratingAvg.toFixed(1)} (${soap.ratingCount})`
-          : "⭐ New";
-  
-      const stockText =
+        const stars = soap.ratingAvg > 0
+        ? `${renderStars(soap.ratingAvg)} ${soap.ratingAvg.toFixed(1)}${soap.ratingCount ? ` (${soap.ratingCount})` : ""}`
+        : "New";      
+        
+        const stockText =
         soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
   
       const lowStockClass =
@@ -196,13 +212,19 @@ document.querySelectorAll(".gallery-item").forEach(item => {
       countEl.textContent = count;
       totalEl.textContent = (count * soap.price).toFixed(2);
   
-      // ✅ update rating + stock INSIDE the click
-      const starText =
-        soap.ratingCount > 0
-          ? `⭐ ${soap.ratingAvg.toFixed(1)} (${soap.ratingCount})`
-          : "⭐ New";
-      ratingEl.textContent = starText;
+      // ⭐ Rating (stars + number)
+      ratingEl.innerHTML = `
+        <span style="font-size:20px;">
+          ${soap.ratingAvg > 0 ? renderStars(soap.ratingAvg) : "New"}
+        </span>
+        ${
+          soap.ratingAvg > 0
+            ? `<span style="font-size:14px;"> ${soap.ratingAvg.toFixed(1)}${soap.ratingCount ? ` (${soap.ratingCount})` : ""}</span>`
+            : ""
+        }
+      `;
   
+      // 📦 Stock text
       if (soap.stock <= 0) {
         stockEl.textContent = "Out of stock";
         stockEl.style.color = "#c0392b";
@@ -217,8 +239,6 @@ document.querySelectorAll(".gallery-item").forEach(item => {
       modal.classList.remove("hidden");
     });
   });
-  
-
 
 // Quantity buttons
 document.getElementById("plus").onclick = () => {

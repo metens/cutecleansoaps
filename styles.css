@@ -238,12 +238,17 @@ body {
     cursor: not-allowed;
 }
 
-.meta-line{
+.meta-line {
     margin-top: 6px;
     font-size: 13px;
     opacity: 0.9;
-  }
-  .meta-line .low{
+}
+
+.meta-line .low {
     color: #c0392b;
     font-weight: bold;
-  }
+}
+
+.star {
+    color: #f1c40f;
+}
