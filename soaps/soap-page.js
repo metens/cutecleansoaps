@@ -78,29 +78,67 @@ document.addEventListener("DOMContentLoaded", async () => {
     reviewsListEl.innerHTML = snap.docs
       .map((docSnap) => {
         const r = docSnap.data();
-        const stars = "★★★★★☆☆☆☆☆".slice(5 - (r.stars || 0), 10 - (r.stars || 0)); // quick display
-        const text = (r.text || "").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-        return `<div style="padding:10px 0;border-bottom:1px solid #eee;">
-          <div>${stars}</div>
-          <div style="opacity:.9">${text}</div>
-        </div>`;
+
+        const text = (r.text || "")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+
+        const name = r.displayName || "Anonymous";
+        const when = r.createdAt?.toDate
+          ? r.createdAt.toDate().toLocaleDateString()
+          : "";
+
+        return `
+      <div style="padding:10px 0;border-bottom:1px solid #eee;">
+        <div>
+          <strong>${name}</strong>
+          <span style="opacity:.6;font-size:12px;"> · ${when}</span>
+        </div>
+        <div>${"★".repeat(Number(r.stars) || 0)}${"☆".repeat(5 - (Number(r.stars) || 0))}</div>
+        <div style="opacity:.9">${text}</div>
+      </div>
+    `;
       })
       .join("");
   });
 
+  const useNameEl = document.getElementById("use-name");
+  const nameInputEl = document.getElementById("review-name");
+
+  useNameEl.addEventListener("change", () => {
+    nameInputEl.style.display = useNameEl.checked ? "block" : "none";
+  });
+
+
   // 3) Submit review
   document.getElementById("review-submit").addEventListener("click", async () => {
+    await ensureAnonAuth();
+
     const stars = Number(document.getElementById("review-stars").value);
-    const text = document.getElementById("review-text").value;
+    const text = document.getElementById("review-text").value.trim();
+
+    const useName = document.getElementById("use-name").checked;
+    const nameInput = document.getElementById("review-name").value.trim();
+
+    const uid = auth.currentUser?.uid || "";
+    const displayName = useName && nameInput
+      ? nameInput
+      : "Anonymous";
+
+    if (!stars || !text) return;
 
     await addDoc(collection(db, "soaps", slug, "reviews"), {
       stars,
-      text: (text || "").trim(),
-      uid: auth.currentUser?.uid || null,
-      createdAt: serverTimestamp(),
+      text,
+      displayName,                 // ✅ chosen or anonymous
+      uid,
+      createdAt: serverTimestamp() // ✅ timestamp
     });
 
     document.getElementById("review-text").value = "";
+    document.getElementById("review-name").value = "";
+    document.getElementById("use-name").checked = false;
+    nameInputEl.style.display = "none";
   });
-});
 
+});
