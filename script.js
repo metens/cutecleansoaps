@@ -32,14 +32,19 @@ function updateOneCardUI(soapName) {
   const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
   const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
 
+  const soapId = soapIdFromName(name);
+
   meta.innerHTML = `
-  <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
+  <a class="star-link" href="/soaps/${soapId}" aria-label="See reviews for ${name}">
+    <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
+  </a>
   <span class="rating-text">
     ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
     ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
   </span>
   • <span class="${lowStockClass}">${stockText}</span>
-`;}
+`;
+}
 
 function loadCartFromStorage() {
   try {
@@ -127,29 +132,29 @@ class Soap {
 
 const soaps = {
   "Cinnamon Soap": new Soap(
-      [ // Ingredients
-        "Cinnamon", 
-        "Cinnamon Fragrence Oil", 
-        "Vanilla Fragrance Oil", 
-        "Shea Soap Base",
-        "Vitamin-E Oil",
-        "Nutmeg",
-        "Cinnamon Topping",
-        "Vanilla Extract"
-      ], 
-      6.0,  // Price
-      5,    // Quantity in Stock 
-      0,    // Average Rating
-      0     // Total Ratings
-    ),
+    [ // Ingredients
+      "Cinnamon",
+      "Cinnamon Fragrence Oil",
+      "Vanilla Fragrance Oil",
+      "Shea Soap Base",
+      "Vitamin-E Oil",
+      "Nutmeg",
+      "Cinnamon Topping",
+      "Vanilla Extract"
+    ],
+    6.0,  // Price
+    5,    // Quantity in Stock 
+    0,    // Average Rating
+    0     // Total Ratings
+  ),
   "Coconut Soap": new Soap(
     [ // Ingredients
-      "Coconut Oil", 
-      "Shea Soap Base", 
+      "Coconut Oil",
+      "Shea Soap Base",
       "Coconut",
       "Vitamin-E Oil",
       "Organic Coconut Shreddings"
-    ], 
+    ],
     6.0,  // Price
     0,    // Quantity in Stock
     0,    // Average Rating
@@ -157,9 +162,9 @@ const soaps = {
   ),
   "Almond Shea Soap": new Soap(
     [ // Ingredients
-      "Goat Soap Base", 
-      "Grounded Almonds + Almond Topping", 
-      "Vitamin-E Oil", 
+      "Goat Soap Base",
+      "Grounded Almonds + Almond Topping",
+      "Vitamin-E Oil",
       "Coconut Oil"
     ],
     8.0,  // Price
@@ -169,11 +174,11 @@ const soaps = {
   ),
   "Honey Soap": new Soap(
     [ // Ingredients
-      "Pure Organic Honey", 
-      "Goat Milk Soap Base", 
-      "Vitamin-E Oil", 
+      "Pure Organic Honey",
+      "Goat Milk Soap Base",
+      "Vitamin-E Oil",
       "Natural Coloring"
-    ], 
+    ],
     8.0,  // Price
     0,    // Total Stock
     0,    // Average Rating
@@ -181,12 +186,12 @@ const soaps = {
   ),
   "Lavender Soap": new Soap(
     [ // Ingredients
-      "Dried Lavender Cloves", 
-      "Vitamin-E Oil", 
-      "Clear Soap Base", 
+      "Dried Lavender Cloves",
+      "Vitamin-E Oil",
+      "Clear Soap Base",
       "Lavener Essential Oil",
       "Natural Coloring"
-    ], 
+    ],
     8.0,  // Price
     7,    // Total in Stock
     0,    // Average Rating
@@ -194,9 +199,9 @@ const soaps = {
   ),
   "Oatmeal Soap": new Soap(
     [ // Ingredients
-      "Goat Milk Soap Base", 
-      "Shredded Oats + Oat Topping", 
-      "Brown Sugar", 
+      "Goat Milk Soap Base",
+      "Shredded Oats + Oat Topping",
+      "Brown Sugar",
       "Vitamin-E Oil",
       "Oat Milk",
       "Honey Oil"
@@ -207,10 +212,10 @@ const soaps = {
     0     // Total Ratings
   ),
   "Citrus Soap": new Soap(
-    ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"], 
-    6.0, 
-    0, 
-    0, 
+    ["Olive oil", "Orange Juice", "Lemon Skin", "Lye"],
+    6.0,
+    0,
+    0,
     0),
   "Rose Pedal Soap": new Soap(
     ["Rose Pedals", "Olive oil", "Rose Essential Oil", "Lye"],
@@ -226,6 +231,15 @@ const soaps = {
 ========================= */
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  document.addEventListener("click", (e) => {
+    const starLink = e.target.closest(".star-link");
+    if (starLink) {
+      e.stopPropagation(); // prevents gallery-item click handler from opening modal
+      // let the link navigate normally
+    }
+  });
+
   ensureAnonAuth();
   console.log("script running, items:", document.querySelectorAll(".gallery-item").length);
   // ----- Grab elements -----
@@ -255,8 +269,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Reviews UI (must exist in modal HTML)
   const reviewStarsEl = document.getElementById("review-stars");
-  const reviewTextEl = document.getElementById("review-text");
-  const reviewSubmitBtn = document.getElementById("review-submit");
+  //const reviewTextEl = document.getElementById("review-text");
+  //const reviewSubmitBtn = document.getElementById("review-submit");
 
   let currentSoap = null;
   let currentSoapName = null;
@@ -315,14 +329,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (meta) {
       const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
       const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
+
+      const soapId = soapIdFromName(name);
+
       meta.innerHTML = `
-      <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
-      <span class="rating-text">
-        ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
-        ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
-      </span>
-      • <span class="${lowStockClass}">${stockText}</span>
-    `;
+        <a class="star-link" href="/soaps/${soapId}" aria-label="See reviews for ${name}">
+          <span class="star-wrap">${renderStarsHTML(soap.ratingAvg || 0)}</span>
+        </a>
+        <span class="rating-text">
+          ${soap.ratingCount ? (soap.ratingAvg || 0).toFixed(2) : "New"}
+          ${soap.ratingCount ? ` (${soap.ratingCount})` : ""}
+        </span>
+        • <span class="${lowStockClass}">${stockText}</span>
+      `;
     }
 
     // block click styling if out
@@ -372,10 +391,11 @@ document.addEventListener("DOMContentLoaded", () => {
       soap.ratingCount = cnt;
       soap.stock = stock;
 
-      ratingEl.innerHTML = `
+      ratingEl.innerHTML = "none";
+      /*ratingEl.innerHTML = `
         <span class="star" style="font-size:20px;">${renderStarsHTML(avg)}</span>
         <span style="font-size:14px;"> ${avg.toFixed(1)}${cnt ? ` (${cnt})` : ""}</span>
-      `;
+      `;*/
 
       if (stock <= 0) {
         stockEl.textContent = "Out of stock";
@@ -495,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----- Reviews submit -----
-  reviewSubmitBtn?.addEventListener("click", async () => {
+  /*reviewSubmitBtn?.addEventListener("click", async () => {
     if (!currentSoap) return;
     const soapName = currentSoapName;
 
@@ -503,7 +523,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reviewTextEl.value = "";
     // After you deploy the Cloud Function, avg/count will update automatically and
     // the live onSnapshot will refresh UI.
-  });
+  });*/
 
   // ----- Checkout -----
   checkoutBtn?.addEventListener("click", async () => {

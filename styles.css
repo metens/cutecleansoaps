@@ -237,41 +237,63 @@ body {
 .gallery-item.out {
     cursor: not-allowed;
 }
-/* keeps stars + text from colliding */
-.meta-line{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-  
-  .star-wrap{
-    display:inline-flex;
-    flex:0 0 auto;
-  }
-  
-  .star-rating{
-    display:inline-flex;
-    gap:2px;
-    line-height:1;
-  }
-  .star{
-    position:relative;
-    display:inline-block;
-    width:16px;
-    height:16px;
-    font-size:16px;
-    line-height:16px;
-  }
-  .star::before{ content:"☆"; position:absolute; left:0; top:0; }
-  .star::after{
-    content:"★";
-    position:absolute; left:0; top:0;
-    width:calc(var(--fill,0) * 100%);
-    overflow:hidden;
-  }
-  
 
-  .rating-text{
+/* keeps stars + text from colliding */
+.meta-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.star-wrap {
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+
+.star-rating {
+    display: inline-flex;
+    gap: 2px;
+    line-height: 1;
+}
+
+.star {
+    position: relative;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    line-height: 16px;
+}
+
+.star::before {
+    content: "☆";
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.star::after {
+    content: "★";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(var(--fill, 0) * 100%);
+    overflow: hidden;
+}
+
+
+.rating-text {
     white-space: nowrap;
-  }
+}
+
+.star-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+}
+
+.star-link:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
