@@ -134,6 +134,29 @@ export default async function handler(req, res) {
         { merge: true }
       );
 
+      const shipping = {
+        name: shipName,
+        phone: shipPhone,
+        address1: addr?.line1 || "",
+        address2: addr?.line2 || "",
+        city: addr?.city || "",
+        state: addr?.state || "",
+        zip: addr?.postal_code || "",
+        country: addr?.country || "",
+      };
+      
+      await db.collection("orders").doc(session.id).set({
+        status: "paid",
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        customerEmail,
+        shipping,
+        items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
+        // optional later:
+        trackingNumber: null,
+        shippedAt: null,
+        deliveredAt: null,
+      }, { merge: true });
+
       // ----- Emails -----
       const ownerMessage = [
         "NEW ORDER",
