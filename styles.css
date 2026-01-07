@@ -638,3 +638,64 @@ h1, h2, h3,
     margin-bottom: 10px;
   }
    
+  /* ===== Neater /soaps/:slug layout ===== */
+.soap-page{
+    max-width: 720px;          /* centered “card” width */
+    margin: 0 auto;
+    padding: 28px 18px;        /* space on both sides */
+  }
+  
+  /* give sections breathing room */
+  .soap-page > *{
+    margin-bottom: 12px;
+  }
+  
+  #soap-title{
+    margin: 0 0 6px;
+  }
+  
+  #soap-rating{
+    margin: 6px 0 10px;
+  }
+  
+  #soap-ingredients{
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+  
+  /* Review box: smaller + centered + tidy */
+  #review-stars,
+  #review-text,
+  #review-name{
+    max-width: 520px;
+    width: 100%;
+    display: block;
+  }
+  
+  #review-stars{
+    margin: 6px auto 0;
+  }
+  
+  #review-text{
+    margin: 8px auto 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    resize: vertical;
+  }
+  
+  #review-submit{
+    display: inline-block;
+    margin: 10px auto 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+  }
+  
+  /* Center the “Use a name” row */
+  #use-name{
+    transform: translateY(1px);
+  }
+  .soap-page label{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
