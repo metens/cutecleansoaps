@@ -394,12 +394,6 @@ document.addEventListener("DOMContentLoaded", () => {
       soap.ratingCount = cnt;
       soap.stock = stock;
 
-      ratingEl.innerHTML = "none";
-      /*ratingEl.innerHTML = `
-        <span class="star" style="font-size:20px;">${renderStarsHTML(avg)}</span>
-        <span style="font-size:14px;"> ${avg.toFixed(1)}${cnt ? ` (${cnt})` : ""}</span>
-      `;*/
-
       if (stock <= 0) {
         stockEl.textContent = "Out of stock";
         stockEl.style.color = "#c0392b";
