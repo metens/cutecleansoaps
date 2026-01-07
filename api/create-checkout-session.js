@@ -2,6 +2,18 @@ const Stripe = require("stripe");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+const admin = require("firebase-admin");
+
+if (!admin.apps.length) {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (!raw) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
+  admin.initializeApp({
+    credential: admin.credential.cert(JSON.parse(raw)),
+  });
+}
+const db = admin.firestore();
+
+
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).send(""); // optional
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
@@ -31,6 +43,27 @@ export default async function handler(req, res) {
       "Oatmeal Soap": "oatmeal-soap",
     };
 
+    // ---- Stock validation (server-side) ----
+for (const i of (items || [])) {
+  const soapId = SOAP_ID_LOOKUP[i.name];
+  if (!soapId) throw new Error("Missing soapId for: " + i.name);
+
+  const qty = Number(i.quantity || 0);
+  if (!Number.isFinite(qty) || qty < 1) {
+    return res.status(400).json({ error: `Invalid quantity for ${i.name}` });
+  }
+
+  const snap = await db.doc(`soaps/${soapId}`).get();
+  const stock = Number(snap.data()?.stock ?? 0);
+
+  if (qty > stock) {
+    return res.status(400).json({
+      error: `Only ${stock} left of ${i.name}. Please update your cart.`,
+    });
+  }
+}
+
+
     const line_items = (items || []).map((i) => {
       const unit_amount = PRICE_LOOKUP[i.name];
       const soapId = SOAP_ID_LOOKUP[i.name];
@@ -39,7 +72,7 @@ export default async function handler(req, res) {
       if (!soapId) throw new Error("Missing soapId for: " + i.name);
     
       return {
-        quantity: i.quantity,
+        quantity: Math.max(1, Math.floor(Number(i.quantity || 1))),
         price_data: {
           currency: "usd",
           unit_amount,
