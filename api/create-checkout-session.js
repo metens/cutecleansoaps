@@ -20,20 +20,37 @@ export default async function handler(req, res) {
       "Oatmeal Soap": 600,
     };
 
+    const SOAP_ID_LOOKUP = {
+      "Cinnamon Soap": "cinnamon-soap",
+      "Coconut Soap": "coconut-soap",
+      "Honey Soap": "honey-soap",
+      "Lavender Soap": "lavender-soap",
+      "Citrus Soap": "citrus-soap",
+      "Rose Pedal Soap": "rose-pedal-soap",
+      "Almond Shea Soap": "almond-shea-soap",
+      "Oatmeal Soap": "oatmeal-soap",
+    };
+
     const line_items = (items || []).map((i) => {
       const unit_amount = PRICE_LOOKUP[i.name];
+      const soapId = SOAP_ID_LOOKUP[i.name];
+    
       if (!unit_amount) throw new Error("Unknown item: " + i.name);
-
+      if (!soapId) throw new Error("Missing soapId for: " + i.name);
+    
       return {
         quantity: i.quantity,
         price_data: {
           currency: "usd",
           unit_amount,
-          product_data: { name: i.name },
+          product_data: {
+            name: i.name,
+            metadata: { soapId }, // ✅ THIS is the key
+          },
         },
       };
     });
-
+    
     const origin = `https://${req.headers.host}`;
 
     const session = await stripe.checkout.sessions.create({

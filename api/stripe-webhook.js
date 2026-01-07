@@ -106,7 +106,8 @@ export default async function handler(req, res) {
           .map((item) => {
             const qty = item.quantity || 0;
             const product = item.price?.product;
-            const soapId = product?.metadata?.soapId; // MUST exist
+            //const soapId = product?.metadata?.soapId; // MUST exist
+            const soapId = item.price?.product?.metadata?.soapId;
             return { soapId, qty, description: item.description || "" };
           })
           .filter((it) => it.soapId && it.qty > 0);

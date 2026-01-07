@@ -588,15 +588,15 @@ body {
   ========================= */
   @media (max-width: 700px) {
     .hero-title {
-      font-size: 30px;
+      font-size: 20px;
     }
   
     .home-hero {
-      padding: 18px 12px;
+      /*padding: 14px 10px;*/
     }
   
     .home-section h2 {
-      font-size: 22px;
+      font-size: 18px;
     }
   
     .tagline {
