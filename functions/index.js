@@ -34,3 +34,37 @@ exports.onReviewCreated = onDocumentCreated(
     });
   }
 );
+
+exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => {
+  const order = event.data?.data();
+  if (!order?.items?.length) return;
+
+  await db.runTransaction(async (tx) => {
+    // read all soaps first
+    const soapRefs = order.items.map((it) => db.doc(`soaps/${it.soapId}`));
+    const soapSnaps = await Promise.all(soapRefs.map((ref) => tx.get(ref)));
+
+    // validate stock
+    for (let i = 0; i < order.items.length; i++) {
+      const it = order.items[i];
+      const snap = soapSnaps[i];
+      const stock = Number(snap.data()?.stock ?? 0);
+
+      if (!snap.exists) throw new Error(`Missing soap: ${it.soapId}`);
+      if (stock < it.qty) throw new Error(`Not enough stock for ${it.soapId}`);
+    }
+
+    // write stock decrements
+    for (let i = 0; i < order.items.length; i++) {
+      const it = order.items[i];
+      const snap = soapSnaps[i];
+      const stock = Number(snap.data()?.stock ?? 0);
+
+      tx.update(db.doc(`soaps/${it.soapId}`), { stock: stock - it.qty });
+    }
+
+    // mark order processed
+    tx.update(event.data.ref, { status: "processed" });
+  });
+});
+
