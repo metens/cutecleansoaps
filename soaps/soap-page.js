@@ -72,7 +72,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   <span class="star-wrap">${renderStarsHTML(avg)}</span>
   <span class="rating-text">${avg.toFixed(2)}${count ? ` (${count})` : ""}</span>
 `;
-
     const stock = Number(d.stock ?? 0);
     stockEl.textContent =
       stock <= 0 ? "Out of stock" : stock <= 3 ? `Only ${stock} left!` : `${stock} in stock`;

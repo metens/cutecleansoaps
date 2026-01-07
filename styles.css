@@ -300,108 +300,149 @@ body {
 
 .gallery-item {
     position: relative;
-  }
-  
-  .gallery-item .overlay {
+}
+
+.gallery-item .overlay {
     position: absolute;
     inset: 0;
-    padding-bottom: 36px; /* 👈 leaves room for rating/meta */
-    pointer-events: none; /* overlay never steals clicks */
-  }
-  
-  /* Keep rating always above overlay */
-  .gallery-item .meta-line {
+    padding-bottom: 36px;
+    /* 👈 leaves room for rating/meta */
+    pointer-events: none;
+    /* overlay never steals clicks */
+}
+
+/* Keep rating always above overlay */
+.gallery-item .meta-line {
     position: relative;
     z-index: 2;
     backdrop-filter: blur(2px);
-  }
+}
 
-  /* clickable rating area */
+/* clickable rating area */
 .star-link {
     display: inline-flex;
     align-items: center;
     transition: transform 0.15s ease, filter 0.15s ease;
     transform-origin: left center;
-  }
-  
-  /* hover effect */
-  .star-link:hover {
+}
+
+/* hover effect */
+.star-link:hover {
     transform: scale(1.08);
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
-  }
-  
-  /* prevent layout jump */
-  .meta-line {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+/* prevent layout jump */
+.meta-line {
     min-height: 24px;
-  }
+}
 
-  .star-link {
+.star-link {
     cursor: pointer;
-  }
+}
 
-  /* rating line should look natural (no white pill/box) */
-.meta-line{
+/* rating line should look natural (no white pill/box) */
+.meta-line {
     background: transparent !important;
     backdrop-filter: none !important;
-  }
+}
 
-  .gallery-item{
+.gallery-item {
     position: relative;
-  }
-  
-  /* keep rating at the bottom in its own layer */
-  .gallery-item .meta-line{
+}
+
+/* keep rating at the bottom in its own layer */
+.gallery-item .meta-line {
     position: relative;
     z-index: 3;
-  }
-  
-  /* hover overlay stops before rating */
-  .gallery-item .overlay{
+}
+
+/* hover overlay stops before rating */
+.gallery-item .overlay {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
-  
+
     /* 👇 this is the magic: overlay ends before the rating row */
-    bottom: 34px;   /* adjust: 28–44px depending on your design */
-  
+    bottom: 34px;
+    /* adjust: 28–44px depending on your design */
+
     z-index: 2;
-  }
-  
-  .rating-link{
+}
+
+.rating-link {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     text-decoration: none;
     color: inherit;
-    padding: 2px 4px;           /* makes the clickable area bigger */
+    padding: 2px 4px;
+    /* makes the clickable area bigger */
     border-radius: 8px;
-  }
-  
-  .rating-link:hover{
+}
+
+.rating-link:hover {
     transform: scale(1.06);
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
-  }
-  
-  .rating-link:active{
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+}
+
+.rating-link:active {
     transform: scale(1.02);
-  }
+}
 
 
-  /* --- Soap page rating line: prevent overlap --- */
+/* --- Soap page rating line: prevent overlap --- */
 #soap-rating {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-  }
-  
-  #soap-rating .star-wrap,
-  #soap-rating .star-rating {
+}
+
+#soap-rating .star-wrap,
+#soap-rating .star-rating {
     display: inline-flex;
     flex: 0 0 auto;
-  }
-  
-  #soap-rating .rating-text {
+}
+
+#soap-rating .rating-text {
     white-space: nowrap;
-  }
+}
+
+/* ===== Fix star centering ONLY on /soaps/:slug page ===== */
+#soap-rating {
+    display: inline-flex;
+    /* not full-width flex */
+    align-items: center;
+    gap: 10px;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+#soap-rating .star-wrap,
+#soap-rating .star-rating {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+#soap-rating .star {
+    display: inline-flex;
+    /* keeps pseudo-elements aligned */
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+#soap-rating .rating-text {
+    display: inline-block;
+    line-height: 1;
+    white-space: nowrap;
+    transform: translateY(-0.5px);
+    /* tweak: try 0px, -0.5px, or -1px */
+}

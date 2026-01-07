@@ -163,14 +163,14 @@ const soaps = {
   "Almond Shea Soap": new Soap(
     [ // Ingredients
       "Goat Soap Base",
-      "Grounded Almonds + Almond Topping",
+      "Almonds",
       "Vitamin-E Oil",
       "Coconut Oil"
     ],
     8.0,  // Price
     12,   // Total Soaps in Stock
-    5,    // Average Rating
-    1     // Total Ratings
+    0,    // Average Rating
+    0     // Total Ratings
   ),
   "Honey Soap": new Soap(
     [ // Ingredients
