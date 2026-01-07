@@ -529,36 +529,47 @@ document.addEventListener("DOMContentLoaded", () => {
   });*/
 
   // ----- Checkout -----
-  checkoutBtn?.addEventListener("click", async () => {
-    const items = Object.entries(cart).map(([name, v]) => ({
-      name,
-      quantity: v.quantity,
-    }));
+  // ----- Checkout -----
+checkoutBtn?.addEventListener("click", async () => {
+  const items = Object.entries(cart).map(([name, v]) => ({
+    name,
+    quantity: v.quantity,
+  }));
 
-    if (items.length === 0) {
-      alert("Your cart is empty!");
-      return;
-    }
+  if (items.length === 0) {
+    alert("Your cart is empty!");
+    return;
+  }
 
-    saveCartToStorage();
-    localStorage.setItem(RESUME_FLAG_KEY, "1");
+  saveCartToStorage();
+  localStorage.setItem(RESUME_FLAG_KEY, "1");
 
-    const res = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
-    });
-
-    const text = await res.text();
-    if (!res.ok) {
-      console.log("Function failed:", res.status, text);
-      alert(`Checkout failed (${res.status}). Open Console for details.`);
-      return;
-    }
-
-    const data = JSON.parse(text);
-    window.location.href = data.url;
+  const res = await fetch("/api/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items }),
   });
+
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (e) {
+    console.error("Checkout: failed to parse JSON response", e);
+  }
+
+  if (!res.ok) {
+    console.error("Checkout failed:", res.status, data);
+    alert(data?.error || `Checkout failed (${res.status}). Please try again.`);
+    return;
+  }
+
+  if (!data?.url) {
+    alert("Checkout failed: missing Stripe URL.");
+    return;
+  }
+
+  window.location.href = data.url;
+});
 
   // ----- Initial render -----
   fillAllCards();
