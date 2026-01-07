@@ -150,8 +150,15 @@
             const trackInput = document.querySelector(`input[data-track-for="${CSS.escape(orderId)}"]`);
             const trackingNumber = trackInput ? trackInput.value.trim() : "";
 
+            // Only require confirmation when we're about to send tracking (shipped + tracking present)
+            if (status === "shipped" && trackingNumber) {
+                openConfirmModal({ orderId, status, trackingNumber, token });
+                return;
+            }
+
             await updateOrder(orderId, status, trackingNumber, token);
         });
+
         async function updateOrder(orderId, status, trackingNumber, token) {
             const msgEl = document.getElementById(`msg-${orderId}`);
             if (msgEl) msgEl.textContent = "Updating…";
@@ -175,7 +182,47 @@
 
         window.updateOrder = updateOrder;
         $("load").addEventListener("click", loadOrders);
+
+        $("cmCancel").addEventListener("click", closeConfirmModal);
+
+        $("cmConfirm").addEventListener("click", async () => {
+            if (!pendingUpdate) return;
+
+            const { orderId, status, trackingNumber, token } = pendingUpdate;
+            await updateOrder(orderId, status, trackingNumber, token);
+            closeConfirmModal();
+        });
+
     </script>
+
+    <div id="confirmModal"
+        style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);padding:16px;z-index:9999;">
+        <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:16px;border:1px solid #eee;">
+            <h3 style="margin:0 0 10px;">Double check tracking</h3>
+            <div class="muted" style="margin-bottom:10px;">
+                Order: <span id="cmOrderId"></span>
+            </div>
+
+            <div style="margin:10px 0;">
+                <div><strong>Tracking #</strong></div>
+                <div id="cmTracking" style="margin-top:6px;font-family:monospace;"></div>
+            </div>
+
+            <div style="margin:10px 0;">
+                <a id="cmLink" href="#" target="_blank" rel="noopener noreferrer">Open USPS tracking link</a>
+            </div>
+
+            <div class="row" style="justify-content:flex-end;margin-top:14px;">
+                <button class="btn" id="cmCancel">Cancel</button>
+                <button class="btn primary" id="cmConfirm">Confirm & Send</button>
+            </div>
+
+            <div class="muted" style="margin-top:10px;font-size:12px;">
+                Tip: click the USPS link to confirm it’s the right package before notifying the customer.
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
