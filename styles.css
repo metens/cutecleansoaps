@@ -446,3 +446,24 @@ body {
     transform: translateY(-0.5px);
     /* tweak: try 0px, -0.5px, or -1px */
 }
+
+/* Slightly larger gallery items */
+.gallery-item {
+    transform: scale(1.05);
+    transform-origin: center;
+}
+
+/* Prevent layout from feeling cramped */
+.gallery {
+    gap: 18px;
+    /* increase spacing a bit */
+}
+
+.gallery-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gallery-item:hover {
+    transform: scale(1.07);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
