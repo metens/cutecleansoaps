@@ -58,6 +58,14 @@ function loadCartFromStorage() {
   }
 }
 
+function cartQty(name) {
+  return Number(cart?.[name]?.quantity || 0);
+}
+
+function availableStock(name) {
+  return Math.max(0, Number(soaps?.[name]?.stock || 0) - cartQty(name));
+}
+
 function soapIdFromName(name) {
   return name
     .toLowerCase()
@@ -466,9 +474,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!cart[name]) cart[name] = { price: currentSoap.price, quantity: 0 };
     cart[name].quantity += addQty;
-
-    // local stock decrease (Firestore stock is separate — you’ll handle real stock later if you want)
-    currentSoap.stock -= addQty;
 
     updateCartButton();
     updateOneCardUI(name);
