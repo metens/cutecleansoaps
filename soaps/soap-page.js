@@ -22,6 +22,20 @@ function getSlug() {
   return parts[0] === "soaps" ? parts[1] : null; // /soaps/:slug
 }
 
+function renderStarsHTML(ratingAvg) {
+  const v = Math.max(0, Math.min(5, Number(ratingAvg || 0)));
+  const step = 0.25; // quarter stars
+  const snapped = Math.round(v / step) * step;
+
+  let html = `<span class="star-rating" aria-label="${snapped} out of 5">`;
+  for (let i = 1; i <= 5; i++) {
+    const fill = Math.max(0, Math.min(1, snapped - (i - 1))); // 0..1
+    html += `<span class="star" style="--fill:${fill}"></span>`;
+  }
+  html += `</span>`;
+  return html;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   ensureAnonAuth();
 
