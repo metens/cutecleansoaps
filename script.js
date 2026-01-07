@@ -11,31 +11,6 @@ import {
    Helpers
 ========================= */
 
-checkoutBtn.addEventListener("click", async () => {
-  ensureAnonAuth();
-
-  // build order items from your cart structure
-  const items = cart.map((it) => ({
-    soapId: it.soapId,      // MUST be the Firestore doc id like "lavender-soap"
-    name: it.name,
-    qty: it.qty,
-    price: it.price
-  }));
-
-  await addDoc(collection(db, "orders"), {
-    uid: auth.currentUser?.uid || null,
-    items,
-    createdAt: serverTimestamp(),
-    status: "created"
-  });
-
-  // then clear cart locally + close modal
-  cart = [];
-  updateCartUI();
-  closeCartModal();
-});
-
-
 const cart = {};
 const CART_STORAGE_KEY = "ccs_cart_v1";
 const RESUME_FLAG_KEY = "ccs_resume_checkout";
@@ -56,7 +31,6 @@ function updateOneCardUI(soapName) {
 
   const stockText = soap.stock > 0 ? `${soap.stock} left` : "Out of stock";
   const lowStockClass = soap.stock > 0 && soap.stock <= 3 ? "low" : "";
-  const soapId = soapIdFromName(name);
 
   meta.innerHTML = `
     <a class="rating-link" href="/soaps/${soapId}" aria-label="See reviews for ${name}">
