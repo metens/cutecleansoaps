@@ -386,3 +386,22 @@ body {
   .rating-link:active{
     transform: scale(1.02);
   }
+
+
+  /* --- Soap page rating line: prevent overlap --- */
+#soap-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  #soap-rating .star-wrap,
+  #soap-rating .star-rating {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+  
+  #soap-rating .rating-text {
+    white-space: nowrap;
+  }

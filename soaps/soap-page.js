@@ -54,7 +54,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const avg = Number(d.ratingAvg || 0);
     const count = Number(d.ratingCount || 0);
 
-    ratingEl.innerHTML = `<span class="star">${renderStars(avg)}</span> ${avg.toFixed(1)}${count ? ` (${count})` : ""}`;
+    ratingEl.innerHTML = `
+  <span class="star-wrap">${renderStarsHTML(avg)}</span>
+  <span class="rating-text">${avg.toFixed(2)}${count ? ` (${count})` : ""}</span>
+`;
 
     const stock = Number(d.stock ?? 0);
     stockEl.textContent =
