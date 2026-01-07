@@ -78,12 +78,14 @@ export default async function handler(req, res) {
 
       const resend = new Resend(process.env.RESEND_API_KEY);
       const code = order.confirmationCode || orderId;
+      const trackingUrl = `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(nextTracking)}`;
 
       const msg = [
         "Your order has shipped! 🚚",
         "",
         `Order: ${code}`,
         `Tracking number: ${nextTracking}`,
+        `Track it: ${trackingUrl}`,
         "",
         "— Cute Clean Soaps",
       ].join("\n");
