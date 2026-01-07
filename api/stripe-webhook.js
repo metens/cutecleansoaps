@@ -1,6 +1,12 @@
 import Stripe from "stripe";
 import { Resend } from "resend";
 import crypto from "crypto";
+import admin from "firebase-admin";
+
+export const config = {
+  runtime: "nodejs",
+  api: { bodyParser: false }, // IMPORTANT for Stripe signature verification
+};
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -21,20 +27,32 @@ function formatAddress(addr) {
   return lines.join("\n");
 }
 
-export const config = { runtime: "nodejs" };
+async function readRawBody(req) {
+  return await new Promise((resolve, reject) => {
+    let data = "";
+    req.on("data", (chunk) => (data += chunk));
+    req.on("end", () => resolve(data));
+    req.on("error", reject);
+  });
+}
+
+// Firebase Admin init (Vercel env var should contain the service account JSON)
+if (!admin.apps.length) {
+  const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  admin.initializeApp({
+    credential: admin.credential.cert(sa),
+  });
+}
+const db = admin.firestore();
 
 export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+
   const sig = req.headers["stripe-signature"];
   let event;
 
   try {
-    const rawBody = await new Promise((resolve, reject) => {
-      let data = "";
-      req.on("data", (chunk) => (data += chunk));
-      req.on("end", () => resolve(data));
-      req.on("error", reject);
-    });
-
+    const rawBody = await readRawBody(req);
     event = stripe.webhooks.constructEvent(
       rawBody,
       sig,
@@ -51,10 +69,8 @@ export default async function handler(req, res) {
 
       // ----- Idempotency guard (no DB): use PaymentIntent metadata -----
       const paymentIntentId = session.payment_intent;
-
       if (paymentIntentId) {
         const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
-
         if (pi.metadata?.receipt_sent === "1") {
           console.log("Receipt already sent for PI:", paymentIntentId);
           return res.status(200).json({ received: true, skipped: "already_sent" });
@@ -64,32 +80,38 @@ export default async function handler(req, res) {
       }
 
       const customerEmail = session.customer_details?.email || null;
-
       const shipName =
         session.shipping_details?.name ||
         session.customer_details?.name ||
         "(no name)";
-
       const shipPhone =
-        session.shipping_details?.phone ||
-        session.customer_details?.phone ||
-        "N/A";
-
+        session.shipping_details?.phone || session.customer_details?.phone || "N/A";
       const addr =
-        session.shipping_details?.address ||
-        session.customer_details?.address ||
-        null;
-
+        session.shipping_details?.address || session.customer_details?.address || null;
       const shipAddress = formatAddress(addr);
-
       const amount = session.amount_total
         ? (session.amount_total / 100).toFixed(2)
         : "0.00";
 
+      // ----- Load line items + expand product so we can read product.metadata.soapId -----
       let itemsText = "(could not load line items)";
+      let orderItems = [];
+
       try {
-        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-        itemsText = lineItems.data
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+          expand: ["data.price.product"],
+        });
+
+        orderItems = (lineItems.data || [])
+          .map((item) => {
+            const qty = item.quantity || 0;
+            const product = item.price?.product;
+            const soapId = product?.metadata?.soapId; // MUST exist
+            return { soapId, qty, description: item.description || "" };
+          })
+          .filter((it) => it.soapId && it.qty > 0);
+
+        itemsText = (lineItems.data || [])
           .map((item) => `${item.description} × ${item.quantity}`)
           .join("\n");
       } catch (e) {
@@ -98,8 +120,24 @@ export default async function handler(req, res) {
 
       const code = confirmationCode(session.id);
 
+      // ----- Write Firestore order AFTER successful payment -----
+      // (doc id = session.id makes it idempotent)
+      await db.collection("orders").doc(session.id).set(
+        {
+          status: "paid",
+          stripeSessionId: session.id,
+          paymentIntentId: paymentIntentId || null,
+          confirmationCode: code,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          customerEmail,
+          items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
+        },
+        { merge: true }
+      );
+
+      // ----- Emails -----
       const ownerMessage = [
-        "NEW ORDER 🧼",
+        "NEW ORDER",
         "",
         `Confirmation Code: ${code}`,
         `Session: ${session.id}`,
@@ -119,7 +157,7 @@ export default async function handler(req, res) {
       ].join("\n");
 
       const customerMessage = [
-        "Thank you for your order from Cute Clean Soaps! 🧼💛",
+        "Thank you for your order from Cute Clean Soaps!",
         "",
         `Confirmation Code: ${code}`,
         "",
@@ -142,17 +180,16 @@ export default async function handler(req, res) {
       const ownerResult = await resend.emails.send({
         from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
         to: process.env.ORDER_EMAILS.split(",").map((s) => s.trim()),
-        subject: "🧼 New Soap Order",
+        subject: "New Soap Order",
         text: ownerMessage,
       });
-
       console.log("Owner email result:", ownerResult);
 
       if (customerEmail) {
         const customerResult = await resend.emails.send({
           from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
           to: [customerEmail],
-          subject: `🧼 Thanks for your order! (${code})`,
+          subject: `Thanks for your order! (${code})`,
           text: customerMessage,
         });
         console.log("Customer receipt email result:", customerResult);
