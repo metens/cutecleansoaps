@@ -699,3 +699,35 @@ h1, h2, h3,
     align-items: center;
     gap: 8px;
   }
+
+  .review-card{
+    background:#eff6ff;
+    border:1px solid #dbeafe;
+    border-radius:14px;
+    padding:12px 14px;
+    margin:10px 0;
+  }
+  
+  .review-meta{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  
+  .review-stars{ margin-top:6px; }
+  .review-text{ margin-top:8px; line-height:1.45; opacity:.92; }
+  
+  .like-btn{
+    margin-top:10px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border:1px solid #dbeafe;
+    background:rgba(255,255,255,.7);
+    border-radius:999px;
+    padding:6px 10px;
+    cursor:pointer;
+  }
+  .like-btn[disabled]{ opacity:.6; cursor:not-allowed; }
