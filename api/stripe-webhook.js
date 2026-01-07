@@ -105,8 +105,6 @@ export default async function handler(req, res) {
         orderItems = (lineItems.data || [])
           .map((item) => {
             const qty = item.quantity || 0;
-            const product = item.price?.product;
-            //const soapId = product?.metadata?.soapId; // MUST exist
             const soapId = item.price?.product?.metadata?.soapId;
             return { soapId, qty, description: item.description || "" };
           })

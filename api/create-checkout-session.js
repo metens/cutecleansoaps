@@ -45,7 +45,7 @@ export default async function handler(req, res) {
           unit_amount,
           product_data: {
             name: i.name,
-            metadata: { soapId }, // ✅ THIS is the key
+            metadata: { soapId }, // ✅ ADD THIS
           },
         },
       };

@@ -38,6 +38,7 @@ exports.onReviewCreated = onDocumentCreated(
 exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => {
   const order = event.data?.data();
   if (!order?.items?.length) return;
+    if (order.status !== "paid") return; // ✅ ADD THIS
 
   await db.runTransaction(async (tx) => {
     // read all soaps first
