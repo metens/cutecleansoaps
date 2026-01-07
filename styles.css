@@ -476,3 +476,136 @@ body {
   .gallery-item .meta-line {
     font-size: 0.85rem; /* rating + count + stock */
   }
+
+
+
+
+  /******** Homepage **********/
+  /* =========================
+   HOME PAGE STYLES
+   These are ADD-ONS that match your current site + gallery.
+   Paste at the bottom of your existing CSS.
+========================= */
+
+/* Hero */
+.home-hero {
+    max-width: 1000px;
+    margin: 0 auto 28px;
+    padding: 22px 16px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: rgb(186, 228, 250); /* same as .gallery-item */
+  }
+  
+  .hero-title {
+    margin: 0 0 6px;
+    font-size: 40px;
+    line-height: 1.1;
+  }
+  
+  .hero-subtitle {
+    margin: 0 auto 14px;
+    max-width: 800px;
+    font-size: 16px;
+    opacity: 0.95;
+  }
+  
+  .hero-btn {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    text-decoration: none;
+    background: #fffaea; /* matches body bg */
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .hero-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Sections */
+  .home-section {
+    max-width: 1000px;
+    margin: 0 auto 26px;
+    padding: 0 10px;
+  }
+  
+  .home-section h2 {
+    margin: 0 0 10px;
+    font-size: 26px;
+  }
+  
+  .home-text {
+    max-width: 900px;
+    margin: 0 auto 12px;
+    font-size: 15px;
+    line-height: 1.55;
+    opacity: 0.95;
+  }
+  
+  /* Cards that reuse your gallery layout */
+  .home-cards {
+    margin-top: 14px;
+  }
+  
+  .home-card {
+    cursor: default; /* not clickable like products */
+    transform: none; /* keep calm */
+  }
+  
+  .home-card:hover {
+    transform: translateY(-2px); /* subtle */
+  }
+  
+  /* Card text */
+  .card-title {
+    margin: 2px 0 8px;
+    font-size: 18px;
+  }
+  
+  .card-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  
+  /* Tagline */
+  .tagline {
+    margin: 0 auto 10px;
+    font-size: 18px;
+  }
+  
+  /* Closing section */
+  .home-closing {
+    padding-bottom: 10px;
+  }
+  
+  /* =========================
+     MOBILE FRIENDLY TWEAKS
+  ========================= */
+  @media (max-width: 700px) {
+    .hero-title {
+      font-size: 30px;
+    }
+  
+    .home-hero {
+      padding: 18px 12px;
+    }
+  
+    .home-section h2 {
+      font-size: 22px;
+    }
+  
+    .tagline {
+      font-size: 16px;
+    }
+  
+    /* Make the "why" cards a bit wider on phones */
+    .gallery-item.home-card {
+      width: min(92vw, 420px);
+    }
+  }
+/************************/  
