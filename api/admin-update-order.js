@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { Resend } from "resend";
 
 function requireAdmin(req, res) {
   const token = req.query.token || "";
@@ -15,7 +16,6 @@ function requireAdmin(req, res) {
 
 function initFirebaseAdmin() {
   if (admin.apps.length) return;
-
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!raw) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
   admin.initializeApp({
@@ -42,20 +42,64 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid status" });
     }
 
+    // Read current order (for customerEmail + “send only once” logic)
+    const ref = db.collection("orders").doc(orderId);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: "Order not found" });
+
+    const order = snap.data() || {};
+    const prevTracking = (order.trackingNumber || "").trim();
+    const nextTracking = (trackingNumber || "").trim();
+    const customerEmail = order.customerEmail || null;
+
     const updates = {
       status,
-      trackingNumber: trackingNumber || null,
+      trackingNumber: nextTracking || null,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    if (status === "shipped") {
-      updates.shippedAt = admin.firestore.FieldValue.serverTimestamp();
-    }
-    if (status === "delivered") {
-      updates.deliveredAt = admin.firestore.FieldValue.serverTimestamp();
-    }
+    if (status === "shipped") updates.shippedAt = admin.firestore.FieldValue.serverTimestamp();
+    if (status === "delivered") updates.deliveredAt = admin.firestore.FieldValue.serverTimestamp();
 
-    await db.collection("orders").doc(orderId).set(updates, { merge: true });
+    await ref.set(updates, { merge: true });
+
+    // ---- Email customer when tracking is newly added OR status becomes shipped ----
+    const shippingEmailAlreadySent = !!order.shippingEmailSentAt;
+    const trackingJustAdded = !prevTracking && !!nextTracking;
+    const becameShipped = order.status !== "shipped" && status === "shipped";
+
+    if (
+      customerEmail &&
+      !shippingEmailAlreadySent &&
+      (trackingJustAdded || becameShipped) &&
+      nextTracking
+    ) {
+      if (!process.env.RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
+
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const code = order.confirmationCode || orderId;
+
+      const msg = [
+        "Your order has shipped! 🚚",
+        "",
+        `Order: ${code}`,
+        `Tracking number: ${nextTracking}`,
+        "",
+        "— Cute Clean Soaps",
+      ].join("\n");
+
+      await resend.emails.send({
+        from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
+        to: [customerEmail],
+        subject: `Your order shipped (${code})`,
+        text: msg,
+      });
+
+      await ref.set(
+        { shippingEmailSentAt: admin.firestore.FieldValue.serverTimestamp() },
+        { merge: true }
+      );
+    }
 
     res.status(200).json({ ok: true });
   } catch (err) {
