@@ -58,14 +58,6 @@ function loadCartFromStorage() {
   }
 }
 
-function cartQty(name) {
-  return Number(cart?.[name]?.quantity || 0);
-}
-
-function availableStock(name) {
-  return Math.max(0, Number(soaps?.[name]?.stock || 0) - cartQty(name));
-}
-
 function soapIdFromName(name) {
   return name
     .toLowerCase()
@@ -464,21 +456,33 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // ----- Add to cart -----
-  addToCartBtn.addEventListener("click", () => {
-    if (!currentSoap || !currentSoap.inStock) return;
+  // helper (put once near the top of script.js)
+function cartQty(name) {
+  return Number(cart?.[name]?.quantity || 0);
+}
+function availableStock(name) {
+  return Math.max(0, Number(soaps?.[name]?.stock ?? 0) - cartQty(name));
+}
 
-    const name = currentSoapName;
-    const available = currentSoap.stock;
-    const addQty = Math.min(count, available);
-    if (addQty <= 0) return;
+addToCartBtn.addEventListener("click", () => {
+  if (!currentSoap) return;
 
-    if (!cart[name]) cart[name] = { price: currentSoap.price, quantity: 0 };
-    cart[name].quantity += addQty;
+  const name = currentSoapName;
 
-    updateCartButton();
-    updateOneCardUI(name);
-    modal.classList.add("hidden");
-  });
+  const available = availableStock(name);     // ✅ real stock minus cart
+  const addQty = Math.min(count, available);  // ✅ clamp
+
+  if (addQty <= 0) return;
+
+  if (!cart[name]) cart[name] = { price: currentSoap.price, quantity: 0 };
+  cart[name].quantity += addQty;
+
+  saveCartToStorage?.(); // if you have this helper
+  updateCartButton();
+  updateOneCardUI(name);
+  modal.classList.add("hidden");
+});
+
 
   // ----- Cart modal open/close -----
   cartBtn.addEventListener("click", () => {
