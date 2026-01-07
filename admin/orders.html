@@ -1,55 +1,94 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Orders Admin</title>
-  <link rel="stylesheet" href="/styles.css" />
-  <style>
-    .admin-wrap{max-width:900px;margin:0 auto;padding:24px 16px;}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-    .card{border:1px solid #eee;border-radius:12px;padding:14px;margin:12px 0;}
-    .muted{opacity:.75}
-    .btn{padding:8px 10px;border-radius:10px;border:1px solid #ddd;background:#fff;cursor:pointer}
-    .btn.primary{border-color:#000}
-    input{padding:8px 10px;border-radius:10px;border:1px solid #ddd}
-    pre{white-space:pre-wrap}
-  </style>
-</head>
-<body>
-  <div class="admin-wrap">
-    <h1>Orders</h1>
 
-    <div class="row" style="margin:12px 0 18px;">
-      <input id="token" placeholder="Admin token" style="min-width:260px;" />
-      <button class="btn primary" id="load">Load orders</button>
-      <span class="muted" id="status"></span>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Orders Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+        .admin-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 14px;
+            margin: 12px 0;
+        }
+
+        .muted {
+            opacity: .75
+        }
+
+        .btn {
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer
+        }
+
+        .btn.primary {
+            border-color: #000
+        }
+
+        input {
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid #ddd
+        }
+
+        pre {
+            white-space: pre-wrap
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-wrap">
+        <h1>Orders</h1>
+
+        <div class="row" style="margin:12px 0 18px;">
+            <input id="token" placeholder="Admin token" style="min-width:260px;" />
+            <button class="btn primary" id="load">Load orders</button>
+            <span class="muted" id="status"></span>
+        </div>
+
+        <div id="orders"></div>
     </div>
 
-    <div id="orders"></div>
-  </div>
+    <script>
+        const $ = (id) => document.getElementById(id);
 
-  <script>
-    const $ = (id) => document.getElementById(id);
+        function renderOrder(o, token) {
+            const items = (o.items || [])
+                .map(it => `${it.soapId} × ${it.qty}`)
+                .join(", ");
 
-    function renderOrder(o, token) {
-      const items = (o.items || [])
-        .map(it => `${it.soapId} × ${it.qty}`)
-        .join(", ");
+            const ship = o.shipping || {};
+            const addr = [
+                ship.name,
+                ship.phone,
+                ship.address1,
+                ship.address2,
+                [ship.city, ship.state, ship.zip].filter(Boolean).join(", "),
+                ship.country
+            ].filter(Boolean).join("\n");
 
-      const ship = o.shipping || {};
-      const addr = [
-        ship.name,
-        ship.phone,
-        ship.address1,
-        ship.address2,
-        [ship.city, ship.state, ship.zip].filter(Boolean).join(", "),
-        ship.country
-      ].filter(Boolean).join("\n");
+            const created = o.createdAt ? new Date(o.createdAt).toLocaleString() : "(no time)";
 
-      const created = o.createdAt ? new Date(o.createdAt).toLocaleString() : "(no time)";
-
-      return `
+            return `
         <div class="card">
           <div class="row" style="justify-content:space-between;">
             <div>
@@ -70,59 +109,73 @@
           </div>
 
           <div class="row" style="margin-top:12px;">
-            <input placeholder="Tracking #" value="${o.trackingNumber || ""}" id="trk-${o.id}" />
-            <button class="btn" onclick="updateOrder('${o.id}','packing','trk-${o.id}','${token}')">Packing</button>
-            <button class="btn" onclick="updateOrder('${o.id}','shipped','trk-${o.id}','${token}')">Shipped</button>
-            <button class="btn" onclick="updateOrder('${o.id}','delivered','trk-${o.id}','${token}')">Delivered</button>
+            <input placeholder="Tracking #" value="${o.trackingNumber || ""}" data-track-for="${o.id}" />
+            <button class="btn" data-action="update" data-order="${o.id}" data-status="packing">Packing</button>
+            <button class="btn" data-action="update" data-order="${o.id}" data-status="shipped">Shipped</button>
+            <button class="btn" data-action="update" data-order="${o.id}" data-status="delivered">Delivered</button>
           </div>
-
           <div class="muted" id="msg-${o.id}" style="margin-top:8px;font-size:12px;"></div>
         </div>
       `;
-    }
+        }
 
-    async function loadOrders() {
-      const token = $("token").value.trim();
-      if (!token) return alert("Paste your admin token first.");
+        async function loadOrders() {
+            const token = $("token").value.trim();
+            if (!token) return alert("Paste your admin token first.");
 
-      $("status").textContent = "Loading…";
-      const res = await fetch(`/api/admin-list-orders?token=${encodeURIComponent(token)}`);
-      const data = await res.json().catch(() => ({}));
+            $("status").textContent = "Loading…";
+            const res = await fetch(`/api/admin-list-orders?token=${encodeURIComponent(token)}`);
+            const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
-        $("status").textContent = "";
-        return alert(data.error || "Failed to load orders.");
-      }
+            if (!res.ok) {
+                $("status").textContent = "";
+                return alert(data.error || "Failed to load orders.");
+            }
 
-      const orders = data.orders || [];
-      $("orders").innerHTML = orders.map(o => renderOrder(o, token)).join("");
-      $("status").textContent = `Loaded ${orders.length} orders`;
-    }
+            const orders = data.orders || [];
+            $("orders").innerHTML = orders.map(o => renderOrder(o, token)).join("");
+            $("status").textContent = `Loaded ${orders.length} orders`;
+        }
 
-    async function updateOrder(orderId, status, trackingInputId, token) {
-      const trackingNumber = document.getElementById(trackingInputId).value.trim();
-      const msgEl = document.getElementById(`msg-${orderId}`);
-      msgEl.textContent = "Updating…";
+        document.addEventListener("click", async (e) => {
+            const btn = e.target.closest('button[data-action="update"]');
+            if (!btn) return;
 
-      const res = await fetch(`/api/admin-update-order?token=${encodeURIComponent(token)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, status, trackingNumber }),
-      });
-      const data = await res.json().catch(() => ({}));
+            const token = $("token").value.trim();
+            if (!token) return alert("Paste your admin token first.");
 
-      if (!res.ok) {
-        msgEl.textContent = data.error || "Update failed.";
-        return;
-      }
+            const orderId = btn.dataset.order;
+            const status = btn.dataset.status;
 
-      msgEl.textContent = "Updated!";
-      // reload to show new status
-      loadOrders();
-    }
+            const trackInput = document.querySelector(`input[data-track-for="${CSS.escape(orderId)}"]`);
+            const trackingNumber = trackInput ? trackInput.value.trim() : "";
 
-    window.updateOrder = updateOrder;
-    $("load").addEventListener("click", loadOrders);
-  </script>
+            await updateOrder(orderId, status, trackingNumber, token);
+        });
+        async function updateOrder(orderId, status, trackingNumber, token) {
+            const msgEl = document.getElementById(`msg-${orderId}`);
+            if (msgEl) msgEl.textContent = "Updating…";
+
+            const res = await fetch(`/api/admin-update-order?token=${encodeURIComponent(token)}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId, status, trackingNumber }),
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                if (msgEl) msgEl.textContent = data.error || "Update failed.";
+                return;
+            }
+
+            if (msgEl) msgEl.textContent = "Updated!";
+            loadOrders();
+        }
+
+        window.updateOrder = updateOrder;
+        $("load").addEventListener("click", loadOrders);
+    </script>
 </body>
+
 </html>
