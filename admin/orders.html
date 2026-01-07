@@ -1,94 +1,108 @@
 <!doctype html>
 <html>
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Orders Admin</title>
-    <link rel="stylesheet" href="/styles.css" />
-    <style>
-        .admin-wrap {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 24px 16px;
-        }
-
-        .row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .card {
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 14px;
-            margin: 12px 0;
-        }
-
-        .muted {
-            opacity: .75
-        }
-
-        .btn {
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            background: #fff;
-            cursor: pointer
-        }
-
-        .btn.primary {
-            border-color: #000
-        }
-
-        input {
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd
-        }
-
-        pre {
-            white-space: pre-wrap
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Orders Admin</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .admin-wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .card { border: 1px solid #eee; border-radius: 12px; padding: 14px; margin: 12px 0; }
+    .muted { opacity: .75; }
+    .btn { padding: 8px 10px; border-radius: 10px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+    .btn.primary { border-color: #000; }
+    input { padding: 8px 10px; border-radius: 10px; border: 1px solid #ddd; }
+    pre { white-space: pre-wrap; }
+  </style>
 </head>
 
 <body>
-    <div class="admin-wrap">
-        <h1>Orders</h1>
+  <!-- ===== Confirm Tracking Modal (MUST be above the script) ===== -->
+  <div id="confirmModal"
+    style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+           background:rgba(0,0,0,.4);padding:16px;z-index:9999;">
+    <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;
+                padding:16px;border:1px solid #eee;">
+      <h3 style="margin:0 0 10px;">Double check tracking</h3>
 
-        <div class="row" style="margin:12px 0 18px;">
-            <input id="token" placeholder="Admin token" style="min-width:260px;" />
-            <button class="btn primary" id="load">Load orders</button>
-            <span class="muted" id="status"></span>
-        </div>
+      <div class="muted" style="margin-bottom:10px;">
+        Order: <span id="cmOrderId"></span>
+      </div>
 
-        <div id="orders"></div>
+      <div style="margin:10px 0;">
+        <strong>Tracking #</strong>
+        <div id="cmTracking" style="margin-top:6px;font-family:monospace;"></div>
+      </div>
+
+      <div style="margin:10px 0;">
+        <a id="cmLink" href="#" target="_blank" rel="noopener noreferrer">
+          Open USPS tracking link
+        </a>
+      </div>
+
+      <div class="row" style="justify-content:flex-end;margin-top:14px;">
+        <button class="btn" id="cmCancel">Cancel</button>
+        <button class="btn primary" id="cmConfirm">Confirm & Send</button>
+      </div>
+
+      <div class="muted" style="margin-top:10px;font-size:12px;">
+        Tip: click the USPS link to confirm it’s the right package before notifying the customer.
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+    <h1>Orders</h1>
+
+    <div class="row" style="margin:12px 0 18px;">
+      <input id="token" placeholder="Admin token" style="min-width:260px;" />
+      <button class="btn primary" id="load">Load orders</button>
+      <span class="muted" id="status"></span>
     </div>
 
-    <script>
-        const $ = (id) => document.getElementById(id);
+    <div id="orders"></div>
+  </div>
 
-        function renderOrder(o, token) {
-            const items = (o.items || [])
-                .map(it => `${it.soapId} × ${it.qty}`)
-                .join(", ");
+  <script>
+    const $ = (id) => document.getElementById(id);
 
-            const ship = o.shipping || {};
-            const addr = [
-                ship.name,
-                ship.phone,
-                ship.address1,
-                ship.address2,
-                [ship.city, ship.state, ship.zip].filter(Boolean).join(", "),
-                ship.country
-            ].filter(Boolean).join("\n");
+    // ===== Modal helpers =====
+    function uspsTrackingUrl(trk) {
+      return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(trk)}`;
+    }
 
-            const created = o.createdAt ? new Date(o.createdAt).toLocaleString() : "(no time)";
+    let pendingUpdate = null;
 
-            return `
+    function openConfirmModal({ orderId, status, trackingNumber, token }) {
+      $("cmOrderId").textContent = orderId;
+      $("cmTracking").textContent = trackingNumber;
+      $("cmLink").href = uspsTrackingUrl(trackingNumber);
+
+      pendingUpdate = { orderId, status, trackingNumber, token };
+      $("confirmModal").style.display = "flex";
+    }
+
+    function closeConfirmModal() {
+      $("confirmModal").style.display = "none";
+      pendingUpdate = null;
+    }
+
+    function renderOrder(o) {
+      const items = (o.items || []).map(it => `${it.soapId} × ${it.qty}`).join(", ");
+      const ship = o.shipping || {};
+      const addr = [
+        ship.name,
+        ship.phone,
+        ship.address1,
+        ship.address2,
+        [ship.city, ship.state, ship.zip].filter(Boolean).join(", "),
+        ship.country
+      ].filter(Boolean).join("\n");
+
+      const created = o.createdAt ? new Date(o.createdAt).toLocaleString() : "(no time)";
+
+      return `
         <div class="card">
           <div class="row" style="justify-content:space-between;">
             <div>
@@ -114,115 +128,87 @@
             <button class="btn" data-action="update" data-order="${o.id}" data-status="shipped">Shipped</button>
             <button class="btn" data-action="update" data-order="${o.id}" data-status="delivered">Delivered</button>
           </div>
+
           <div class="muted" id="msg-${o.id}" style="margin-top:8px;font-size:12px;"></div>
         </div>
       `;
-        }
+    }
 
-        async function loadOrders() {
-            const token = $("token").value.trim();
-            if (!token) return alert("Paste your admin token first.");
+    async function loadOrders() {
+      const token = $("token").value.trim();
+      if (!token) return alert("Paste your admin token first.");
 
-            $("status").textContent = "Loading…";
-            const res = await fetch(`/api/admin-list-orders?token=${encodeURIComponent(token)}`);
-            const data = await res.json().catch(() => ({}));
+      $("status").textContent = "Loading…";
+      const res = await fetch(`/api/admin-list-orders?token=${encodeURIComponent(token)}`);
+      const data = await res.json().catch(() => ({}));
 
-            if (!res.ok) {
-                $("status").textContent = "";
-                return alert(data.error || "Failed to load orders.");
-            }
+      if (!res.ok) {
+        $("status").textContent = "";
+        return alert(data.error || "Failed to load orders.");
+      }
 
-            const orders = data.orders || [];
-            $("orders").innerHTML = orders.map(o => renderOrder(o, token)).join("");
-            $("status").textContent = `Loaded ${orders.length} orders`;
-        }
+      const orders = data.orders || [];
+      $("orders").innerHTML = orders.map(o => renderOrder(o)).join("");
+      $("status").textContent = `Loaded ${orders.length} orders`;
+    }
 
-        document.addEventListener("click", async (e) => {
-            const btn = e.target.closest('button[data-action="update"]');
-            if (!btn) return;
+    async function updateOrder(orderId, status, trackingNumber, token) {
+      const msgEl = document.getElementById(`msg-${orderId}`);
+      if (msgEl) msgEl.textContent = "Updating…";
 
-            const token = $("token").value.trim();
-            if (!token) return alert("Paste your admin token first.");
+      const res = await fetch(`/api/admin-update-order?token=${encodeURIComponent(token)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status, trackingNumber }),
+      });
 
-            const orderId = btn.dataset.order;
-            const status = btn.dataset.status;
+      const data = await res.json().catch(() => ({}));
 
-            const trackInput = document.querySelector(`input[data-track-for="${CSS.escape(orderId)}"]`);
-            const trackingNumber = trackInput ? trackInput.value.trim() : "";
+      if (!res.ok) {
+        if (msgEl) msgEl.textContent = data.error || "Update failed.";
+        return;
+      }
 
-            // Only require confirmation when we're about to send tracking (shipped + tracking present)
-            if (status === "shipped" && trackingNumber) {
-                openConfirmModal({ orderId, status, trackingNumber, token });
-                return;
-            }
+      if (msgEl) msgEl.textContent = "Updated!";
+      loadOrders();
+    }
 
-            await updateOrder(orderId, status, trackingNumber, token);
-        });
+    // Handle order buttons
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest('button[data-action="update"]');
+      if (!btn) return;
 
-        async function updateOrder(orderId, status, trackingNumber, token) {
-            const msgEl = document.getElementById(`msg-${orderId}`);
-            if (msgEl) msgEl.textContent = "Updating…";
+      const token = $("token").value.trim();
+      if (!token) return alert("Paste your admin token first.");
 
-            const res = await fetch(`/api/admin-update-order?token=${encodeURIComponent(token)}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId, status, trackingNumber }),
-            });
+      const orderId = btn.dataset.order;
+      const status = btn.dataset.status;
 
-            const data = await res.json().catch(() => ({}));
+      const trackInput = document.querySelector(
+        `input[data-track-for="${CSS.escape(orderId)}"]`
+      );
+      const trackingNumber = trackInput ? trackInput.value.trim() : "";
 
-            if (!res.ok) {
-                if (msgEl) msgEl.textContent = data.error || "Update failed.";
-                return;
-            }
+      // Confirm only when shipping with a tracking number
+      if (status === "shipped" && trackingNumber) {
+        openConfirmModal({ orderId, status, trackingNumber, token });
+        return;
+      }
 
-            if (msgEl) msgEl.textContent = "Updated!";
-            loadOrders();
-        }
+      await updateOrder(orderId, status, trackingNumber, token);
+    });
 
-        window.updateOrder = updateOrder;
-        $("load").addEventListener("click", loadOrders);
+    // Modal buttons
+    $("cmCancel").addEventListener("click", closeConfirmModal);
 
-        $("cmCancel").addEventListener("click", closeConfirmModal);
+    $("cmConfirm").addEventListener("click", async () => {
+      if (!pendingUpdate) return;
+      const { orderId, status, trackingNumber, token } = pendingUpdate;
+      await updateOrder(orderId, status, trackingNumber, token);
+      closeConfirmModal();
+    });
 
-        $("cmConfirm").addEventListener("click", async () => {
-            if (!pendingUpdate) return;
-
-            const { orderId, status, trackingNumber, token } = pendingUpdate;
-            await updateOrder(orderId, status, trackingNumber, token);
-            closeConfirmModal();
-        });
-
-    </script>
-
-    <div id="confirmModal"
-        style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);padding:16px;z-index:9999;">
-        <div style="background:#fff;border-radius:14px;max-width:520px;width:100%;padding:16px;border:1px solid #eee;">
-            <h3 style="margin:0 0 10px;">Double check tracking</h3>
-            <div class="muted" style="margin-bottom:10px;">
-                Order: <span id="cmOrderId"></span>
-            </div>
-
-            <div style="margin:10px 0;">
-                <div><strong>Tracking #</strong></div>
-                <div id="cmTracking" style="margin-top:6px;font-family:monospace;"></div>
-            </div>
-
-            <div style="margin:10px 0;">
-                <a id="cmLink" href="#" target="_blank" rel="noopener noreferrer">Open USPS tracking link</a>
-            </div>
-
-            <div class="row" style="justify-content:flex-end;margin-top:14px;">
-                <button class="btn" id="cmCancel">Cancel</button>
-                <button class="btn primary" id="cmConfirm">Confirm & Send</button>
-            </div>
-
-            <div class="muted" style="margin-top:10px;font-size:12px;">
-                Tip: click the USPS link to confirm it’s the right package before notifying the customer.
-            </div>
-        </div>
-    </div>
-
+    $("load").addEventListener("click", loadOrders);
+  </script>
 </body>
-
 </html>
