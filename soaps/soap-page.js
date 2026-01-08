@@ -16,6 +16,7 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithRedirect,
+  linkWithRedirect,
   getRedirectResult,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -139,9 +140,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   authBar.appendChild(signInBtn);
   authBar.appendChild(signOutBtn);
   authBar.appendChild(whoEl);
- 
+
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
+  
+    // If anon is already signed in, LINK (upgrade) the anon account to Google
+    if (auth.currentUser && auth.currentUser.isAnonymous) {
+      await linkWithRedirect(auth.currentUser, provider);
+      return;
+    }
+  
+    // Otherwise normal redirect sign-in
     await signInWithRedirect(auth, provider);
   }
 
@@ -185,7 +194,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     setReviewFormEnabled(ok);
     // Re-render likes disabled state (so buttons disable properly after sign in/out)
     lastReviewDocs && renderReviews(lastReviewDocs);
-    console.log("AUTH:", user?.email, "anon?", user?.isAnonymous);
+
+    console.log("AUTH:", {
+      uid: user?.uid,
+      email: user?.email,
+      isAnonymous: user?.isAnonymous,
+      providers: user?.providerData?.map(p => p.providerId),
+    });
 
   });
 
