@@ -298,29 +298,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Please sign in to like reviews.");
       return;
     }
-
-    const uid = user.uid;
-    const likedSet = getLikedSet(slug, uid);
-    if (likedSet.has(reviewId)) return;
-
-    const reviewRef = doc(db, "soaps", slug, "reviews", reviewId);
-    const likeRef = doc(db, "soaps", slug, "reviews", reviewId, "likes", uid);
-
-    await runTransaction(db, async (tx) => {
-      const likeSnap = await tx.get(likeRef);
-      if (likeSnap.exists()) return; // already liked (server-enforced)
-
-      tx.set(likeRef, { createdAt: serverTimestamp() });
-      tx.update(reviewRef, { likesCount: increment(1) });
-    });
-
-    // UI disable immediately (even before snapshot refresh)
-    likedSet.add(reviewId);
-    saveLikedSet(slug, uid, likedSet);
-
-    const btn = reviewsListEl.querySelector(`button[data-like="${CSS.escape(reviewId)}"]`);
-    if (btn) btn.disabled = true;
+  
+    try {
+      const uid = user.uid;
+      const likedSet = getLikedSet(slug, uid);
+      if (likedSet.has(reviewId)) return;
+  
+      const reviewRef = doc(db, "soaps", slug, "reviews", reviewId);
+      const likeRef = doc(db, "soaps", slug, "reviews", reviewId, "likes", uid);
+  
+      await runTransaction(db, async (tx) => {
+        const likeSnap = await tx.get(likeRef);
+        if (likeSnap.exists()) return;
+  
+        tx.set(likeRef, { createdAt: serverTimestamp() });
+        tx.update(reviewRef, { likesCount: increment(1) });
+      });
+  
+      likedSet.add(reviewId);
+      saveLikedSet(slug, uid, likedSet);
+  
+      const btn = reviewsListEl.querySelector(`button[data-like="${CSS.escape(reviewId)}"]`);
+      if (btn) btn.disabled = true;
+  
+    } catch (e) {
+      console.error("likeReview failed:", e);
+      alert("Like failed. Check console for details.");
+    }
   }
+  
 
   reviewsListEl?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-like]");
