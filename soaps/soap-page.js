@@ -13,6 +13,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 import {
+  GoogleAuthProvider,
+  signInWithRedirect,
+  getRedirectResult,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+async function doGoogleSignIn() {
+  const provider = new GoogleAuthProvider();
+  await signInWithRedirect(auth, provider);
+}
+
+import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
@@ -78,6 +89,13 @@ function saveLikedSet(slug, uid, set) {
 
 // ---------- Main ----------
 document.addEventListener("DOMContentLoaded", async () => {
+
+  try {
+    await getRedirectResult(auth);
+  } catch (e) {
+    console.error("redirect sign-in failed:", e);
+  }
+
   // Keep anon auth so the page always has an auth context,
   // but we will BLOCK reviews/likes unless user is NOT anonymous.
   await ensureAnonAuth();
@@ -136,13 +154,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   authBar.appendChild(signInBtn);
   authBar.appendChild(signOutBtn);
   authBar.appendChild(whoEl);
-
+ 
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-  }
-
-  signInBtn.addEventListener("click", async () => {
+    await signInWithRedirect(auth, provider);
+  }  signInBtn.addEventListener("click", async () => {
     try {
       await doGoogleSignIn();
     } catch (e) {
