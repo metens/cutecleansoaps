@@ -185,6 +185,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     setReviewFormEnabled(ok);
     // Re-render likes disabled state (so buttons disable properly after sign in/out)
     lastReviewDocs && renderReviews(lastReviewDocs);
+    console.log("AUTH:", user?.email, "anon?", user?.isAnonymous);
+
   });
 
   // ----- Name toggle
