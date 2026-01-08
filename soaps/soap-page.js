@@ -79,19 +79,11 @@ function saveLikedSet(slug, uid, set) {
 
 // ---------- Main ----------
 document.addEventListener("DOMContentLoaded", async () => {
-  async function doGoogleSignIn() {
-    const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
-  }
   try {
     await getRedirectResult(auth);
   } catch (e) {
     console.error("redirect sign-in failed:", e);
   }
-
-  // Keep anon auth so the page always has an auth context,
-  // but we will BLOCK reviews/likes unless user is NOT anonymous.
-  await ensureAnonAuth();
 
   const slug = getSlug();
   if (!slug) {
@@ -151,20 +143,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
     await signInWithRedirect(auth, provider);
-  }  signInBtn.addEventListener("click", async () => {
+  }
+
+  signInBtn.addEventListener("click", async () => {
     try {
       await doGoogleSignIn();
     } catch (e) {
       console.error("signIn failed:", e);
-      alert("Sign in failed. Try again.");
+      alert("Sign in failed. Check console for details.");
     }
   });
 
   signOutBtn.addEventListener("click", async () => {
     try {
       await signOut(auth);
-      // Optional: fall back to anon so the site still works
-      await ensureAnonAuth();
     } catch (e) {
       console.error("signOut failed:", e);
     }
