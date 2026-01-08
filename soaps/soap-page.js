@@ -13,22 +13,16 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 import {
+  onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 async function doGoogleSignIn() {
   const provider = new GoogleAuthProvider();
   await signInWithRedirect(auth, provider);
 }
-
-import {
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 // ---------- Helpers ----------
 function getSlug() {
