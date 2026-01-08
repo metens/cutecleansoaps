@@ -15,9 +15,8 @@ import {
 import {
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithRedirect,
-  linkWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
+  linkWithPopup,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
@@ -81,13 +80,6 @@ function cssEscapeSafe(v) {
 
 // ---------- Main ----------
 document.addEventListener("DOMContentLoaded", async () => {
-  // Complete redirect sign-in (or link)
-  try {
-    await getRedirectResult(auth);
-  } catch (e) {
-    console.error("redirect sign-in failed:", e);
-  }
-
   const slug = getSlug();
   if (!slug) {
     const t = document.getElementById("soap-title");
@@ -148,14 +140,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
-
-    // If anon exists, UPGRADE that same account to Google
+  
+    // ✅ If you're currently anonymous, upgrade THIS SAME account to Google
     if (auth.currentUser && auth.currentUser.isAnonymous) {
-      await linkWithRedirect(auth.currentUser, provider);
+      await linkWithPopup(auth.currentUser, provider);
       return;
     }
-
-    await signInWithRedirect(auth, provider);
+  
+    // Otherwise normal popup sign-in
+    await signInWithPopup(auth, provider);
   }
 
   signInBtn.addEventListener("click", async () => {
