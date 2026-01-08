@@ -141,13 +141,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
   
-    // ✅ If you're currently anonymous, upgrade THIS SAME account to Google
+    // If you are currently anonymous, try to "upgrade" by linking.
     if (auth.currentUser && auth.currentUser.isAnonymous) {
-      await linkWithPopup(auth.currentUser, provider);
-      return;
+      try {
+        await linkWithPopup(auth.currentUser, provider);
+        return;
+      } catch (e) {
+        // If the Google account is already used by another Firebase user,
+        // linking fails — so we just sign in normally instead.
+        if (e?.code === "auth/credential-already-in-use") {
+          await signInWithPopup(auth, provider);
+          return;
+        }
+        throw e;
+      }
     }
   
-    // Otherwise normal popup sign-in
+    // Normal sign-in for non-anon / signed-out users
     await signInWithPopup(auth, provider);
   }
 
