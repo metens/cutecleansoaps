@@ -15,14 +15,10 @@ import {
 import {
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-
-async function doGoogleSignIn() {
-  const provider = new GoogleAuthProvider();
-  await signInWithRedirect(auth, provider);
-}
 
 // ---------- Helpers ----------
 function getSlug() {
@@ -83,7 +79,10 @@ function saveLikedSet(slug, uid, set) {
 
 // ---------- Main ----------
 document.addEventListener("DOMContentLoaded", async () => {
-
+  async function doGoogleSignIn() {
+    const provider = new GoogleAuthProvider();
+    await signInWithRedirect(auth, provider);
+  }
   try {
     await getRedirectResult(auth);
   } catch (e) {
