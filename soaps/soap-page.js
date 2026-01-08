@@ -1,4 +1,5 @@
-import { db, auth, ensureAnonAuth } from "/firebase.js";
+import { db, auth } from "/firebase.js";
+
 import {
   doc,
   collection,
@@ -42,7 +43,7 @@ function renderStarsHTML(ratingAvg) {
 }
 
 function escapeHtml(s) {
-  return String(s || "")
+  return String(s ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -52,10 +53,6 @@ function escapeHtml(s) {
 
 function isRealSignedIn(user) {
   return !!user && user.isAnonymous === false;
-}
-
-function uspsTrackingUrl(trk) {
-  return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(trk)}`;
 }
 
 function likedKey(slug, uid) {
@@ -80,6 +77,7 @@ function saveLikedSet(slug, uid, set) {
 
 // ---------- Main ----------
 document.addEventListener("DOMContentLoaded", async () => {
+  // Finish redirect sign-in (important for redirect flow)
   try {
     await getRedirectResult(auth);
   } catch (e) {
@@ -88,7 +86,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const slug = getSlug();
   if (!slug) {
-    document.getElementById("soap-title").textContent = "No soap selected";
+    const t = document.getElementById("soap-title");
+    if (t) t.textContent = "No soap selected";
     return;
   }
 
@@ -104,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const nameInputEl = document.getElementById("review-name");
   const submitBtn = document.getElementById("review-submit");
 
-  // ----- Insert an auth bar above the review form (no HTML changes needed)
+  // ----- Auth bar (inserted above review submit button)
   const authBar = document.createElement("div");
   authBar.style.margin = "12px 0";
   authBar.style.display = "flex";
@@ -112,7 +111,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   authBar.style.flexWrap = "wrap";
   authBar.style.alignItems = "center";
 
-  // Put it right above the submit button if possible
   if (submitBtn?.parentElement) {
     submitBtn.parentElement.insertBefore(authBar, submitBtn);
   }
@@ -141,16 +139,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   authBar.appendChild(signOutBtn);
   authBar.appendChild(whoEl);
 
+  function setReviewFormEnabled(enabled) {
+    if (reviewStarsEl) reviewStarsEl.disabled = !enabled;
+    if (reviewTextEl) reviewTextEl.disabled = !enabled;
+    if (useNameEl) useNameEl.disabled = !enabled;
+    if (nameInputEl) nameInputEl.disabled = !enabled;
+    if (submitBtn) submitBtn.disabled = !enabled;
+
+    if (reviewTextEl) {
+      reviewTextEl.placeholder = enabled
+        ? "Write your review..."
+        : "Sign in to write a review.";
+    }
+  }
+
+  // UPGRADE anon -> Google (link), otherwise normal redirect sign-in
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
-  
-    // If anon is already signed in, LINK (upgrade) the anon account to Google
+
     if (auth.currentUser && auth.currentUser.isAnonymous) {
       await linkWithRedirect(auth.currentUser, provider);
       return;
     }
-  
-    // Otherwise normal redirect sign-in
+
     await signInWithRedirect(auth, provider);
   }
 
@@ -171,40 +182,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  function setReviewFormEnabled(enabled) {
-    if (reviewStarsEl) reviewStarsEl.disabled = !enabled;
-    if (reviewTextEl) reviewTextEl.disabled = !enabled;
-    if (useNameEl) useNameEl.disabled = !enabled;
-    if (nameInputEl) nameInputEl.disabled = !enabled;
-    if (submitBtn) submitBtn.disabled = !enabled;
-
-    if (!enabled && reviewTextEl) {
-      reviewTextEl.placeholder = "Sign in to write a review.";
-    }
-    if (enabled && reviewTextEl) {
-      reviewTextEl.placeholder = "Write your review...";
-    }
-  }
+  let lastReviewDocs = null;
 
   onAuthStateChanged(auth, (user) => {
     const ok = isRealSignedIn(user);
+
     signInBtn.style.display = ok ? "none" : "inline-block";
     signOutBtn.style.display = ok ? "inline-block" : "none";
-    whoEl.textContent = ok ? `Signed in as ${user.email || user.displayName || "user"}` : "Not signed in";
+    whoEl.textContent = ok
+      ? `Signed in as ${user.email || user.displayName || "user"}`
+      : "Not signed in";
+
     setReviewFormEnabled(ok);
-    // Re-render likes disabled state (so buttons disable properly after sign in/out)
-    lastReviewDocs && renderReviews(lastReviewDocs);
 
-    console.log("AUTH:", {
-      uid: user?.uid,
-      email: user?.email,
-      isAnonymous: user?.isAnonymous,
-      providers: user?.providerData?.map(p => p.providerId),
-    });
-
+    // Re-render to disable/enable like buttons properly
+    if (lastReviewDocs) renderReviews(lastReviewDocs);
   });
 
-  // ----- Name toggle
+  // Name toggle
   useNameEl?.addEventListener("change", () => {
     if (!nameInputEl) return;
     nameInputEl.style.display = useNameEl.checked ? "block" : "none";
@@ -214,29 +209,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   onSnapshot(doc(db, "soaps", slug), (snap) => {
     const d = snap.data();
     if (!d) {
-      titleEl.textContent = "Soap not found in Firestore";
-      ratingEl.textContent = "";
-      stockEl.textContent = "";
-      ingredientsEl.textContent = "";
+      if (titleEl) titleEl.textContent = "Soap not found in Firestore";
+      if (ratingEl) ratingEl.textContent = "";
+      if (stockEl) stockEl.textContent = "";
+      if (ingredientsEl) ingredientsEl.textContent = "";
       return;
     }
 
     document.title = d.name || slug;
-    titleEl.textContent = d.name || slug;
+    if (titleEl) titleEl.textContent = d.name || slug;
 
     const avg = Number(d.ratingAvg || 0);
     const count = Number(d.ratingCount || 0);
-
-    ratingEl.innerHTML = `
-      <span class="star-wrap">${renderStarsHTML(avg)}</span>
-      <span class="rating-text">${avg.toFixed(2)}${count ? ` (${count})` : ""}</span>
-    `;
+    if (ratingEl) {
+      ratingEl.innerHTML = `
+        <span class="star-wrap">${renderStarsHTML(avg)}</span>
+        <span class="rating-text">${avg.toFixed(2)}${count ? ` (${count})` : ""}</span>
+      `;
+    }
 
     const stock = Number(d.stock ?? 0);
-    stockEl.textContent =
-      stock <= 0 ? "Out of stock" : stock <= 3 ? `Only ${stock} left!` : `${stock} in stock`;
+    if (stockEl) {
+      stockEl.textContent =
+        stock <= 0 ? "Out of stock" : stock <= 3 ? `Only ${stock} left!` : `${stock} in stock`;
+    }
 
-    ingredientsEl.textContent = d.ingredients ? `Ingredients: ${d.ingredients.join(", ")}` : "";
+    if (ingredientsEl) {
+      ingredientsEl.textContent = d.ingredients
+        ? `Ingredients: ${d.ingredients.join(", ")}`
+        : "";
+    }
   });
 
   // 2) Live recent reviews
@@ -246,10 +248,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     limit(20)
   );
 
-  let lastReviewDocs = null;
-
   function renderReviews(docs) {
     lastReviewDocs = docs;
+
+    if (!reviewsListEl) return;
 
     if (!docs || docs.length === 0) {
       reviewsListEl.textContent = "No reviews yet.";
@@ -258,7 +260,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const user = auth.currentUser;
     const ok = isRealSignedIn(user);
-    const uid = ok ? user.uid : null;
+    const uid = ok ? user.uid : "";
     const likedSet = ok ? getLikedSet(slug, uid) : new Set();
 
     reviewsListEl.innerHTML = docs
@@ -305,9 +307,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .join("");
   }
 
-  onSnapshot(reviewsQ, (snap) => {
-    renderReviews(snap.docs);
-  });
+  onSnapshot(reviewsQ, (snap) => renderReviews(snap.docs));
 
   // 3) Like logic (once per user)
   async function likeReview(reviewId) {
@@ -316,35 +316,45 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Please sign in to like reviews.");
       return;
     }
-  
+
     try {
       const uid = user.uid;
       const likedSet = getLikedSet(slug, uid);
       if (likedSet.has(reviewId)) return;
-  
+
       const reviewRef = doc(db, "soaps", slug, "reviews", reviewId);
       const likeRef = doc(db, "soaps", slug, "reviews", reviewId, "likes", uid);
-  
+
       await runTransaction(db, async (tx) => {
         const likeSnap = await tx.get(likeRef);
         if (likeSnap.exists()) return;
-  
+
         tx.set(likeRef, { createdAt: serverTimestamp() });
         tx.update(reviewRef, { likesCount: increment(1) });
       });
-  
+
       likedSet.add(reviewId);
       saveLikedSet(slug, uid, likedSet);
-  
-      const btn = reviewsListEl.querySelector(`button[data-like="${CSS.escape(reviewId)}"]`);
+
+      const btn = reviewsListEl?.querySelector(
+        `button[data-like="${CSS.escape(reviewId)}"]`
+      );
       if (btn) btn.disabled = true;
-  
     } catch (e) {
       console.error("likeReview failed:", e);
       alert("Like failed. Check console for details.");
     }
   }
-  
+
+  // IMPORTANT: CSS.escape needs a string-safe fallback in some environments
+  function CSSescapeSafe(v) {
+    try {
+      return CSS.escape(v);
+    } catch {
+      return String(v).replaceAll('"', '\\"');
+    }
+  }
+  function CTO(v){ return v } // no-op helper to avoid minifier weirdness
 
   reviewsListEl?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-like]");
@@ -352,7 +362,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await likeReview(btn.dataset.like);
   });
 
-  // 4) Submit review (signed-in users only)
+  // 4) Submit review
   submitBtn?.addEventListener("click", async () => {
     const user = auth.currentUser;
     if (!isRealSignedIn(user)) {
@@ -362,7 +372,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const stars = Number(reviewStarsEl?.value);
     const text = reviewTextEl?.value?.trim() || "";
-
     const useName = !!useNameEl?.checked;
     const nameInput = nameInputEl?.value?.trim() || "";
 
@@ -386,3 +395,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (nameInputEl) nameInputEl.style.display = "none";
   });
 });
+
+// Small helper because some older browsers choke on CSS.escape in template selectors
+function CSSescape(v) {
+  try {
+    return CSS.escape(v);
+  } catch {
+    return String(v).replaceAll('"', '\\"');
+  }
+}
+function NOOP(v){ return v }
+function _selSafe(reviewId) {
+  return `button[data-like="${CSSescape(reviewId)}"]`;
+}
+function _btnFor(reviewsListEl, reviewId) {
+  return reviewsListEl?.querySelector(_selSafe(reviewId));
+}
