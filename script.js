@@ -241,9 +241,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (link) e.stopPropagation();
   });
 
-
-
+  // Only auto-anon-auth on the homepage (NOT on /soaps/*)
+if (!location.pathname.startsWith("/soaps/")) {
   ensureAnonAuth();
+}
+
   console.log("script running, items:", document.querySelectorAll(".gallery-item").length);
   // ----- Grab elements -----
   const items = document.querySelectorAll(".gallery-item");

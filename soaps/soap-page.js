@@ -1,5 +1,4 @@
 import { db, auth } from "/firebase.js";
-
 import {
   doc,
   collection,
@@ -28,20 +27,6 @@ function getSlug() {
   return parts[0] === "soaps" ? parts[1] : null; // /soaps/:slug
 }
 
-function renderStarsHTML(ratingAvg) {
-  const v = Math.max(0, Math.min(5, Number(ratingAvg || 0)));
-  const step = 0.25; // quarter stars
-  const snapped = Math.round(v / step) * step;
-
-  let html = `<span class="star-rating" aria-label="${snapped} out of 5">`;
-  for (let i = 1; i <= 5; i++) {
-    const fill = Math.max(0, Math.min(1, snapped - (i - 1))); // 0..1
-    html += `<span class="star" style="--fill:${fill}"></span>`;
-  }
-  html += `</span>`;
-  return html;
-}
-
 function escapeHtml(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -55,10 +40,23 @@ function isRealSignedIn(user) {
   return !!user && user.isAnonymous === false;
 }
 
+function renderStarsHTML(ratingAvg) {
+  const v = Math.max(0, Math.min(5, Number(ratingAvg || 0)));
+  const step = 0.25;
+  const snapped = Math.round(v / step) * step;
+
+  let html = `<span class="star-rating" aria-label="${snapped} out of 5">`;
+  for (let i = 1; i <= 5; i++) {
+    const fill = Math.max(0, Math.min(1, snapped - (i - 1))); // 0..1
+    html += `<span class="star" style="--fill:${fill}"></span>`;
+  }
+  html += `</span>`;
+  return html;
+}
+
 function likedKey(slug, uid) {
   return `ccs_liked_${slug}_${uid}`;
 }
-
 function getLikedSet(slug, uid) {
   try {
     const raw = localStorage.getItem(likedKey(slug, uid));
@@ -68,16 +66,22 @@ function getLikedSet(slug, uid) {
     return new Set();
   }
 }
-
 function saveLikedSet(slug, uid, set) {
   try {
     localStorage.setItem(likedKey(slug, uid), JSON.stringify([...set]));
   } catch {}
 }
+function cssEscapeSafe(v) {
+  try {
+    return CSS.escape(v);
+  } catch {
+    return String(v).replaceAll('"', '\\"');
+  }
+}
 
 // ---------- Main ----------
 document.addEventListener("DOMContentLoaded", async () => {
-  // Finish redirect sign-in (important for redirect flow)
+  // Complete redirect sign-in (or link)
   try {
     await getRedirectResult(auth);
   } catch (e) {
@@ -103,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const nameInputEl = document.getElementById("review-name");
   const submitBtn = document.getElementById("review-submit");
 
-  // ----- Auth bar (inserted above review submit button)
+  // ----- Auth bar above submit
   const authBar = document.createElement("div");
   authBar.style.margin = "12px 0";
   authBar.style.display = "flex";
@@ -117,19 +121,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const signInBtn = document.createElement("button");
   signInBtn.textContent = "Sign in to review";
-  signInBtn.style.padding = "10px 12px";
-  signInBtn.style.borderRadius = "10px";
-  signInBtn.style.border = "1px solid #ddd";
-  signInBtn.style.background = "#fff";
-  signInBtn.style.cursor = "pointer";
+  signInBtn.className = "btn";
 
   const signOutBtn = document.createElement("button");
   signOutBtn.textContent = "Sign out";
-  signOutBtn.style.padding = "10px 12px";
-  signOutBtn.style.borderRadius = "10px";
-  signOutBtn.style.border = "1px solid #ddd";
-  signOutBtn.style.background = "#fff";
-  signOutBtn.style.cursor = "pointer";
+  signOutBtn.className = "btn";
 
   const whoEl = document.createElement("span");
   whoEl.style.opacity = "0.8";
@@ -145,18 +141,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (useNameEl) useNameEl.disabled = !enabled;
     if (nameInputEl) nameInputEl.disabled = !enabled;
     if (submitBtn) submitBtn.disabled = !enabled;
-
     if (reviewTextEl) {
-      reviewTextEl.placeholder = enabled
-        ? "Write your review..."
-        : "Sign in to write a review.";
+      reviewTextEl.placeholder = enabled ? "Write your review..." : "Sign in to write a review.";
     }
   }
 
-  // UPGRADE anon -> Google (link), otherwise normal redirect sign-in
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
 
+    // If anon exists, UPGRADE that same account to Google
     if (auth.currentUser && auth.currentUser.isAnonymous) {
       await linkWithRedirect(auth.currentUser, provider);
       return;
@@ -195,26 +188,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     setReviewFormEnabled(ok);
 
-    // Re-render to disable/enable like buttons properly
     if (lastReviewDocs) renderReviews(lastReviewDocs);
   });
 
-  // Name toggle
   useNameEl?.addEventListener("change", () => {
     if (!nameInputEl) return;
     nameInputEl.style.display = useNameEl.checked ? "block" : "none";
   });
 
-  // 1) Live soap doc
+  // 1) Soap doc
   onSnapshot(doc(db, "soaps", slug), (snap) => {
     const d = snap.data();
-    if (!d) {
-      if (titleEl) titleEl.textContent = "Soap not found in Firestore";
-      if (ratingEl) ratingEl.textContent = "";
-      if (stockEl) stockEl.textContent = "";
-      if (ingredientsEl) ingredientsEl.textContent = "";
-      return;
-    }
+    if (!d) return;
 
     document.title = d.name || slug;
     if (titleEl) titleEl.textContent = d.name || slug;
@@ -235,13 +220,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (ingredientsEl) {
-      ingredientsEl.textContent = d.ingredients
-        ? `Ingredients: ${d.ingredients.join(", ")}`
-        : "";
+      ingredientsEl.textContent = d.ingredients ? `Ingredients: ${d.ingredients.join(", ")}` : "";
     }
   });
 
-  // 2) Live recent reviews
+  // 2) Reviews list
   const reviewsQ = query(
     collection(db, "soaps", slug, "reviews"),
     orderBy("createdAt", "desc"),
@@ -250,7 +233,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function renderReviews(docs) {
     lastReviewDocs = docs;
-
     if (!reviewsListEl) return;
 
     if (!docs || docs.length === 0) {
@@ -278,28 +260,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         const likeDisabled = !ok || alreadyLiked;
 
         return `
-          <div class="review-card" style="background:#eff6ff;border:1px solid #dbeafe;border-radius:14px;padding:12px 14px;margin:10px 0;">
-            <div class="review-meta" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
+          <div style="background:#eff6ff;border:1px solid #dbeafe;border-radius:14px;padding:12px 14px;margin:10px 0;">
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
               <div><strong>${name}</strong></div>
               <div style="opacity:.7;font-size:12px;">${escapeHtml(when)}</div>
             </div>
-
-            <div class="review-stars" style="margin-top:6px;">
-              ${"★".repeat(stars)}${"☆".repeat(5 - stars)}
-            </div>
-
-            <div class="review-text" style="margin-top:8px;line-height:1.45;opacity:.92;">
-              ${text}
-            </div>
-
+            <div style="margin-top:6px;">${"★".repeat(stars)}${"☆".repeat(5 - stars)}</div>
+            <div style="margin-top:8px;line-height:1.45;opacity:.92;">${text}</div>
             <button
-              class="like-btn"
               data-like="${reviewId}"
               ${likeDisabled ? "disabled" : ""}
               style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;border:1px solid #dbeafe;background:rgba(255,255,255,.7);border-radius:999px;padding:6px 10px;cursor:${likeDisabled ? "not-allowed" : "pointer"};opacity:${likeDisabled ? ".6" : "1"};"
-              title="${!ok ? "Sign in to like" : alreadyLiked ? "You already liked this" : "Like this review"}"
             >
-              👍 <span data-like-count="${reviewId}">${likesCount}</span>
+              👍 <span>${likesCount}</span>
             </button>
           </div>
         `;
@@ -309,7 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   onSnapshot(reviewsQ, (snap) => renderReviews(snap.docs));
 
-  // 3) Like logic (once per user)
+  // 3) Like once per user
   async function likeReview(reviewId) {
     const user = auth.currentUser;
     if (!isRealSignedIn(user)) {
@@ -317,44 +290,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    try {
-      const uid = user.uid;
-      const likedSet = getLikedSet(slug, uid);
-      if (likedSet.has(reviewId)) return;
+    const uid = user.uid;
+    const likedSet = getLikedSet(slug, uid);
+    if (likedSet.has(reviewId)) return;
 
-      const reviewRef = doc(db, "soaps", slug, "reviews", reviewId);
-      const likeRef = doc(db, "soaps", slug, "reviews", reviewId, "likes", uid);
+    const reviewRef = doc(db, "soaps", slug, "reviews", reviewId);
+    const likeRef = doc(db, "soaps", slug, "reviews", reviewId, "likes", uid);
 
-      await runTransaction(db, async (tx) => {
-        const likeSnap = await tx.get(likeRef);
-        if (likeSnap.exists()) return;
+    await runTransaction(db, async (tx) => {
+      const likeSnap = await tx.get(likeRef);
+      if (likeSnap.exists()) return;
 
-        tx.set(likeRef, { createdAt: serverTimestamp() });
-        tx.update(reviewRef, { likesCount: increment(1) });
-      });
+      tx.set(likeRef, { createdAt: serverTimestamp() });
+      tx.update(reviewRef, { likesCount: increment(1) });
+    });
 
-      likedSet.add(reviewId);
-      saveLikedSet(slug, uid, likedSet);
+    likedSet.add(reviewId);
+    saveLikedSet(slug, uid, likedSet);
 
-      const btn = reviewsListEl?.querySelector(
-        `button[data-like="${CSS.escape(reviewId)}"]`
-      );
-      if (btn) btn.disabled = true;
-    } catch (e) {
-      console.error("likeReview failed:", e);
-      alert("Like failed. Check console for details.");
-    }
+    const btn = reviewsListEl?.querySelector(
+      `button[data-like="${cssEscapeSafe(reviewId)}"]`
+    );
+    if (btn) btn.disabled = true;
   }
-
-  // IMPORTANT: CSS.escape needs a string-safe fallback in some environments
-  function CSSescapeSafe(v) {
-    try {
-      return CSS.escape(v);
-    } catch {
-      return String(v).replaceAll('"', '\\"');
-    }
-  }
-  function CTO(v){ return v } // no-op helper to avoid minifier weirdness
 
   reviewsListEl?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-like]");
@@ -371,9 +329,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const stars = Number(reviewStarsEl?.value);
-    const text = reviewTextEl?.value?.trim() || "";
+    const text = (reviewTextEl?.value || "").trim();
     const useName = !!useNameEl?.checked;
-    const nameInput = nameInputEl?.value?.trim() || "";
+    const nameInput = (nameInputEl?.value || "").trim();
 
     const displayName =
       useName && nameInput ? nameInput : (user.displayName || user.email || "Anonymous");
@@ -395,19 +353,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (nameInputEl) nameInputEl.style.display = "none";
   });
 });
-
-// Small helper because some older browsers choke on CSS.escape in template selectors
-function CSSescape(v) {
-  try {
-    return CSS.escape(v);
-  } catch {
-    return String(v).replaceAll('"', '\\"');
-  }
-}
-function NOOP(v){ return v }
-function _selSafe(reviewId) {
-  return `button[data-like="${CSSescape(reviewId)}"]`;
-}
-function _btnFor(reviewsListEl, reviewId) {
-  return reviewsListEl?.querySelector(_selSafe(reviewId));
-}
