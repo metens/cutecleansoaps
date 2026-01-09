@@ -1,4 +1,5 @@
 import { db, auth } from "/firebase.js";
+
 import {
   doc,
   collection,
@@ -41,7 +42,7 @@ function isRealSignedIn(user) {
 
 function renderStarsHTML(ratingAvg) {
   const v = Math.max(0, Math.min(5, Number(ratingAvg || 0)));
-  const step = 0.25;
+  const step = 0.25; // quarter stars
   const snapped = Math.round(v / step) * step;
 
   let html = `<span class="star-rating" aria-label="${snapped} out of 5">`;
@@ -56,6 +57,7 @@ function renderStarsHTML(ratingAvg) {
 function likedKey(slug, uid) {
   return `ccs_liked_${slug}_${uid}`;
 }
+
 function getLikedSet(slug, uid) {
   try {
     const raw = localStorage.getItem(likedKey(slug, uid));
@@ -65,11 +67,13 @@ function getLikedSet(slug, uid) {
     return new Set();
   }
 }
+
 function saveLikedSet(slug, uid, set) {
   try {
     localStorage.setItem(likedKey(slug, uid), JSON.stringify([...set]));
   } catch {}
 }
+
 function cssEscapeSafe(v) {
   try {
     return CSS.escape(v);
@@ -99,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const nameInputEl = document.getElementById("review-name");
   const submitBtn = document.getElementById("review-submit");
 
-  // ----- Auth bar above submit
+  // ----- Auth bar above submit (no HTML edits needed)
   const authBar = document.createElement("div");
   authBar.style.margin = "12px 0";
   authBar.style.display = "flex";
@@ -133,48 +137,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (useNameEl) useNameEl.disabled = !enabled;
     if (nameInputEl) nameInputEl.disabled = !enabled;
     if (submitBtn) submitBtn.disabled = !enabled;
+
     if (reviewTextEl) {
-      reviewTextEl.placeholder = enabled ? "Write your review..." : "Sign in to write a review.";
+      reviewTextEl.placeholder = enabled
+        ? "Write your review..."
+        : "Sign in to write a review.";
     }
   }
 
-  async function doGoogleSignIn() {
+  async function doGoogleSignInPopup() {
     const provider = new GoogleAuthProvider();
-  
-    // Try popup first
-    try {
-      // If anon, try linking first (upgrade)
-      if (auth.currentUser && auth.currentUser.isAnonymous) {
-        try {
-          await linkWithPopup(auth.currentUser, provider);
-          return;
-        } catch (e) {
-          if (e?.code !== "auth/credential-already-in-use") throw e;
-          // Fall through to normal popup sign-in
-        }
-      }
-      await signInWithPopup(auth, provider);
-      return;
-    } catch (e) {
-      // Popup blocked: fall back to redirect
-      if (e?.code === "auth/popup-blocked" || e?.code === "auth/popup-closed-by-user") {
-        await signInWithRedirect(auth, provider);
+
+    // If anon exists, try upgrading by linking
+    if (auth.currentUser && auth.currentUser.isAnonymous) {
+      try {
+        await linkWithPopup(auth.currentUser, provider);
         return;
+      } catch (e) {
+        // If that Google account already belongs to another Firebase user,
+        // linking fails — so just sign in normally.
+        if (e?.code === "auth/credential-already-in-use") {
+          await signInWithPopup(auth, provider);
+          return;
+        }
+        throw e;
       }
-      throw e;
     }
+
+    await signInWithPopup(auth, provider);
   }
-  
+
+  // IMPORTANT: call popup sign-in directly from click (no awaits before it)
   signInBtn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-  
-    // IMPORTANT: do not "await" anything before this call
-    doGoogleSignIn().catch((err) => {
+
+    doGoogleSignInPopup().catch((err) => {
       console.error("signIn failed:", err);
-      alert(err?.message || "Sign in failed.");
+
+      if (err?.code === "auth/popup-blocked") {
+        alert(
+          "Popup blocked. Please allow popups for this site, then click Sign in again."
+        );
+        return;
+      }
+
+      alert(err?.message || "Sign in failed. Check console for details.");
     });
   });
+
   signOutBtn.addEventListener("click", async () => {
     try {
       await signOut(auth);
@@ -196,6 +207,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     setReviewFormEnabled(ok);
 
+    // Re-render so like buttons enable/disable correctly
     if (lastReviewDocs) renderReviews(lastReviewDocs);
   });
 
@@ -204,7 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     nameInputEl.style.display = useNameEl.checked ? "block" : "none";
   });
 
-  // 1) Soap doc
+  // 1) Live soap doc
   onSnapshot(doc(db, "soaps", slug), (snap) => {
     const d = snap.data();
     if (!d) return;
@@ -214,6 +226,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const avg = Number(d.ratingAvg || 0);
     const count = Number(d.ratingCount || 0);
+
     if (ratingEl) {
       ratingEl.innerHTML = `
         <span class="star-wrap">${renderStarsHTML(avg)}</span>
@@ -224,15 +237,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const stock = Number(d.stock ?? 0);
     if (stockEl) {
       stockEl.textContent =
-        stock <= 0 ? "Out of stock" : stock <= 3 ? `Only ${stock} left!` : `${stock} in stock`;
+        stock <= 0
+          ? "Out of stock"
+          : stock <= 3
+          ? `Only ${stock} left!`
+          : `${stock} in stock`;
     }
 
     if (ingredientsEl) {
-      ingredientsEl.textContent = d.ingredients ? `Ingredients: ${d.ingredients.join(", ")}` : "";
+      ingredientsEl.textContent = d.ingredients
+        ? `Ingredients: ${d.ingredients.join(", ")}`
+        : "";
     }
   });
 
-  // 2) Reviews list
+  // 2) Live recent reviews
   const reviewsQ = query(
     collection(db, "soaps", slug, "reviews"),
     orderBy("createdAt", "desc"),
@@ -259,7 +278,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         const reviewId = docSnap.id;
 
         const name = escapeHtml(r.displayName || "Anonymous");
-        const when = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString() : "";
+        const when = r.createdAt?.toDate
+          ? r.createdAt.toDate().toLocaleDateString()
+          : "";
         const stars = Math.max(0, Math.min(5, Number(r.stars) || 0));
         const text = escapeHtml(r.text || "");
         const likesCount = Number(r.likesCount || 0);
@@ -273,12 +294,20 @@ document.addEventListener("DOMContentLoaded", async () => {
               <div><strong>${name}</strong></div>
               <div style="opacity:.7;font-size:12px;">${escapeHtml(when)}</div>
             </div>
-            <div style="margin-top:6px;">${"★".repeat(stars)}${"☆".repeat(5 - stars)}</div>
+            <div style="margin-top:6px;">${"★".repeat(stars)}${"☆".repeat(
+          5 - stars
+        )}</div>
             <div style="margin-top:8px;line-height:1.45;opacity:.92;">${text}</div>
+
             <button
               data-like="${reviewId}"
               ${likeDisabled ? "disabled" : ""}
-              style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;border:1px solid #dbeafe;background:rgba(255,255,255,.7);border-radius:999px;padding:6px 10px;cursor:${likeDisabled ? "not-allowed" : "pointer"};opacity:${likeDisabled ? ".6" : "1"};"
+              style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;border:1px solid #dbeafe;background:rgba(255,255,255,.7);border-radius:999px;padding:6px 10px;cursor:${
+                likeDisabled ? "not-allowed" : "pointer"
+              };opacity:${likeDisabled ? ".6" : "1"};"
+              title="${
+                !ok ? "Sign in to like" : alreadyLiked ? "You already liked this" : "Like"
+              }"
             >
               👍 <span>${likesCount}</span>
             </button>
@@ -290,7 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   onSnapshot(reviewsQ, (snap) => renderReviews(snap.docs));
 
-  // 3) Like once per user
+  // 3) Like once per user (transaction)
   async function likeReview(reviewId) {
     const user = auth.currentUser;
     if (!isRealSignedIn(user)) {
@@ -342,7 +371,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const nameInput = (nameInputEl?.value || "").trim();
 
     const displayName =
-      useName && nameInput ? nameInput : (user.displayName || user.email || "Anonymous");
+      useName && nameInput
+        ? nameInput
+        : user.displayName || user.email || "Anonymous";
 
     if (!stars || !text) return;
 
