@@ -12,5 +12,14 @@
         "*.local"
       ]
     }
-  ]
+  ],
+  "hosting": {
+    "public": "public",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "rewrites": [],
+    "headers": [],
+    "redirects": [],
+    "errorPage": "/404.html"
+  }
 }
