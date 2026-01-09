@@ -141,35 +141,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function doGoogleSignIn() {
     const provider = new GoogleAuthProvider();
   
-    // If you are currently anonymous, try to "upgrade" by linking.
-    if (auth.currentUser && auth.currentUser.isAnonymous) {
-      try {
-        await linkWithPopup(auth.currentUser, provider);
-        return;
-      } catch (e) {
-        // If the Google account is already used by another Firebase user,
-        // linking fails — so we just sign in normally instead.
-        if (e?.code === "auth/credential-already-in-use") {
-          await signInWithPopup(auth, provider);
-          return;
-        }
-        throw e;
-      }
-    }
-  
-    // Normal sign-in for non-anon / signed-out users
-    await signInWithPopup(auth, provider);
-  }
-
-  signInBtn.addEventListener("click", async () => {
+    // Try popup first
     try {
-      await doGoogleSignIn();
+      // If anon, try linking first (upgrade)
+      if (auth.currentUser && auth.currentUser.isAnonymous) {
+        try {
+          await linkWithPopup(auth.currentUser, provider);
+          return;
+        } catch (e) {
+          if (e?.code !== "auth/credential-already-in-use") throw e;
+          // Fall through to normal popup sign-in
+        }
+      }
+      await signInWithPopup(auth, provider);
+      return;
     } catch (e) {
-      console.error("signIn failed:", e);
-      alert("Sign in failed. Check console for details.");
+      // Popup blocked: fall back to redirect
+      if (e?.code === "auth/popup-blocked" || e?.code === "auth/popup-closed-by-user") {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      throw e;
     }
+  }
+  
+  signInBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  
+    // IMPORTANT: do not "await" anything before this call
+    doGoogleSignIn().catch((err) => {
+      console.error("signIn failed:", err);
+      alert(err?.message || "Sign in failed.");
+    });
   });
-
   signOutBtn.addEventListener("click", async () => {
     try {
       await signOut(auth);
