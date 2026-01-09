@@ -84,28 +84,56 @@
     </main>
 
     <script>
-      // CHANGE THIS to your real support email:
-      const SUPPORT_EMAIL = "cutecleansoaps@gmail.com";
-
-      document.getElementById("contactForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const name = document.getElementById("name").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const subject = document.getElementById("subject").value.trim() || "Website message";
-        const message = document.getElementById("message").value.trim();
-
-        const body =
-          `Name: ${name}\n` +
-          `Email: ${email}\n\n` +
-          `${message}\n`;
-
-        const mailto =
-          `mailto:${encodeURIComponent(SUPPORT_EMAIL)}` +
-          `?subject=${encodeURIComponent(subject)}` +
-          `&body=${encodeURIComponent(body)}`;
-
-        window.location.href = mailto;
-      });
-    </script>
+        const form = document.getElementById("contactForm");
+      
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+      
+          const name = document.getElementById("name").value.trim();
+          const email = document.getElementById("email").value.trim();
+          const subject = document.getElementById("subject").value.trim();
+          const message = document.getElementById("message").value.trim();
+      
+          if (!email || !message) {
+            alert("Please fill out your email and message.");
+            return;
+          }
+      
+          const btn = form.querySelector("button[type='submit']");
+          btn.disabled = true;
+          btn.textContent = "Sending…";
+      
+          try {
+            const res = await fetch("/api/contact", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, email, subject, message }),
+            });
+      
+            if (!res.ok) throw new Error("Send failed");
+      
+            // ✅ Success message
+            form.innerHTML = `
+              <div style="
+                background:#ecfeff;
+                border:1px solid #cffafe;
+                border-radius:14px;
+                padding:18px;
+              ">
+                <h3 style="margin:0 0 8px;">Thank you for your message 💙</h3>
+                <p style="margin:0;opacity:.9;">
+                  We’ve received your message and will review it and reply as soon as possible.
+                </p>
+              </div>
+            `;
+          } catch (err) {
+            console.error(err);
+            btn.disabled = false;
+            btn.textContent = "Send email";
+            alert("Sorry — something went wrong. Please try again.");
+          }
+        });
+      </script>
+      
   </body>
 </html>
