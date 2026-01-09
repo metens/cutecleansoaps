@@ -251,6 +251,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // --- Gallery ---
+const galleryEl = document.getElementById("soap-gallery");
+if (galleryEl) {
+  const imgs = Array.isArray(d.images) ? d.images : (d.image ? [d.image] : []);
+  if (!imgs.length) {
+    galleryEl.innerHTML = "";
+  } else {
+    galleryEl.innerHTML = `
+      <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:14px;">
+        ${imgs
+          .map(
+            (src, i) => `
+              <button
+                type="button"
+                data-full="${src}"
+                style="border:1px solid #dbeafe;background:#eff6ff;border-radius:14px;padding:8px;cursor:pointer;"
+                aria-label="Open image ${i + 1}"
+              >
+                <img
+                  src="${src}"
+                  alt="${(d.name || slug)} photo ${i + 1}"
+                  loading="lazy"
+                  style="width:100%;height:150px;object-fit:cover;border-radius:10px;display:block;"
+                />
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+}
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-full]");
+  if (!btn) return;
+  const src = btn.getAttribute("data-full");
+  window.open(src, "_blank", "noopener,noreferrer");
+});
+
   // 2) Live recent reviews
   const reviewsQ = query(
     collection(db, "soaps", slug, "reviews"),
