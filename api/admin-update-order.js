@@ -5,11 +5,9 @@ function requireAdmin(req, res) {
     // Prefer Authorization header
     const auth = req.headers.authorization || "";
     const headerToken = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  
-    // Backward-compatible fallback: ?token=
-    const queryToken = (req.query.token || "").trim();
-    const token = headerToken || queryToken;
-  
+
+    const token = headerToken;
+ 
     if (!process.env.ADMIN_TOKEN) {
       res.status(500).json({ error: "Missing ADMIN_TOKEN env var" });
       return false;
@@ -21,15 +19,22 @@ function requireAdmin(req, res) {
     return true;
   }
   
-
-function initFirebaseAdmin() {
-  if (admin.apps.length) return;
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
-  admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(raw)),
-  });
-}
+  function initFirebaseAdmin() {
+    if (admin.apps.length) return;
+  
+    const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64;
+    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  
+    const jsonStr = b64
+      ? Buffer.from(b64, "base64").toString("utf8")
+      : raw;
+  
+    if (!jsonStr) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON(_B64)");
+  
+    admin.initializeApp({
+      credential: admin.credential.cert(JSON.parse(jsonStr)),
+    });
+  }
 
 const ALLOWED_STATUSES = new Set(["paid", "packing", "shipped", "delivered", "canceled"]);
 
@@ -106,8 +111,9 @@ export default async function handler(req, res) {
       ].join("\n");
 
       await resend.emails.send({
-        from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
+        from: process.env.RESEND_FROM || "Cute Clean Soaps <no-reply@cutecleansoaps.com>",
         to: [customerEmail],
+        reply_to: "support@cutecleansoaps.com", // or your real support email
         subject: `Your order shipped (${code})`,
         text: msg,
       });

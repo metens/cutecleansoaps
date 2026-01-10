@@ -3,67 +3,68 @@ function requireAdmin(req, res) {
     // Prefer Authorization header
     const auth = req.headers.authorization || "";
     const headerToken = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  
-    // Backward-compatible fallback: ?token=
-    const queryToken = (req.query.token || "").trim();
-    const token = headerToken || queryToken;
-  
+
+    const token = headerToken;
+
     if (!process.env.ADMIN_TOKEN) {
-      res.status(500).json({ error: "Missing ADMIN_TOKEN env var" });
-      return false;
+        res.status(500).json({ error: "Missing ADMIN_TOKEN env var" });
+        return false;
     }
     if (!token || token !== process.env.ADMIN_TOKEN) {
-      res.status(401).json({ error: "Unauthorized" });
-      return false;
+        res.status(401).json({ error: "Unauthorized" });
+        return false;
     }
     return true;
-  }
-  
-
-function initFirebaseAdmin() {
-  if (admin.apps.length) return;
-
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
-  admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(raw)),
-  });
 }
+function initFirebaseAdmin() {
+    if (admin.apps.length) return;
 
-export default async function handler(req, res) {
-  if (!requireAdmin(req, res)) return;
-  if (req.method !== "GET") return res.status(405).json({ error: "Method Not Allowed" });
+    const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64;
+    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
-  try {
-    initFirebaseAdmin();
-    const db = admin.firestore();
+    const jsonStr = b64
+        ? Buffer.from(b64, "base64").toString("utf8")
+        : raw;
 
-    const limit = Math.min(Number(req.query.limit || 50), 200);
+    if (!jsonStr) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON(_B64)");
 
-    const snap = await db
-      .collection("orders")
-      .orderBy("createdAt", "desc")
-      .limit(limit)
-      .get();
-
-    const orders = snap.docs.map((d) => {
-      const data = d.data();
-      // Convert Firestore Timestamp -> ms for easy display in browser
-      const createdAtMs =
-        data.createdAt?.toMillis ? data.createdAt.toMillis() : null;
-
-      return {
-        id: d.id,
-        ...data,
-        createdAt: createdAtMs,
-        shippedAt: data.shippedAt?.toMillis ? data.shippedAt.toMillis() : null,
-        deliveredAt: data.deliveredAt?.toMillis ? data.deliveredAt.toMillis() : null,
-      };
+    admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(jsonStr)),
     });
+} export default async function handler(req, res) {
+    if (!requireAdmin(req, res)) return;
+    if (req.method !== "GET") return res.status(405).json({ error: "Method Not Allowed" });
 
-    res.status(200).json({ orders });
-  } catch (err) {
-    console.error("admin-list-orders error:", err);
-    res.status(500).json({ error: err.message || "Server error" });
-  }
+    try {
+        initFirebaseAdmin();
+        const db = admin.firestore();
+
+        const limit = Math.min(Number(req.query.limit || 50), 200);
+
+        const snap = await db
+            .collection("orders")
+            .orderBy("createdAt", "desc")
+            .limit(limit)
+            .get();
+
+        const orders = snap.docs.map((d) => {
+            const data = d.data();
+            // Convert Firestore Timestamp -> ms for easy display in browser
+            const createdAtMs =
+                data.createdAt?.toMillis ? data.createdAt.toMillis() : null;
+
+            return {
+                id: d.id,
+                ...data,
+                createdAt: createdAtMs,
+                shippedAt: data.shippedAt?.toMillis ? data.shippedAt.toMillis() : null,
+                deliveredAt: data.deliveredAt?.toMillis ? data.deliveredAt.toMillis() : null,
+            };
+        });
+
+        res.status(200).json({ orders });
+    } catch (err) {
+        console.error("admin-list-orders error:", err);
+        res.status(500).json({ error: err.message || "Server error" });
+    }
 }
