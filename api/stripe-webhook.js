@@ -120,8 +120,9 @@ export default async function handler(req, res) {
       const code = confirmationCode(session.id);
 
       // ----- Write Firestore order AFTER successful payment -----
-      // (doc id = session.id makes it idempotent)
-      const orderRef = db.collection("orders").doc(session.id);
+
+      // ----- Write Firestore order AFTER successful payment (idempotent + atomic) -----
+const orderRef = db.collection("orders").doc(session.id);
 
 const shipping = {
   name: shipName,
@@ -134,7 +135,6 @@ const shipping = {
   country: addr?.country || "",
 };
 
-// Atomic + idempotent: create order + decrement stock ONCE
 await db.runTransaction(async (tx) => {
   const orderSnap = await tx.get(orderRef);
   const alreadyApplied = orderSnap.exists && orderSnap.data()?.stockApplied === true;
@@ -153,11 +153,9 @@ await db.runTransaction(async (tx) => {
     if (qty > stock) {
       throw new Error(`Insufficient stock for ${soapId}. Have ${stock}, need ${qty}`);
     }
-
     tx.update(soapRef, { stock: stock - qty });
   }
 
-  // Single authoritative order doc
   tx.set(orderRef, {
     status: "paid",
     stripeSessionId: session.id,
@@ -166,14 +164,17 @@ await db.runTransaction(async (tx) => {
     customerEmail,
     shipping,
     items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
 
-    // idempotency marker
+    trackingNumber: null,
+    shippedAt: null,
+    deliveredAt: null,
+
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
     stockApplied: true,
     stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
   }, { merge: true });
 });
-
+     
       // ----- Emails -----
       const ownerMessage = [
         "NEW ORDER",
@@ -217,7 +218,8 @@ await db.runTransaction(async (tx) => {
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       const ownerResult = await resend.emails.send({
-        from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
+        //from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
+        from: process.env.RESEND_FROM || "Cute Clean Soaps <no-reply@cutecleansoaps.com>",
         to: process.env.ORDER_EMAILS.split(",").map((s) => s.trim()),
         subject: "New Soap Order",
         text: ownerMessage,
@@ -226,7 +228,8 @@ await db.runTransaction(async (tx) => {
 
       if (customerEmail) {
         const customerResult = await resend.emails.send({
-          from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
+          //from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
+          from: process.env.RESEND_FROM || "Cute Clean Soaps <no-reply@cutecleansoaps.com>",
           to: [customerEmail],
           subject: `Thanks for your order! (${code})`,
           text: customerMessage,
