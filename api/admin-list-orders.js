@@ -1,17 +1,24 @@
 import admin from "firebase-admin";
-
 function requireAdmin(req, res) {
-  const token = req.query.token || "";
-  if (!process.env.ADMIN_TOKEN) {
-    res.status(500).json({ error: "Missing ADMIN_TOKEN env var" });
-    return false;
+    // Prefer Authorization header
+    const auth = req.headers.authorization || "";
+    const headerToken = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  
+    // Backward-compatible fallback: ?token=
+    const queryToken = (req.query.token || "").trim();
+    const token = headerToken || queryToken;
+  
+    if (!process.env.ADMIN_TOKEN) {
+      res.status(500).json({ error: "Missing ADMIN_TOKEN env var" });
+      return false;
+    }
+    if (!token || token !== process.env.ADMIN_TOKEN) {
+      res.status(401).json({ error: "Unauthorized" });
+      return false;
+    }
+    return true;
   }
-  if (token !== process.env.ADMIN_TOKEN) {
-    res.status(401).json({ error: "Unauthorized" });
-    return false;
-  }
-  return true;
-}
+  
 
 function initFirebaseAdmin() {
   if (admin.apps.length) return;

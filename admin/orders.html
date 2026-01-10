@@ -237,7 +237,9 @@
             if (!token) return alert("Paste your admin token first.");
 
             $("status").textContent = "Loading…";
-            const res = await fetch(`/api/admin-list-orders?token=${encodeURIComponent(token)}`);
+            const res = await fetch(`/api/admin-list-orders`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
             const data = await res.json().catch(() => ({}));
 
             if (!res.ok) {
@@ -254,11 +256,14 @@
             const msgEl = document.getElementById(`msg-${orderId}`);
             if (msgEl) msgEl.textContent = "Updating…";
 
-            const res = await fetch(`/api/admin-update-order?token=${encodeURIComponent(token)}`, {
+            const res = await fetch(`/api/admin-update-order`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify({ orderId, status, trackingNumber }),
-            });
+            })
 
             const data = await res.json().catch(() => ({}));
 
