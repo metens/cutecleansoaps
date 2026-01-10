@@ -3,6 +3,25 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import admin from "firebase-admin";
 
+function initFirebaseAdmin() {
+  if (admin.apps.length) return;
+
+  const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64;
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+
+  const jsonStr = b64
+    ? Buffer.from(b64, "base64").toString("utf8")
+    : raw;
+
+  if (!jsonStr) {
+    throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON or _B64");
+  }
+
+  admin.initializeApp({
+    credential: admin.credential.cert(JSON.parse(jsonStr)),
+  });
+}
+
 export const config = {
   runtime: "nodejs",
   api: { bodyParser: false }, // IMPORTANT for Stripe signature verification
@@ -11,7 +30,7 @@ export const config = {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 function confirmationCode(sessionId) {
-  const salt = process.env.ORDER_CODE_SALT || "ccs_default_salt_change_me";
+  const salt = process.env.ORDER_CODE_SALT;
   const hex = crypto.createHash("sha256").update(sessionId + salt).digest("hex");
   return "CCS-" + hex.slice(0, 8).toUpperCase();
 }
@@ -36,13 +55,7 @@ async function readRawBody(req) {
   });
 }
 
-// Firebase Admin init (Vercel env var should contain the service account JSON)
-if (!admin.apps.length) {
-  const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-  admin.initializeApp({
-    credential: admin.credential.cert(sa),
-  });
-}
+initFirebaseAdmin();
 const db = admin.firestore();
 
 export default async function handler(req, res) {
@@ -218,8 +231,7 @@ await db.runTransaction(async (tx) => {
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       const ownerResult = await resend.emails.send({
-        //from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
-        from: process.env.RESEND_FROM || "Cute Clean Soaps <no-reply@cutecleansoaps.com>",
+        from: process.env.RESEND_FROM,
         to: process.env.ORDER_EMAILS.split(",").map((s) => s.trim()),
         subject: "New Soap Order",
         text: ownerMessage,
@@ -228,8 +240,7 @@ await db.runTransaction(async (tx) => {
 
       if (customerEmail) {
         const customerResult = await resend.emails.send({
-          //from: "Cute Clean Soaps <orders@cutecleansoaps.com>",
-          from: process.env.RESEND_FROM || "Cute Clean Soaps <no-reply@cutecleansoaps.com>",
+          from: process.env.RESEND_FROM,
           to: [customerEmail],
           subject: `Thanks for your order! (${code})`,
           text: customerMessage,

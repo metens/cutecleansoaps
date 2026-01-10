@@ -84,7 +84,7 @@ for (const i of (items || [])) {
       };
     });
     
-    const origin = (process.env.PUBLIC_BASE_URL || "https://cutecleansoaps.com").replace(/\/+$/, "");
+    const origin = (process.env.PUBLIC_BASE_URL);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
