@@ -51,9 +51,13 @@
         Questions about an order, ingredients, or shipping? Send us a message.
       </p>
 
+
       <div class="card">
         <!-- Simple mailto form (no backend needed) -->
         <form id="contactForm">
+
+      <input name="company" id="company" autocomplete="off"
+  style="position:absolute;left:-9999px;opacity:0;height:0;width:0;" tabindex="-1" />
           <div class="grid">
             <div>
               <label for="name">Your name</label>
@@ -89,6 +93,7 @@
           const email = document.getElementById("email").value.trim();
           const subject = document.getElementById("subject").value.trim();
           const message = document.getElementById("message").value.trim();
+          const company = document.getElementById("company").value.trim(); // honeypot
       
           if (!email || !message) {
             alert("Please fill out your email and message.");
@@ -103,34 +108,32 @@
             const res = await fetch("/api/contact", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, email, subject, message }),
+              body: JSON.stringify({ name, email, subject, message, company }),
             });
       
-            if (!res.ok) throw new Error("Send failed");
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || "Send failed");
       
-            // ✅ Success message
             form.innerHTML = `
-              <div style="
-                background:#ecfeff;
-                border:1px solid #cffafe;
-                border-radius:14px;
-                padding:18px;
-              ">
+              <div style="background:#ecfeff;border:1px solid #cffafe;border-radius:14px;padding:18px;">
                 <h3 style="margin:0 0 8px;">Thank you for your message 💙</h3>
                 <p style="margin:0;opacity:.9;">
                   We’ve received your message and will review it and reply as soon as possible.
                 </p>
-                <a class="btn" href="/">← Back to shop</a>
+                <div style="margin-top:12px;">
+                  <a class="btn" href="/">← Back to shop</a>
+                </div>
               </div>
             `;
           } catch (err) {
             console.error(err);
             btn.disabled = false;
             btn.textContent = "Send email";
-            alert("Sorry — something went wrong. Please try again.");
+            alert(err.message || "Sorry — something went wrong. Please try again.");
           }
         });
       </script>
+      
       
   </body>
 </html>
