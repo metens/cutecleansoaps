@@ -161,6 +161,15 @@
     <script>
         const $ = (id) => document.getElementById(id);
 
+        function escapeHtml(s) {
+            return String(s ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
         // ===== Modal helpers =====
         function uspsTrackingUrl(trk) {
             return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encodeURIComponent(trk)}`;
@@ -181,9 +190,11 @@
             $("confirmModal").style.display = "none";
             pendingUpdate = null;
         }
-
         function renderOrder(o) {
-            const items = (o.items || []).map(it => `${it.soapId} × ${it.qty}`).join(", ");
+            const items = (o.items || [])
+                .map(it => `${escapeHtml(it.soapId)} × ${Number(it.qty) || 0}`)
+                .join(", ");
+
             const ship = o.shipping || {};
             const addr = [
                 ship.name,
@@ -192,25 +203,25 @@
                 ship.address2,
                 [ship.city, ship.state, ship.zip].filter(Boolean).join(", "),
                 ship.country
-            ].filter(Boolean).join("\n");
+            ].filter(Boolean).map(escapeHtml).join("\n");
 
             const created = o.createdAt ? new Date(o.createdAt).toLocaleString() : "(no time)";
-            const status = (o.status || "unknown").toLowerCase();
-            const code = o.confirmationCode || "(no code)";
+            const status = String(o.status || "unknown").toLowerCase().replace(/[^a-z0-9_-]/g, "");
+            const code = escapeHtml(o.confirmationCode || "(no code)");
 
             return `
     <div class="card status-${status}">
       <div class="row" style="justify-content:space-between;">
         <div>
-          <span class="pill">${status}</span>
-          <span class="muted"> · ${created}</span>
-          <div class="muted" style="font-size:12px;">${o.id}</div>
+          <span class="pill">${escapeHtml(status)}</span>
+          <span class="muted"> · ${escapeHtml(created)}</span>
+          <div class="muted" style="font-size:12px;">${escapeHtml(o.id)}</div>
           <div style="margin-top:6px;"><strong>Confirmation:</strong> ${code}</div>
         </div>
       </div>
 
       <div style="margin-top:10px;">
-        <div><strong>Email:</strong> ${o.customerEmail || "(none)"}</div>
+        <div><strong>Email:</strong> ${escapeHtml(o.customerEmail || "(none)")}</div>
         <div style="margin-top:6px;"><strong>Items:</strong> ${items || "(none)"}</div>
       </div>
 
@@ -220,17 +231,16 @@
       </div>
 
       <div class="row" style="margin-top:12px;">
-        <input placeholder="Tracking #" value="${o.trackingNumber || ""}" data-track-for="${o.id}" />
-        <button class="btn" data-action="update" data-order="${o.id}" data-status="packing">Packing</button>
-        <button class="btn" data-action="update" data-order="${o.id}" data-status="shipped">Shipped</button>
-        <button class="btn" data-action="update" data-order="${o.id}" data-status="delivered">Delivered</button>
+        <input placeholder="Tracking #" value="${escapeHtml(o.trackingNumber || "")}" data-track-for="${escapeHtml(o.id)}" />
+        <button class="btn" data-action="update" data-order="${escapeHtml(o.id)}" data-status="packing">Packing</button>
+        <button class="btn" data-action="update" data-order="${escapeHtml(o.id)}" data-status="shipped">Shipped</button>
+        <button class="btn" data-action="update" data-order="${escapeHtml(o.id)}" data-status="delivered">Delivered</button>
       </div>
 
-      <div class="muted" id="msg-${o.id}" style="margin-top:8px;font-size:12px;"></div>
+      <div class="muted" id="msg-${escapeHtml(o.id)}" style="margin-top:8px;font-size:12px;"></div>
     </div>
   `;
         }
-
 
         async function loadOrders() {
             const token = $("token").value.trim();
@@ -293,7 +303,11 @@
             const trackingNumber = trackInput ? trackInput.value.trim() : "";
 
             // Confirm only when shipping with a tracking number
-            if (status === "shipped" && trackingNumber) {
+            if (status === "shipped") {
+                if (!trackingNumber) {
+                    alert("Tracking number required before marking as shipped.");
+                    return;
+                }
                 openConfirmModal({ orderId, status, trackingNumber, token });
                 return;
             }

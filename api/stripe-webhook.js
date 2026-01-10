@@ -121,41 +121,58 @@ export default async function handler(req, res) {
 
       // ----- Write Firestore order AFTER successful payment -----
       // (doc id = session.id makes it idempotent)
-      await db.collection("orders").doc(session.id).set(
-        {
-          status: "paid",
-          stripeSessionId: session.id,
-          paymentIntentId: paymentIntentId || null,
-          confirmationCode: code,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          customerEmail,
-          items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
-        },
-        { merge: true }
-      );
+      const orderRef = db.collection("orders").doc(session.id);
 
-      const shipping = {
-        name: shipName,
-        phone: shipPhone,
-        address1: addr?.line1 || "",
-        address2: addr?.line2 || "",
-        city: addr?.city || "",
-        state: addr?.state || "",
-        zip: addr?.postal_code || "",
-        country: addr?.country || "",
-      };
-      
-      await db.collection("orders").doc(session.id).set({
-        status: "paid",
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        customerEmail,
-        shipping,
-        items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
-        // optional later:
-        trackingNumber: null,
-        shippedAt: null,
-        deliveredAt: null,
-      }, { merge: true });
+const shipping = {
+  name: shipName,
+  phone: shipPhone,
+  address1: addr?.line1 || "",
+  address2: addr?.line2 || "",
+  city: addr?.city || "",
+  state: addr?.state || "",
+  zip: addr?.postal_code || "",
+  country: addr?.country || "",
+};
+
+// Atomic + idempotent: create order + decrement stock ONCE
+await db.runTransaction(async (tx) => {
+  const orderSnap = await tx.get(orderRef);
+  const alreadyApplied = orderSnap.exists && orderSnap.data()?.stockApplied === true;
+  if (alreadyApplied) return; // ✅ webhook retry safe
+
+  // Decrement stock for each item
+  for (const it of orderItems) {
+    const soapId = it.soapId;
+    const qty = Number(it.qty || 0);
+    if (!soapId || qty <= 0) continue;
+
+    const soapRef = db.doc(`soaps/${soapId}`);
+    const soapSnap = await tx.get(soapRef);
+    const stock = Number(soapSnap.data()?.stock ?? 0);
+
+    if (qty > stock) {
+      throw new Error(`Insufficient stock for ${soapId}. Have ${stock}, need ${qty}`);
+    }
+
+    tx.update(soapRef, { stock: stock - qty });
+  }
+
+  // Single authoritative order doc
+  tx.set(orderRef, {
+    status: "paid",
+    stripeSessionId: session.id,
+    paymentIntentId: paymentIntentId || null,
+    confirmationCode: code,
+    customerEmail,
+    shipping,
+    items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+
+    // idempotency marker
+    stockApplied: true,
+    stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
+});
 
       // ----- Emails -----
       const ownerMessage = [
