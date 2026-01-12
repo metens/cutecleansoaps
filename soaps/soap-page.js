@@ -209,6 +209,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Re-render so like buttons enable/disable correctly
     if (lastReviewDocs) renderReviews(lastReviewDocs);
+
+    console.log("AUTH state:", {
+      uid: user?.uid,
+      anon: user?.isAnonymous,
+      provider: user?.providerData?.map(p => p.providerId),
+    });
+
   });
 
   useNameEl?.addEventListener("change", () => {
