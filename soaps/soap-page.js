@@ -71,7 +71,7 @@ function getLikedSet(slug, uid) {
 function saveLikedSet(slug, uid, set) {
   try {
     localStorage.setItem(likedKey(slug, uid), JSON.stringify([...set]));
-  } catch {}
+  } catch { }
 }
 
 function cssEscapeSafe(v) {
@@ -240,8 +240,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         stock <= 0
           ? "Out of stock"
           : stock <= 3
-          ? `Only ${stock} left!`
-          : `${stock} in stock`;
+            ? `Only ${stock} left!`
+            : `${stock} in stock`;
     }
 
     if (ingredientsEl) {
@@ -250,14 +250,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         : "";
     }
 
-      // --- Gallery (extra soap photos) ---
-  const galleryEl = document.getElementById("soap-gallery");
-  if (galleryEl) {
-    const imgs = Array.isArray(d.images) ? d.images : [];
-    if (!imgs.length) {
-      galleryEl.innerHTML = "";
-    } else {
-      galleryEl.innerHTML = `
+    // --- Gallery (extra soap photos) ---
+    const galleryEl = document.getElementById("soap-gallery");
+    if (galleryEl) {
+      const imgs = Array.isArray(d.images) ? d.images : [];
+      if (!imgs.length) {
+        galleryEl.innerHTML = "";
+      } else {
+        galleryEl.innerHTML = `
         <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:14px;">
           ${imgs
             .map(
@@ -281,11 +281,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             .join("")}
         </div>
       `;
+      }
     }
-  }
 
   });
- 
+
   // 2) Live recent reviews
   const reviewsQ = query(
     collection(db, "soaps", slug, "reviews"),
@@ -337,12 +337,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             <button
               data-like="${reviewId}"
               ${likeDisabled ? "disabled" : ""}
-              style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;border:1px solid #dbeafe;background:rgba(255,255,255,.7);border-radius:999px;padding:6px 10px;cursor:${
-                likeDisabled ? "not-allowed" : "pointer"
-              };opacity:${likeDisabled ? ".6" : "1"};"
-              title="${
-                !ok ? "Sign in to like" : alreadyLiked ? "You already liked this" : "Like"
-              }"
+              style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;border:1px solid #dbeafe;background:rgba(255,255,255,.7);border-radius:999px;padding:6px 10px;cursor:${likeDisabled ? "not-allowed" : "pointer"
+          };opacity:${likeDisabled ? ".6" : "1"};"
+              title="${!ok ? "Sign in to like" : alreadyLiked ? "You already liked this" : "Like"
+          }"
             >
               👍 <span>${likesCount}</span>
             </button>
@@ -373,8 +371,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const likeSnap = await tx.get(likeRef);
       if (likeSnap.exists()) return;
 
+      const reviewSnap = await tx.get(reviewRef);
+      const current = Number(reviewSnap.data()?.likesCount || 0);
       tx.set(likeRef, { createdAt: serverTimestamp() });
-      tx.update(reviewRef, { likesCount: increment(1) });
+      tx.update(reviewRef, { likesCount: current + 1 });
+
     });
 
     likedSet.add(reviewId);
