@@ -126,68 +126,85 @@ export default async function handler(req, res) {
         itemsText = (lineItems.data || [])
           .map((item) => `${item.description} × ${item.quantity}`)
           .join("\n");
-      } catch (e) {
-        console.error("listLineItems failed:", e);
+      } catch (err) {
+        console.error("Webhook processing failed:", err);
+        return res.status(500).send("Webhook failed");
       }
+
 
       const code = confirmationCode(session.id);
 
       // ----- Write Firestore order AFTER successful payment -----
 
       // ----- Write Firestore order AFTER successful payment (idempotent + atomic) -----
-const orderRef = db.collection("orders").doc(session.id);
+      const orderRef = db.collection("orders").doc(session.id);
 
-const shipping = {
-  name: shipName,
-  phone: shipPhone,
-  address1: addr?.line1 || "",
-  address2: addr?.line2 || "",
-  city: addr?.city || "",
-  state: addr?.state || "",
-  zip: addr?.postal_code || "",
-  country: addr?.country || "",
-};
+      const shipping = {
+        name: shipName,
+        phone: shipPhone,
+        address1: addr?.line1 || "",
+        address2: addr?.line2 || "",
+        city: addr?.city || "",
+        state: addr?.state || "",
+        zip: addr?.postal_code || "",
+        country: addr?.country || "",
+      };
+      await db.runTransaction(async (tx) => {
+        // --- READS FIRST ---
+        const orderSnap = await tx.get(orderRef);
+        const alreadyApplied = orderSnap.exists && orderSnap.data()?.stockApplied === true;
+        if (alreadyApplied) return;
 
-await db.runTransaction(async (tx) => {
-  const orderSnap = await tx.get(orderRef);
-  const alreadyApplied = orderSnap.exists && orderSnap.data()?.stockApplied === true;
-  if (alreadyApplied) return; // ✅ webhook retry safe
+        // Collect refs + do ALL reads up front
+        const items = orderItems
+          .map((it) => ({
+            soapId: it.soapId,
+            qty: Number(it.qty || 0),
+            soapRef: it.soapId ? db.doc(`soaps/${it.soapId}`) : null,
+          }))
+          .filter((it) => it.soapRef && it.qty > 0);
 
-  // Decrement stock for each item
-  for (const it of orderItems) {
-    const soapId = it.soapId;
-    const qty = Number(it.qty || 0);
-    if (!soapId || qty <= 0) continue;
+        const soapSnaps = await Promise.all(items.map((it) => tx.get(it.soapRef)));
 
-    const soapRef = db.doc(`soaps/${soapId}`);
-    const soapSnap = await tx.get(soapRef);
-    const stock = Number(soapSnap.data()?.stock ?? 0);
+        // Validate stock (still no writes)
+        for (let i = 0; i < items.length; i++) {
+          const { soapId, qty } = items[i];
+          const snap = soapSnaps[i];
+          const stock = Number(snap.data()?.stock ?? 0);
+          if (qty > stock) {
+            throw new Error(`Insufficient stock for ${soapId}. Have ${stock}, need ${qty}`);
+          }
+        }
 
-    if (qty > stock) {
-      throw new Error(`Insufficient stock for ${soapId}. Have ${stock}, need ${qty}`);
-    }
-    tx.update(soapRef, { stock: stock - qty });
-  }
+        // --- WRITES AFTER ALL READS ---
+        for (let i = 0; i < items.length; i++) {
+          const { soapRef, qty } = items[i];
+          const snap = soapSnaps[i];
+          const stock = Number(snap.data()?.stock ?? 0);
+          tx.update(soapRef, { stock: stock - qty });
+        }
 
-  tx.set(orderRef, {
-    status: "paid",
-    stripeSessionId: session.id,
-    paymentIntentId: paymentIntentId || null,
-    confirmationCode: code,
-    customerEmail,
-    shipping,
-    items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
+        tx.set(
+          orderRef,
+          {
+            status: "paid",
+            stripeSessionId: session.id,
+            paymentIntentId: paymentIntentId || null,
+            confirmationCode: code,
+            customerEmail,
+            shipping,
+            items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
+            trackingNumber: null,
+            shippedAt: null,
+            deliveredAt: null,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            stockApplied: true,
+            stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+      });
 
-    trackingNumber: null,
-    shippedAt: null,
-    deliveredAt: null,
-
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    stockApplied: true,
-    stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
-  }, { merge: true });
-});
-     
       // ----- Emails -----
       const ownerMessage = [
         "NEW ORDER",
