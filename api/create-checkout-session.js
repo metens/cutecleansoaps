@@ -4,15 +4,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const admin = require("firebase-admin");
 
-if (!admin.apps.length) {
+function initFirebaseAdmin() {
+  if (admin.apps.length) return;
+
+  const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64;
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
+
+  const jsonStr = b64
+    ? Buffer.from(b64, "base64").toString("utf8")
+    : raw;
+
+  if (!jsonStr) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON(_B64)");
+
   admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(raw)),
+    credential: admin.credential.cert(JSON.parse(jsonStr)),
   });
 }
-const db = admin.firestore();
 
+initFirebaseAdmin();
+const db = admin.firestore();
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).send(""); // optional
