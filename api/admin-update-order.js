@@ -111,7 +111,7 @@ export default async function handler(req, res) {
       ].join("\n");
 
       await resend.emails.send({
-        from: process.env.RESEND_FROM,
+        from: process.env.RESEND_FROM || "Cute Clean Soaps <no-reply@cutecleansoaps.com>",
         to: [customerEmail],
         reply_to: "support@cutecleansoaps.com", // or your real support email
         subject: `Your order shipped (${code})`,
