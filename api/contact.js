@@ -91,7 +91,7 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM || "Cute Clean Soaps <no-reply@cutecleansoaps.com>",
+      from: process.env.RESEND_FROM || "Cute Clean Soaps <orders@cutecleansoaps.com>",
       to: [process.env.CONTACT_TO || "orders@cutecleansoaps.com"],
       reply_to: cleanEmail, // Resend will format this safely
       subject: cleanSubject,
