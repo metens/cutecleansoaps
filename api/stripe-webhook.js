@@ -149,25 +149,18 @@ export default async function handler(req, res) {
         zip: addr?.postal_code || "",
         country: addr?.country || "",
       };
+
       await db.runTransaction(async (tx) => {
-        // --- HARD IDEMPOTENCY LOCK ---
+        // -------- READS FIRST --------
         const orderSnap = await tx.get(orderRef);
       
-        if (orderSnap.exists) {
-          const data = orderSnap.data();
-          if (data?.stockApplied === true) {
-            console.log("Stock already applied for", session.id);
-            return;
-          }
-        } else {
-          // Create placeholder doc immediately to block parallel webhooks
-          tx.create(orderRef, {
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            stockApplied: false,
-          });
+        // If already applied, stop (idempotent)
+        if (orderSnap.exists && orderSnap.data()?.stockApplied === true) {
+          console.log("Stock already applied for", session.id);
+          return;
         }
       
-        // --- READ ALL SOAPS FIRST ---
+        // Gather items and read all soap docs (still reads-only)
         const items = orderItems
           .map((it) => ({
             soapId: it.soapId,
@@ -178,41 +171,47 @@ export default async function handler(req, res) {
       
         const soapSnaps = await Promise.all(items.map((it) => tx.get(it.soapRef)));
       
-        // Validate stock
+        // Validate stock (still no writes)
         for (let i = 0; i < items.length; i++) {
           const stock = Number(soapSnaps[i].data()?.stock ?? 0);
           if (items[i].qty > stock) {
-            throw new Error(`Insufficient stock for ${items[i].soapId}`);
+            throw new Error(
+              `Insufficient stock for ${items[i].soapId}. Have ${stock}, need ${items[i].qty}`
+            );
           }
         }
       
-        // --- APPLY STOCK ---
+        // -------- WRITES AFTER ALL READS --------
         for (let i = 0; i < items.length; i++) {
-          const snap = soapSnaps[i];
-          const stock = Number(snap.data()?.stock ?? 0);
+          const stock = Number(soapSnaps[i].data()?.stock ?? 0);
           tx.update(items[i].soapRef, { stock: stock - items[i].qty });
         }
       
-        // --- FINAL ORDER WRITE ---
-        tx.set(
-          orderRef,
-          {
-            status: "paid",
-            stripeSessionId: session.id,
-            paymentIntentId: paymentIntentId || null,
-            confirmationCode: code,
-            customerEmail,
-            shipping,
-            items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
-            trackingNumber: null,
-            shippedAt: null,
-            deliveredAt: null,
-            stockApplied: true,
-            stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
+        const orderData = {
+          status: "paid",
+          stripeSessionId: session.id,
+          paymentIntentId: paymentIntentId || null,
+          confirmationCode: code,
+          customerEmail,
+          shipping,
+          items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
+          trackingNumber: null,
+          shippedAt: null,
+          deliveredAt: null,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          stockApplied: true,
+          stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+      
+        // IMPORTANT: use create if missing, so parallel webhooks can't both "win"
+        if (!orderSnap.exists) {
+          tx.create(orderRef, orderData); // second concurrent attempt will fail + retry
+        } else {
+          tx.set(orderRef, orderData, { merge: true });
+        }
       });
+      
+      
 
       // ----- Emails -----
       const ownerMessage = [
@@ -291,6 +290,7 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     console.error("Webhook processing failed:", err);
+    return res.status(500).send("Webhook failed");
   }
 
   return res.status(200).json({ received: true });
