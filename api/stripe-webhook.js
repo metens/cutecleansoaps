@@ -150,17 +150,16 @@ export default async function handler(req, res) {
         country: addr?.country || "",
       };
 
-      await db.runTransaction(async (tx) => {
-        // -------- READS FIRST --------
-        const orderSnap = await tx.get(orderRef);
+      const lockRef = db.collection("webhookLocks").doc(session.id);
       
-        // If already applied, stop (idempotent)
-        if (orderSnap.exists && orderSnap.data()?.stockApplied === true) {
-          console.log("Stock already applied for", session.id);
+      await db.runTransaction(async (tx) => {
+        // ---------- READS FIRST ----------
+        const lockSnap = await tx.get(lockRef);
+        if (lockSnap.exists) {
+          console.log("Webhook already processed (lock exists):", session.id);
           return;
         }
       
-        // Gather items and read all soap docs (still reads-only)
         const items = orderItems
           .map((it) => ({
             soapId: it.soapId,
@@ -181,38 +180,38 @@ export default async function handler(req, res) {
           }
         }
       
-        // -------- WRITES AFTER ALL READS --------
+        // ---------- WRITES (after all reads) ----------
+        // 1) Create lock FIRST (first writer wins; second delivery will fail+retry and then see lock)
+        tx.create(lockRef, {
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      
+        // 2) Decrement stock
         for (let i = 0; i < items.length; i++) {
           const stock = Number(soapSnaps[i].data()?.stock ?? 0);
           tx.update(items[i].soapRef, { stock: stock - items[i].qty });
         }
       
-        const orderData = {
-          status: "paid",
-          stripeSessionId: session.id,
-          paymentIntentId: paymentIntentId || null,
-          confirmationCode: code,
-          customerEmail,
-          shipping,
-          items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
-          trackingNumber: null,
-          shippedAt: null,
-          deliveredAt: null,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          stockApplied: true,
-          stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
-        };
-      
-        // IMPORTANT: use create if missing, so parallel webhooks can't both "win"
-        if (!orderSnap.exists) {
-          tx.create(orderRef, orderData); // second concurrent attempt will fail + retry
-        } else {
-          tx.set(orderRef, orderData, { merge: true });
-        }
+        // 3) Write order
+        tx.set(
+          orderRef,
+          {
+            status: "paid",
+            stripeSessionId: session.id,
+            paymentIntentId: paymentIntentId || null,
+            confirmationCode: code,
+            customerEmail,
+            shipping,
+            items: orderItems.map(({ soapId, qty }) => ({ soapId, qty })),
+            trackingNumber: null,
+            shippedAt: null,
+            deliveredAt: null,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
       });
       
-      
-
       // ----- Emails -----
       const ownerMessage = [
         "NEW ORDER",
