@@ -150,12 +150,24 @@ export default async function handler(req, res) {
         country: addr?.country || "",
       };
       await db.runTransaction(async (tx) => {
-        // --- READS FIRST ---
+        // --- HARD IDEMPOTENCY LOCK ---
         const orderSnap = await tx.get(orderRef);
-        const alreadyApplied = orderSnap.exists && orderSnap.data()?.stockApplied === true;
-        if (alreadyApplied) return;
-
-        // Collect refs + do ALL reads up front
+      
+        if (orderSnap.exists) {
+          const data = orderSnap.data();
+          if (data?.stockApplied === true) {
+            console.log("Stock already applied for", session.id);
+            return;
+          }
+        } else {
+          // Create placeholder doc immediately to block parallel webhooks
+          tx.create(orderRef, {
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            stockApplied: false,
+          });
+        }
+      
+        // --- READ ALL SOAPS FIRST ---
         const items = orderItems
           .map((it) => ({
             soapId: it.soapId,
@@ -163,27 +175,25 @@ export default async function handler(req, res) {
             soapRef: it.soapId ? db.doc(`soaps/${it.soapId}`) : null,
           }))
           .filter((it) => it.soapRef && it.qty > 0);
-
+      
         const soapSnaps = await Promise.all(items.map((it) => tx.get(it.soapRef)));
-
-        // Validate stock (still no writes)
+      
+        // Validate stock
         for (let i = 0; i < items.length; i++) {
-          const { soapId, qty } = items[i];
-          const snap = soapSnaps[i];
-          const stock = Number(snap.data()?.stock ?? 0);
-          if (qty > stock) {
-            throw new Error(`Insufficient stock for ${soapId}. Have ${stock}, need ${qty}`);
+          const stock = Number(soapSnaps[i].data()?.stock ?? 0);
+          if (items[i].qty > stock) {
+            throw new Error(`Insufficient stock for ${items[i].soapId}`);
           }
         }
-
-        // --- WRITES AFTER ALL READS ---
+      
+        // --- APPLY STOCK ---
         for (let i = 0; i < items.length; i++) {
-          const { soapRef, qty } = items[i];
           const snap = soapSnaps[i];
           const stock = Number(snap.data()?.stock ?? 0);
-          tx.update(soapRef, { stock: stock - qty });
+          tx.update(items[i].soapRef, { stock: stock - items[i].qty });
         }
-
+      
+        // --- FINAL ORDER WRITE ---
         tx.set(
           orderRef,
           {
@@ -197,7 +207,6 @@ export default async function handler(req, res) {
             trackingNumber: null,
             shippedAt: null,
             deliveredAt: null,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
             stockApplied: true,
             stockAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
           },
