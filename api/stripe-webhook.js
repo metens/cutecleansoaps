@@ -240,7 +240,7 @@ export default async function handler(req, res) {
         shipName,
         shipAddress,
         "",
-        "If you have any questions, reply to this email.",
+        "If you have any questions, reply to support@cutecleansoaps.com.",
         "",
         "— Cute Clean Soaps",
       ].join("\n");
