@@ -114,23 +114,37 @@ export default async function handler(req, res) {
         const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
           expand: ["data.price.product"],
         });
-
-        orderItems = (lineItems.data || [])
+      
+        // 1) Build raw orderItems from Stripe line items
+        const rawItems = (lineItems.data || [])
           .map((item) => {
-            const qty = item.quantity || 0;
-            const soapId = item.price?.product?.metadata?.soapId;
+            const qty = Number(item.quantity || 0);
+            const soapId = item.price?.product?.metadata?.soapId || null;
             return { soapId, qty, description: item.description || "" };
           })
           .filter((it) => it.soapId && it.qty > 0);
-
+      
+        // 2) Collapse duplicates by soapId (sum qty)
+        const qtyBySoap = new Map();
+        for (const it of rawItems) {
+          qtyBySoap.set(it.soapId, (qtyBySoap.get(it.soapId) || 0) + it.qty);
+        }
+      
+        orderItems = Array.from(qtyBySoap.entries()).map(([soapId, qty]) => ({
+          soapId,
+          qty,
+        }));
+      
+        // Text for emails (keep as-is)
         itemsText = (lineItems.data || [])
           .map((item) => `${item.description} × ${item.quantity}`)
           .join("\n");
-      } catch (err) {
-        console.error("Webhook processing failed:", err);
+      
+        console.log("orderItems (deduped):", orderItems);
+      } catch (e) {
+        console.error("listLineItems failed:", e);
         return res.status(500).send("Webhook failed");
       }
-
 
       const code = confirmationCode(session.id);
 
@@ -151,7 +165,7 @@ export default async function handler(req, res) {
       };
 
       const lockRef = db.collection("webhookLocks").doc(session.id);
-      
+
       await db.runTransaction(async (tx) => {
         // ---------- READS FIRST ----------
         const lockSnap = await tx.get(lockRef);
@@ -159,7 +173,7 @@ export default async function handler(req, res) {
           console.log("Webhook already processed (lock exists):", session.id);
           return;
         }
-      
+
         const items = orderItems
           .map((it) => ({
             soapId: it.soapId,
@@ -167,9 +181,9 @@ export default async function handler(req, res) {
             soapRef: it.soapId ? db.doc(`soaps/${it.soapId}`) : null,
           }))
           .filter((it) => it.soapRef && it.qty > 0);
-      
+
         const soapSnaps = await Promise.all(items.map((it) => tx.get(it.soapRef)));
-      
+
         // Validate stock (still no writes)
         for (let i = 0; i < items.length; i++) {
           const stock = Number(soapSnaps[i].data()?.stock ?? 0);
@@ -179,19 +193,19 @@ export default async function handler(req, res) {
             );
           }
         }
-      
+
         // ---------- WRITES (after all reads) ----------
         // 1) Create lock FIRST (first writer wins; second delivery will fail+retry and then see lock)
         tx.create(lockRef, {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
-      
+
         // 2) Decrement stock
         for (let i = 0; i < items.length; i++) {
           const stock = Number(soapSnaps[i].data()?.stock ?? 0);
           tx.update(items[i].soapRef, { stock: stock - items[i].qty });
         }
-      
+
         // 3) Write order
         tx.set(
           orderRef,
@@ -211,7 +225,7 @@ export default async function handler(req, res) {
           { merge: true }
         );
       });
-      
+
       // ----- Emails -----
       const ownerMessage = [
         "NEW ORDER",
