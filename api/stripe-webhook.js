@@ -67,6 +67,13 @@ export default async function handler(req, res) {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+    // 👇 ADD LOGS RIGHT HERE
+console.log("WEBHOOK HIT", {
+  eventId: event.id,
+  type: event.type,
+  sessionId: event.data?.object?.id,
+  pi: event.data?.object?.payment_intent,
+});
   } catch (err) {
     console.error("Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
