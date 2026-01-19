@@ -9,8 +9,8 @@ function initFirebaseAdmin() {
 
   const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64;
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-
   const jsonStr = b64 ? Buffer.from(b64, "base64").toString("utf8") : raw;
+
   if (!jsonStr) throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON or _B64");
 
   admin.initializeApp({
@@ -60,6 +60,7 @@ export default async function handler(req, res) {
   const sig = req.headers["stripe-signature"];
   let event;
 
+  // ---- Construct/verify Stripe event (signature) ----
   try {
     const rawBody = await readRawBody(req);
     event = stripe.webhooks.constructEvent(
@@ -67,20 +68,10 @@ export default async function handler(req, res) {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-    // 👇 ADD LOGS RIGHT HERE
-console.log("WEBHOOK HIT", {
-  eventId: event.id,
-  type: event.type,
-  sessionId: event.data?.object?.id,
-  pi: event.data?.object?.payment_intent,
-});
   } catch (err) {
     console.error("Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
-  // Helpful to prove duplicates if they happen:
-  console.log("WEBHOOK HIT", { eventId: event.id, type: event.type });
 
   try {
     if (event.type !== "checkout.session.completed") {
@@ -90,6 +81,15 @@ console.log("WEBHOOK HIT", {
     const session = event.data.object;
 
     const paymentIntentId = session.payment_intent || null;
+
+    // ✅ ONE webhook log line (not two)
+    console.log("WEBHOOK HIT", {
+      eventId: event.id,
+      type: event.type,
+      sessionId: session.id,
+      pi: paymentIntentId,
+    });
+
     const customerEmail = session.customer_details?.email || null;
 
     const shipName =
@@ -98,6 +98,7 @@ console.log("WEBHOOK HIT", {
       "(no name)";
     const shipPhone =
       session.shipping_details?.phone || session.customer_details?.phone || "N/A";
+
     const addr =
       session.shipping_details?.address ||
       session.customer_details?.address ||
@@ -108,7 +109,7 @@ console.log("WEBHOOK HIT", {
       ? (session.amount_total / 100).toFixed(2)
       : "0.00";
 
-    // ----- Load line items + expand product so we can read product.metadata.soapId -----
+    // ----- Load line items + expand product metadata.soapId -----
     let itemsText = "(could not load line items)";
     let orderItems = [];
 
@@ -117,7 +118,6 @@ console.log("WEBHOOK HIT", {
         expand: ["data.price.product"],
       });
 
-      // 1) Build raw items from Stripe
       const rawItems = (lineItems.data || [])
         .map((item) => {
           const qty = Number(item.quantity || 0);
@@ -126,7 +126,7 @@ console.log("WEBHOOK HIT", {
         })
         .filter((it) => it.soapId && it.qty > 0);
 
-      // 2) Collapse duplicates by soapId (sum qty)
+      // Collapse duplicates by soapId
       const qtyBySoap = new Map();
       for (const it of rawItems) {
         qtyBySoap.set(it.soapId, (qtyBySoap.get(it.soapId) || 0) + it.qty);
@@ -148,11 +148,11 @@ console.log("WEBHOOK HIT", {
     }
 
     const code = confirmationCode(session.id);
-
     const orderRef = db.collection("orders").doc(session.id);
 
-    // A hard idempotency lock doc. If it exists, we already processed this session.
-    const lockRef = db.collection("webhookLocks").doc(session.id);
+    // ✅ BEST idempotency key: PI if present, else session
+    const idemKey = paymentIntentId || session.id;
+    const lockRef = db.collection("webhookLocks").doc(idemKey);
 
     const shipping = {
       name: shipName,
@@ -199,6 +199,9 @@ console.log("WEBHOOK HIT", {
       // WRITES AFTER ALL READS
       tx.create(lockRef, {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        eventId: event.id,
+        sessionId: session.id,
+        paymentIntentId: paymentIntentId || null,
       });
 
       for (let i = 0; i < items.length; i++) {
@@ -227,9 +230,9 @@ console.log("WEBHOOK HIT", {
       applied = true;
     });
 
-    // If we didn't apply, DO NOT send emails or touch PI metadata
+    // ✅ Hard stop: if we didn't “win” the lock, do nothing else
     if (!applied) {
-      console.log("Skipping (already processed):", session.id);
+      console.log("Skipping (already processed):", idemKey);
       return res.status(200).json({ received: true, skipped: "already_processed" });
     }
 
@@ -295,7 +298,7 @@ console.log("WEBHOOK HIT", {
       console.log("No customer email found on session.");
     }
 
-    // Mark receipt_sent so Stripe retries won't spam receipts (optional extra safety)
+    // Optional extra safety: mark PI metadata AFTER applied=true
     if (paymentIntentId) {
       const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
       await stripe.paymentIntents.update(paymentIntentId, {
