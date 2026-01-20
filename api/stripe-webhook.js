@@ -81,6 +81,8 @@ export default async function handler(req, res) {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+    console.log("WEBHOOK VERSION: LOCKS_V3", process.env.VERCEL_URL);
+
   } catch (err) {
     console.error("Stripe signature failed:", err.message);
     return res.status(400).send("Webhook Error");
