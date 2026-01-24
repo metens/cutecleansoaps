@@ -90,9 +90,16 @@ export default async function handler(req, res) {
   }
 
   try {
+
+    const recipients = (process.env.CONTACT_TO || "")
+  .split(",")
+  .map(e => e.trim())
+  .filter(Boolean);
+
     await resend.emails.send({
       from: process.env.RESEND_FROM || "Cute Clean Soaps <orders@cutecleansoaps.com>",
-      to: [process.env.CONTACT_TO || "orders@cutecleansoaps.com"],
+      //to: [process.env.CONTACT_TO || "orders@cutecleansoaps.com"],
+      to: recipients,
       reply_to: cleanEmail, // Resend will format this safely
       subject: cleanSubject,
       text:
