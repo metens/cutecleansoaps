@@ -8,19 +8,21 @@
 </head>
 
 <body>
-  <!-- Cart button (JS updates the text + opens cart modal) -->
-  <button class="cart-btn" id="cart-btn">Cart (0) - $0.00</button>
+  <!-- Cart button MUST match index.html IDs -->
+  <button id="cart-btn" class="cart-btn">
+    🛒 Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
+  </button>
 
-  <!-- Header / Nav -->
   <div class="header">
-    <img src="images/logo.png" alt="Cute Clean Soaps logo" class="logo" />
+    <img src="images/logo.png" alt="Cute Clean Soaps Logo" class="logo" />
     <h1>Cute Clean Soaps</h1>
   </div>
 
   <nav style="margin-bottom: 20px;">
-    <a href="/index.html">Home</a> |
-    <a href="/shop.html"><strong>Shop</strong></a> |
-    <a href="/contact.html">Contact</a>
+    <a href="index.html">Home</a> |
+    <a href="shop.html"><strong>Shop</strong></a> |
+    <a href="about.html">About</a> |
+    <a href="contact.html">Contact</a>
   </nav>
 
   <section class="home-hero" style="margin-bottom: 24px;">
@@ -30,7 +32,7 @@
     </p>
   </section>
 
-  <!-- Full Gallery -->
+  <!-- Gallery items MUST keep .overlay + .meta-line -->
   <div class="gallery">
     <div class="gallery-item" data-name="Oatmeal Soap">
       <img src="images/oat.jpg" alt="Oatmeal Soap">
@@ -80,26 +82,24 @@
       <p class="caption">Rose Pedal Soap</p>
       <div class="meta-line"></div>
     </div>
-
-    <div class="gallery-item" data-name="Orange Soap">
-        <img src="images/" alt="Orage Soap">
-        <div class="overlay"></div>
-        <p class="caption">Orange Soap</p>
-        <div class="meta-line"></div>
-      </div>
   </div>
 
-  <!-- Product Modal (JS opens + fills this) -->
-  <div id="modal" class="modal hidden">
+  <!-- Product modal MUST match index.html IDs -->
+  <div id="soap-modal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" id="close-modal">×</button>
-      <h2 id="modal-title"></h2>
-      <p id="modal-price"></p>
+
+      <h2 id="modal-name"></h2>
+      <p id="modal-ingredients"></p>
+
+      <p><strong>Price:</strong> $<span id="modal-price">0.00</span></p>
+      <p><strong>Rating:</strong> <span id="modal-rating">—</span></p>
+      <p><strong>Stock:</strong> <span id="modal-stock">—</span></p>
 
       <div class="quantity">
-        <button id="qty-minus">−</button>
-        <span id="qty-value">1</span>
-        <button id="qty-plus">+</button>
+        <button id="minus">−</button>
+        <span id="count">1</span>
+        <button id="plus">+</button>
       </div>
 
       <p><strong>Total:</strong> $<span id="modal-total">0.00</span></p>
@@ -107,7 +107,7 @@
     </div>
   </div>
 
-  <!-- Cart Modal (JS opens + fills this) -->
+  <!-- Cart modal MUST match index.html IDs -->
   <div id="cart-modal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" id="close-cart">×</button>
@@ -117,14 +117,14 @@
 
       <hr />
 
-      <p><strong>Total Items:</strong> <span id="cart-count">0</span></p>
-      <p><strong>Total Price:</strong> $<span id="cart-total">0.00</span></p>
+      <p><strong>Total Items:</strong> <span id="cart-items-total">0</span></p>
+      <p><strong>Total Price:</strong> $<span id="cart-price-total">0.00</span></p>
 
       <button id="checkout-btn">Checkout</button>
     </div>
   </div>
 
-  <!-- IMPORTANT: load your JS (match whatever index.html uses) -->
+  <!-- Must match index.html path + module setting -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
