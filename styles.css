@@ -541,3 +541,48 @@ h1, h2, h3,
   /* Make the "why" cards a bit wider on phones */
   .gallery-item.home-card{ width: min(92vw, 420px); }
 }
+
+/* ---------- Home footer (remove inline styles) ---------- */
+.home-footer{
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 10px 24px;
+}
+
+.footer-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+@media (max-width: 700px){
+  .footer-grid{ grid-template-columns: 1fr; }
+}
+
+.footer-card{
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(255,255,255,0.65);
+}
+
+.footer-title{
+  font-weight: 700;
+}
+
+.footer-sub{
+  opacity: .8;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.footer-cta{
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #000;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
