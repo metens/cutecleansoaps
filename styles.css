@@ -586,3 +586,19 @@ h1, h2, h3,
   text-decoration: none;
   color: inherit;
 }
+
+/* ---------- Bigger cart button on mobile ---------- */
+@media (max-width: 700px){
+  .cart-btn{
+    padding: 14px 18px;   /* bigger tap area */
+    font-size: 16px;      /* larger text */
+    border-radius: 999px; /* keep pill shape */
+  }
+
+  /* If you ever add an icon inside */
+  .cart-btn svg,
+  .cart-btn img{
+    width: 20px;
+    height: 20px;
+  }
+}
