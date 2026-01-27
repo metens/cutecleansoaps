@@ -250,28 +250,26 @@
         </div>
     </div>
 
-    <footer style="max-width:920px;margin:30px auto 0;padding:20px 16px;">
-        <div style="background:#eff6ff;border:1px solid #dbeafe;border-radius:16px;padding:16px;">
-          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
-            <div>
-              <strong>Need help?</strong>
-              <div style="opacity:.8;font-size:13px;margin-top:4px;">
-                Questions about ingredients, orders, or shipping.
-              </div>
-            </div>
-      
-            <a href="/contact.html"
-               style="display:inline-block;padding:10px 12px;border-radius:10px;border:1px solid #000;background:#fff;text-decoration:none;color:inherit;">
-              Contact us
-            </a>
-          </div>
+    <footer class="home-footer" id="closing">
+      <div class="footer-grid">
+        <div class="footer-card">
+          <div class="footer-title">About</div>
+          <div class="footer-sub">Handmade soaps, cute designs, and clean ingredients.</div>
+          <a class="footer-cta" href="/about.html">Learn more</a>
         </div>
-      
-        <div style="opacity:.75;font-size:12px;margin-top:12px;">
-          © <span id="yr"></span> Cute Clean Soaps
+  
+        <div class="footer-card">
+          <div class="footer-title">Contact</div>
+          <div class="footer-sub">Questions about ingredients, orders, or shipping.</div>
+          <a class="footer-cta" href="/contact.html">Contact us</a>
         </div>
-      </footer>
-      
+      </div>
+  
+      <div style="opacity:.75;font-size:12px;margin-top:12px;">
+        © <span id="yr"></span> Cute Clean Soaps
+      </div>
+    </footer>
+     
       <script>
         document.getElementById("yr").textContent = new Date().getFullYear();
       </script>
