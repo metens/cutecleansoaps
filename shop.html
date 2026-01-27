@@ -8,10 +8,12 @@
 </head>
 
 <body>
+  <!-- Cart button (JS updates the text + opens cart modal) -->
+  <button class="cart-btn" id="cart-btn">Cart (0) - $0.00</button>
 
-  <!-- Header / Navigation -->
+  <!-- Header / Nav -->
   <div class="header">
-    <img src="images/sticker.png" alt="Cute Clean Soaps Logo" class="logo" />
+    <img src="images/logo.png" alt="Cute Clean Soaps logo" class="logo" />
     <h1>Cute Clean Soaps</h1>
   </div>
 
@@ -22,7 +24,6 @@
     <a href="/contact.html">Contact</a>
   </nav>
 
-  <!-- Page Title -->
   <section class="home-hero" style="margin-bottom: 24px;">
     <h2 class="hero-title" style="font-size:28px;">Shop All Soaps</h2>
     <p class="hero-subtitle">
@@ -30,7 +31,7 @@
     </p>
   </section>
 
-  <!-- SOAP GALLERY (your existing code) -->
+  <!-- Full Gallery -->
   <div class="gallery">
     <div class="gallery-item" data-name="Oatmeal Soap">
       <img src="images/oat.jpg" alt="Oatmeal Soap">
@@ -82,9 +83,42 @@
     </div>
   </div>
 
-  <!-- Cart Button (your JS hooks this) -->
-  <button class="cart-btn">🛒 Cart</button>
+  <!-- Product Modal (JS opens + fills this) -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" id="close-modal">×</button>
+      <h2 id="modal-title"></h2>
+      <p id="modal-price"></p>
 
+      <div class="quantity">
+        <button id="qty-minus">−</button>
+        <span id="qty-value">1</span>
+        <button id="qty-plus">+</button>
+      </div>
+
+      <p><strong>Total:</strong> $<span id="modal-total">0.00</span></p>
+      <button id="add-to-cart">Add to Cart</button>
+    </div>
+  </div>
+
+  <!-- Cart Modal (JS opens + fills this) -->
+  <div id="cart-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" id="close-cart">×</button>
+      <h2>Your Cart</h2>
+
+      <div id="cart-items"></div>
+
+      <hr />
+
+      <p><strong>Total Items:</strong> <span id="cart-count">0</span></p>
+      <p><strong>Total Price:</strong> $<span id="cart-total">0.00</span></p>
+
+      <button id="checkout-btn">Checkout</button>
+    </div>
+  </div>
+
+  <!-- IMPORTANT: load your JS (match whatever index.html uses) -->
   <script type="module" src="/script.js"></script>
 </body>
 </html>
