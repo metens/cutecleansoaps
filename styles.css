@@ -602,3 +602,31 @@ h1, h2, h3,
     height: 20px;
   }
 }
+
+/* ---------- Featured soaps row (homepage) ---------- */
+.featured-row{
+  max-width: 900px;
+}
+
+@media (min-width: 701px){
+  .featured-row{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .featured-row .gallery-item{
+    width: auto; /* override the fixed 260px width */
+  }
+}
+
+@media (max-width: 700px){
+  .featured-row{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .featured-row .gallery-item{
+    width: min(92vw, 420px);
+    margin: 0 auto;
+  }
+}
