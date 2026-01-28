@@ -1067,3 +1067,38 @@ h1, h2, h3,
   .mcar-track img{ height: 240px; }
   .mcar-btn{ width: 34px; height: 34px; }
 }
+
+/* =========================
+   Make ALL soap gallery cards the same shape
+   (home + shop, especially on mobile)
+========================= */
+
+.gallery {
+  display: grid;
+  gap: 14px;
+}
+
+/* Desktop */
+@media (min-width: 900px){
+  .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Mobile/tablet */
+@media (max-width: 899px){
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Each card stays a clean box */
+.gallery-item{
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+/* This is the big fix: same proportions for every image */
+.gallery-item > img{
+  width: 100%;
+  aspect-ratio: 1 / 1;   /* <- change to 4/5 if you want taller cards */
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
