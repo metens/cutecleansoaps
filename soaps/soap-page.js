@@ -1,4 +1,4 @@
-import { db } from "../firebase.js";
+import { db, auth, ensureAnonAuth } from "../firebase.js";
 import {
   doc,
   getDoc,
@@ -103,6 +103,7 @@ if (!soapId) {
 }
 
 async function boot(soapId) {
+  await ensureAnonAuth(); // silent, no UI
   // Toggle name input
   if (cbUseName && elName) {
     cbUseName.addEventListener("change", () => {
@@ -229,10 +230,11 @@ async function boot(soapId) {
         stars,
         text,
         name: name || null,
+        uid: auth.currentUser?.uid || null,
         createdAt: serverTimestamp(),
         likesCount: 0,
-      });
-
+      });      
+      
       if (elText) elText.value = "";
       if (elName) elName.value = "";
       if (cbUseName) cbUseName.checked = false;
