@@ -1,32 +1,53 @@
-import { db, auth } from "/firebase.js";
-
+import { db } from "../firebase.js";
 import {
   doc,
+  getDoc,
   collection,
   addDoc,
   onSnapshot,
   query,
   orderBy,
-  limit,
   serverTimestamp,
   runTransaction,
-  increment,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-import {
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  linkWithPopup,
-  signOut,
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+/* =========================
+   Session “identity” (no sign-in)
+========================= */
+const SESSION_ID_KEY = "ccs_session_id_v1";
 
-// ---------- Helpers ----------
-function getSlug() {
-  const parts = window.location.pathname.split("/").filter(Boolean);
-  return parts[0] === "soaps" ? parts[1] : null; // /soaps/:slug
+function getSessionId() {
+  let id = sessionStorage.getItem(SESSION_ID_KEY);
+  if (!id) {
+    id = (crypto?.randomUUID?.() || `sid_${Math.random().toString(16).slice(2)}_${Date.now()}`);
+    sessionStorage.setItem(SESSION_ID_KEY, id);
+  }
+  return id;
 }
 
+function likedKey(soapId) {
+  return `ccs_liked_${soapId}`; // stores JSON array of reviewIds liked for this soap
+}
+
+function getLikedSet(soapId) {
+  try {
+    const raw = sessionStorage.getItem(likedKey(soapId));
+    const arr = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function rememberLiked(soapId, reviewId) {
+  const set = getLikedSet(soapId);
+  set.add(reviewId);
+  sessionStorage.setItem(likedKey(soapId), JSON.stringify([...set]));
+}
+
+/* =========================
+   Helpers
+========================= */
 function escapeHtml(s) {
   return String(s ?? "")
     .replaceAll("&", "&amp;")
@@ -36,409 +57,240 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
-function isRealSignedIn(user) {
-  return !!user && user.isAnonymous === false;
+function fmtDate(ts) {
+  const d = ts?.toDate?.() || null;
+  if (!d) return "";
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
-function renderStarsHTML(ratingAvg) {
-  const v = Math.max(0, Math.min(5, Number(ratingAvg || 0)));
-  const step = 0.25; // quarter stars
-  const snapped = Math.round(v / step) * step;
+function getSoapIdFromUrl() {
+  // supports:
+  // /soaps/?id=almond-shea-soap
+  // /soaps/almond-shea-soap
+  const url = new URL(location.href);
+  const q = url.searchParams.get("id");
+  if (q) return q.trim();
 
-  let html = `<span class="star-rating" aria-label="${snapped} out of 5">`;
-  for (let i = 1; i <= 5; i++) {
-    const fill = Math.max(0, Math.min(1, snapped - (i - 1))); // 0..1
-    html += `<span class="star" style="--fill:${fill}"></span>`;
-  }
-  html += `</span>`;
-  return html;
+  const parts = location.pathname.split("/").filter(Boolean);
+  const last = parts[parts.length - 1];
+  if (last && last !== "soaps" && last !== "index.html") return last;
+
+  return null;
 }
 
-function likedKey(slug, uid) {
-  return `ccs_liked_${slug}_${uid}`;
+/* =========================
+   DOM
+========================= */
+const elTitle = document.getElementById("soap-title");
+const elMeta = document.getElementById("soap-meta");
+const elReviews = document.getElementById("reviews-list");
+
+const btnSubmit = document.getElementById("review-submit");
+const elMsg = document.getElementById("review-msg");
+const elText = document.getElementById("review-text");
+const cbUseName = document.getElementById("use-name");
+const elName = document.getElementById("review-name");
+
+/* =========================
+   Load soap + reviews
+========================= */
+const soapId = getSoapIdFromUrl();
+if (!soapId) {
+  elTitle.textContent = "Soap not found";
+  elReviews.textContent = "Missing soap id in URL.";
+} else {
+  boot(soapId);
 }
 
-function getLikedSet(slug, uid) {
-  try {
-    const raw = localStorage.getItem(likedKey(slug, uid));
-    const arr = raw ? JSON.parse(raw) : [];
-    return new Set(Array.isArray(arr) ? arr : []);
-  } catch {
-    return new Set();
-  }
-}
-
-function saveLikedSet(slug, uid, set) {
-  try {
-    localStorage.setItem(likedKey(slug, uid), JSON.stringify([...set]));
-  } catch { }
-}
-
-function cssEscapeSafe(v) {
-  try {
-    return CSS.escape(v);
-  } catch {
-    return String(v).replaceAll('"', '\\"');
-  }
-}
-
-// ---------- Main ----------
-document.addEventListener("DOMContentLoaded", async () => {
-  const slug = getSlug();
-  if (!slug) {
-    const t = document.getElementById("soap-title");
-    if (t) t.textContent = "No soap selected";
-    return;
-  }
-
-  const titleEl = document.getElementById("soap-title");
-  const ratingEl = document.getElementById("soap-rating");
-  const stockEl = document.getElementById("soap-stock");
-  const ingredientsEl = document.getElementById("soap-ingredients");
-  const reviewsListEl = document.getElementById("reviews-list");
-
-  const reviewStarsEl = document.getElementById("review-stars");
-  const reviewTextEl = document.getElementById("review-text");
-  const useNameEl = document.getElementById("use-name");
-  const nameInputEl = document.getElementById("review-name");
-  const submitBtn = document.getElementById("review-submit");
-
-  // ----- Auth bar above submit (no HTML edits needed)
-  const authBar = document.createElement("div");
-  authBar.style.margin = "12px 0";
-  authBar.style.display = "flex";
-  authBar.style.gap = "10px";
-  authBar.style.flexWrap = "wrap";
-  authBar.style.alignItems = "center";
-
-  if (submitBtn?.parentElement) {
-    submitBtn.parentElement.insertBefore(authBar, submitBtn);
-  }
-
-  const signInBtn = document.createElement("button");
-  signInBtn.textContent = "Sign in to review";
-  signInBtn.className = "btn";
-
-  const signOutBtn = document.createElement("button");
-  signOutBtn.textContent = "Sign out";
-  signOutBtn.className = "btn";
-
-  const whoEl = document.createElement("span");
-  whoEl.style.opacity = "0.8";
-  whoEl.style.fontSize = "13px";
-
-  authBar.appendChild(signInBtn);
-  authBar.appendChild(signOutBtn);
-  authBar.appendChild(whoEl);
-
-  function setReviewFormEnabled(enabled) {
-    if (reviewStarsEl) reviewStarsEl.disabled = !enabled;
-    if (reviewTextEl) reviewTextEl.disabled = !enabled;
-    if (useNameEl) useNameEl.disabled = !enabled;
-    if (nameInputEl) nameInputEl.disabled = !enabled;
-    if (submitBtn) submitBtn.disabled = !enabled;
-
-    if (reviewTextEl) {
-      reviewTextEl.placeholder = enabled
-        ? "Write your review..."
-        : "Sign in to write a review.";
-    }
-  }
-
-  async function doGoogleSignInPopup() {
-    const provider = new GoogleAuthProvider();
-
-    // If anon exists, try upgrading by linking
-    if (auth.currentUser && auth.currentUser.isAnonymous) {
-      try {
-        await linkWithPopup(auth.currentUser, provider);
-        return;
-      } catch (e) {
-        // If that Google account already belongs to another Firebase user,
-        // linking fails — so just sign in normally.
-        if (e?.code === "auth/credential-already-in-use") {
-          await signInWithPopup(auth, provider);
-          return;
-        }
-        throw e;
-      }
-    }
-
-    await signInWithPopup(auth, provider);
-  }
-
-  // IMPORTANT: call popup sign-in directly from click (no awaits before it)
-  signInBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    doGoogleSignInPopup().catch((err) => {
-      console.error("signIn failed:", err);
-
-      if (err?.code === "auth/popup-blocked") {
-        alert(
-          "Popup blocked. Please allow popups for this site, then click Sign in again."
-        );
-        return;
-      }
-
-      alert(err?.message || "Sign in failed. Check console for details.");
+async function boot(soapId) {
+  // Toggle name input
+  if (cbUseName && elName) {
+    cbUseName.addEventListener("change", () => {
+      elName.style.display = cbUseName.checked ? "inline-block" : "none";
     });
-  });
+  }
 
-  signOutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-    } catch (e) {
-      console.error("signOut failed:", e);
+  // Load soap doc
+  const soapRef = doc(db, "soaps", soapId);
+  const soapSnap = await getDoc(soapRef);
+  const soap = soapSnap.exists() ? soapSnap.data() : null;
+
+  elTitle.textContent = soap?.name || prettifySoapId(soapId);
+
+  const avg = Number(soap?.ratingAvg || 0);
+  const cnt = Number(soap?.ratingCount || 0);
+  const stock = soap?.stock ?? null;
+  const price = soap?.price ?? null;
+
+  elMeta.innerHTML = `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${price != null ? `<span><strong>Price:</strong> $${Number(price).toFixed(2)}</span>` : ""}
+      ${stock != null ? `<span><strong>Stock:</strong> ${Number(stock)}</span>` : ""}
+      <span><strong>Rating:</strong> ${cnt ? `${avg.toFixed(2)} (${cnt})` : "New"}</span>
+    </div>
+  `;
+
+  // Reviews live
+  const reviewsRef = collection(db, "soaps", soapId, "reviews");
+  const q = query(reviewsRef, orderBy("createdAt", "desc"));
+
+  onSnapshot(q, (snap) => {
+    if (snap.empty) {
+      elReviews.innerHTML = `<p>No reviews yet. Be the first!</p>`;
+      return;
     }
-  });
+    const liked = getLikedSet(soapId);
 
-  let lastReviewDocs = null;
+    const html = snap.docs.map((d) => {
+      const r = d.data() || {};
+      const rid = d.id;
 
-  onAuthStateChanged(auth, (user) => {
-    const ok = isRealSignedIn(user);
+      const stars = Number(r.stars || 0);
+      const txt = escapeHtml(r.text || "");
+      const name = r.name ? escapeHtml(r.name) : "Anonymous";
+      const date = fmtDate(r.createdAt);
+      const likesCount = Number(r.likesCount || 0);
 
-    signInBtn.style.display = ok ? "none" : "inline-block";
-    signOutBtn.style.display = ok ? "inline-block" : "none";
-    whoEl.textContent = ok
-      ? `Signed in as ${user.email || user.displayName || "user"}`
-      : "Not signed in";
+      const disabled = liked.has(rid) ? "disabled" : "";
+      const btnText = liked.has(rid) ? "Liked" : "Like";
 
-    setReviewFormEnabled(ok);
+      return `
+        <div class="review-card" data-review-id="${rid}" style="padding:12px;border:1px solid rgba(0,0,0,.12);border-radius:10px;margin:10px 0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <div>
+              <strong>${name}</strong>
+              <span style="opacity:.75;margin-left:8px;">${date}</span>
+            </div>
+            <div aria-label="${stars} out of 5">
+              ${renderStarsText(stars)}
+            </div>
+          </div>
 
-    // Re-render so like buttons enable/disable correctly
-    if (lastReviewDocs) renderReviews(lastReviewDocs);
+          <p style="margin:10px 0 10px;white-space:pre-wrap;">${txt}</p>
 
-    console.log("AUTH state:", {
-      uid: user?.uid,
-      anon: user?.isAnonymous,
-      provider: user?.providerData?.map(p => p.providerId),
-    });
-
-  });
-
-  useNameEl?.addEventListener("change", () => {
-    if (!nameInputEl) return;
-    nameInputEl.style.display = useNameEl.checked ? "block" : "none";
-  });
-
-  // 1) Live soap doc
-  onSnapshot(doc(db, "soaps", slug), (snap) => {
-    const d = snap.data();
-    if (!d) return;
-
-    document.title = d.name || slug;
-    if (titleEl) titleEl.textContent = d.name || slug;
-
-    const avg = Number(d.ratingAvg || 0);
-    const count = Number(d.ratingCount || 0);
-
-    if (ratingEl) {
-      ratingEl.innerHTML = `
-        <span class="star-wrap">${renderStarsHTML(avg)}</span>
-        <span class="rating-text">${avg.toFixed(2)}${count ? ` (${count})` : ""}</span>
-      `;
-    }
-
-    const stock = Number(d.stock ?? 0);
-    if (stockEl) {
-      stockEl.textContent =
-        stock <= 0
-          ? "Out of stock"
-          : stock <= 3
-            ? `Only ${stock} left!`
-            : `${stock} in stock`;
-    }
-
-    if (ingredientsEl) {
-      ingredientsEl.textContent = d.ingredients
-        ? `Ingredients: ${d.ingredients.join(", ")}`
-        : "";
-    }
-
-    // --- Gallery (extra soap photos) ---
-    const galleryEl = document.getElementById("soap-gallery");
-    if (galleryEl) {
-      const imgs = Array.isArray(d.images) ? d.images : [];
-      if (!imgs.length) {
-        galleryEl.innerHTML = "";
-      } else {
-        galleryEl.innerHTML = `
-        <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:14px;">
-          ${imgs
-            .map(
-              (src, i) => `
-                <button
-                  type="button"
-                  data-full="${src}"
-                  style="border:1px solid #dbeafe;background:#eff6ff;border-radius:14px;padding:8px;cursor:pointer;"
-                  aria-label="Open image ${i + 1}"
-                >
-                  <img
-                    src="${src}"
-                    alt="${(d.name || slug)} photo ${i + 1}"
-                    loading="lazy"
-                    style="width:100%;height:160px;object-fit:cover;border-radius:10px;display:block;"
-                    onerror="this.style.opacity='.35'; this.alt='Image not found: ${src}'"
-                  />
-                </button>
-              `
-            )
-            .join("")}
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="like-btn" type="button" ${disabled}>${btnText}</button>
+            <span class="like-count" aria-label="Likes">${likesCount}</span>
+          </div>
         </div>
       `;
-      }
-    }
+    }).join("");
 
+    elReviews.innerHTML = html;
   });
 
-  // 2) Live recent reviews
-  const reviewsQ = query(
-    collection(db, "soaps", slug, "reviews"),
-    orderBy("createdAt", "desc"),
-    limit(20)
-  );
-
-  function renderReviews(docs) {
-    lastReviewDocs = docs;
-    if (!reviewsListEl) return;
-
-    if (!docs || docs.length === 0) {
-      reviewsListEl.textContent = "No reviews yet.";
-      return;
-    }
-
-    const user = auth.currentUser;
-    const ok = isRealSignedIn(user);
-    const uid = ok ? user.uid : "";
-    const likedSet = ok ? getLikedSet(slug, uid) : new Set();
-
-    reviewsListEl.innerHTML = docs
-      .map((docSnap) => {
-        const r = docSnap.data();
-        const reviewId = docSnap.id;
-
-        const name = escapeHtml(r.displayName || "Anonymous");
-        const when = r.createdAt?.toDate
-          ? r.createdAt.toDate().toLocaleDateString()
-          : "";
-        const stars = Math.max(0, Math.min(5, Number(r.stars) || 0));
-        const text = escapeHtml(r.text || "");
-        const likesCount = Number(r.likesCount || 0);
-
-        const alreadyLiked = ok && likedSet.has(reviewId);
-        const likeDisabled = !ok || alreadyLiked;
-
-        return `
-          <div style="background:#eff6ff;border:1px solid #dbeafe;border-radius:14px;padding:12px 14px;margin:10px 0;">
-            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
-              <div><strong>${name}</strong></div>
-              <div style="opacity:.7;font-size:12px;">${escapeHtml(when)}</div>
-            </div>
-            <div style="margin-top:6px;">${"★".repeat(stars)}${"☆".repeat(
-          5 - stars
-        )}</div>
-            <div style="margin-top:8px;line-height:1.45;opacity:.92;">${text}</div>
-
-            <button
-              data-like="${reviewId}"
-              ${likeDisabled ? "disabled" : ""}
-              style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;border:1px solid #dbeafe;background:rgba(255,255,255,.7);border-radius:999px;padding:6px 10px;cursor:${likeDisabled ? "not-allowed" : "pointer"
-          };opacity:${likeDisabled ? ".6" : "1"};"
-              title="${!ok ? "Sign in to like" : alreadyLiked ? "You already liked this" : "Like"
-          }"
-            >
-              👍 <span>${likesCount}</span>
-            </button>
-          </div>
-        `;
-      })
-      .join("");
-  }
-
-  onSnapshot(reviewsQ, (snap) => renderReviews(snap.docs));
-
-  // 3) Like once per user (transaction)
-  async function likeReview(reviewId) {
-    const user = auth.currentUser;
-    if (!isRealSignedIn(user)) {
-      alert("Please sign in to like reviews.");
-      return;
-    }
-
-    const uid = user.uid;
-    const likedSet = getLikedSet(slug, uid);
-    if (likedSet.has(reviewId)) return;
-
-    const reviewRef = doc(db, "soaps", slug, "reviews", reviewId);
-    const likeRef = doc(db, "soaps", slug, "reviews", reviewId, "likes", uid);
-
-    await runTransaction(db, async (tx) => {
-      const likeSnap = await tx.get(likeRef);
-      if (likeSnap.exists()) return;
-
-      const reviewSnap = await tx.get(reviewRef);
-      const current = Number(reviewSnap.data()?.likesCount || 0);
-      tx.set(likeRef, { createdAt: serverTimestamp() });
-      tx.update(reviewRef, { likesCount: current + 1 });
-
-    });
-
-    likedSet.add(reviewId);
-    saveLikedSet(slug, uid, likedSet);
-
-    const btn = reviewsListEl?.querySelector(
-      `button[data-like="${cssEscapeSafe(reviewId)}"]`
-    );
-    if (btn) btn.disabled = true;
-  }
-
-  reviewsListEl?.addEventListener("click", async (e) => {
-    const btn = e.target.closest("button[data-like]");
+  // Like handler (one like per session per review)
+  elReviews.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".like-btn");
     if (!btn) return;
-    await likeReview(btn.dataset.like);
+
+    const card = e.target.closest(".review-card");
+    const reviewId = card?.dataset?.reviewId;
+    if (!reviewId) return;
+
+    const liked = getLikedSet(soapId);
+    if (liked.has(reviewId)) return; // already liked this session
+
+    btn.disabled = true;
+
+    try {
+      await likeReviewOncePerSession({ soapId, reviewId });
+      rememberLiked(soapId, reviewId);
+      btn.textContent = "Liked";
+    } catch (err) {
+      console.error("Like failed:", err);
+      btn.disabled = false;
+      btn.textContent = "Like";
+    }
   });
 
-  // 4) Submit review
-  submitBtn?.addEventListener("click", async () => {
-    const user = auth.currentUser;
-    if (!isRealSignedIn(user)) {
-      alert("Please sign in to write a review.");
+  // Submit review (no sign-in)
+  btnSubmit?.addEventListener("click", async () => {
+    const stars = getSelectedStars();
+    const text = String(elText?.value || "").trim();
+
+    if (stars < 1 || stars > 5) {
+      setMsg("Please pick a rating (1–5).");
+      return;
+    }
+    if (text.length < 3) {
+      setMsg("Please write a short review.");
       return;
     }
 
-    const stars = Number(reviewStarsEl?.value);
-    const text = (reviewTextEl?.value || "").trim();
-    const useName = !!useNameEl?.checked;
-    const nameInput = (nameInputEl?.value || "").trim();
+    const useName = !!cbUseName?.checked;
+    const name = useName ? String(elName?.value || "").trim().slice(0, 40) : "";
 
-    const displayName =
-      useName && nameInput
-        ? nameInput
-        : user.displayName || user.email || "Anonymous";
+    btnSubmit.disabled = true;
+    setMsg("Posting…");
 
-    if (!stars || !text) return;
+    try {
+      await addDoc(collection(db, "soaps", soapId, "reviews"), {
+        stars,
+        text,
+        name: name || null,
+        createdAt: serverTimestamp(),
+        likesCount: 0,
+      });
 
-    await addDoc(collection(db, "soaps", slug, "reviews"), {
-      stars,
-      text,
-      displayName,
-      uid: user.uid,
-      createdAt: serverTimestamp(),
-      likesCount: 0,
-    });
+      if (elText) elText.value = "";
+      if (elName) elName.value = "";
+      if (cbUseName) cbUseName.checked = false;
+      if (elName) elName.style.display = "none";
 
-    if (reviewTextEl) reviewTextEl.value = "";
-    if (nameInputEl) nameInputEl.value = "";
-    if (useNameEl) useNameEl.checked = false;
-    if (nameInputEl) nameInputEl.style.display = "none";
+      setMsg("Thanks! Your review was posted.");
+    } catch (err) {
+      console.error("Review submit failed:", err);
+      setMsg("Sorry — couldn’t post your review. Try again.");
+    } finally {
+      btnSubmit.disabled = false;
+    }
   });
+}
 
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-full]");
-    if (!btn) return;
-    const src = btn.getAttribute("data-full");
-    window.open(src, "_blank", "noopener,noreferrer");
+function prettifySoapId(id) {
+  return String(id || "")
+    .replaceAll("-", " ")
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function renderStarsText(n) {
+  const x = Math.max(0, Math.min(5, Number(n || 0)));
+  return "★★★★★☆☆☆☆☆".slice(5 - x, 10 - x);
+}
+
+function getSelectedStars() {
+  const checked = document.querySelector('input[name="stars"]:checked');
+  return Number(checked?.value || 0);
+}
+
+function setMsg(s) {
+  if (!elMsg) return;
+  elMsg.textContent = s;
+}
+
+/* =========================
+   Like logic:
+   - one like per session per review
+   - stored in Firestore as: reviews/{reviewId}/likes/{sessionId}
+   - increments review.likesCount in a transaction
+========================= */
+async function likeReviewOncePerSession({ soapId, reviewId }) {
+  const sessionId = getSessionId();
+
+  const reviewRef = doc(db, "soaps", soapId, "reviews", reviewId);
+  const likeRef = doc(db, "soaps", soapId, "reviews", reviewId, "likes", sessionId);
+
+  await runTransaction(db, async (tx) => {
+    const likeSnap = await tx.get(likeRef);
+    if (likeSnap.exists()) return; // already liked from this sessionId
+
+    const reviewSnap = await tx.get(reviewRef);
+    if (!reviewSnap.exists()) throw new Error("Missing review doc");
+
+    const cur = Number(reviewSnap.data()?.likesCount || 0);
+
+    tx.set(likeRef, { createdAt: serverTimestamp() });
+    tx.update(reviewRef, { likesCount: cur + 1 });
   });
-});
+}
