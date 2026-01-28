@@ -700,3 +700,63 @@ h1, h2, h3,
 @media (hover:none){
   .car-btn{ display:none; } /* mobile/iPad: swipe only */
 }
+
+.gallery-item .overlay{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 13px;
+  letter-spacing: .2px;
+}
+.gallery-item .overlay::before{
+  content: "Tap to view details";
+}
+@media (hover:hover) and (pointer:fine){
+  .gallery-item .overlay::before{ content:"Click to view details"; }
+}
+
+/* Modal carousel */
+.modal-carousel{ position:relative; border-radius:12px; overflow:hidden; margin:10px 0 12px; }
+.mcar-track{
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.mcar-track::-webkit-scrollbar{ display:none; }
+.mcar-track img{
+  flex:0 0 100%;
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  scroll-snap-align:start;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+/* dots */
+.mcar-dots{
+  position:absolute;
+  left:0; right:0; bottom:8px;
+  display:flex; justify-content:center; gap:6px;
+  pointer-events:none;
+}
+.mcar-dots .dot{
+  width:7px; height:7px; border-radius:999px;
+  background:rgba(255,255,255,0.55);
+}
+.mcar-dots .dot.is-active{ background:rgba(255,255,255,0.95); }
+
+/* arrows (desktop only) */
+.mcar-btn{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; border-radius:999px; border:none;
+  background:rgba(255,255,255,0.75);
+  font-size:22px; line-height:34px; padding:0;
+  cursor:pointer; z-index:3;
+}
+.mcar-btn.prev{ left:8px; }
+.mcar-btn.next{ right:8px; }
+@media (hover:none){ .mcar-btn{ display:none; } } /* swipe on mobile/iPad */

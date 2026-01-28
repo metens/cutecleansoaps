@@ -34,26 +34,10 @@
   <!-- Gallery items MUST keep .overlay + .meta-line -->
   <div class="gallery">
     <div class="gallery-item" data-name="Oatmeal Soap">
-            <div class="soap-carousel" data-index="0">
-              <button class="car-btn prev" type="button" aria-label="Previous photo">‹</button>
-          
-              <div class="car-track">
-                <img src="images/oat.jpg" alt="Oatmeal Soap photo 1" draggable="false">
-                <img src="images/goat.png" alt="Oatmeal Soap photo 2" draggable="false">
-              </div>
-          
-              <button class="car-btn next" type="button" aria-label="Next photo">›</button>
-          
-              <div class="car-dots" aria-hidden="true">
-                <span class="dot is-active"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-              </div>
-            </div>
-          
-            <div class="overlay"></div>
-            <p class="caption">Oatmeal Soap</p>
-            <div class="meta-line"></div>
+      <img src="images/oat.jpg" alt="Oatmeal Soap">
+      <div class="overlay"></div>
+      <p class="caption">Oatmeal Soap</p>
+      <div class="meta-line"></div>
     </div>
 
     <div class="gallery-item" data-name="Lavender Soap">
@@ -105,6 +89,19 @@
       <button class="close-btn" id="close-modal">×</button>
 
       <h2 id="modal-name"></h2>
+
+      <div class="modal-carousel">
+        <button class="mcar-btn prev" type="button" aria-label="Previous photo">‹</button>
+      
+        <div class="mcar-track" id="modal-track">
+          <!-- JS will inject 3 images here -->
+        </div>
+      
+        <button class="mcar-btn next" type="button" aria-label="Next photo">›</button>
+      
+        <div class="mcar-dots" id="modal-dots" aria-hidden="true"></div>
+      </div>
+
       <p id="modal-ingredients"></p>
 
       <p><strong>Price:</strong> $<span id="modal-price">0.00</span></p>
