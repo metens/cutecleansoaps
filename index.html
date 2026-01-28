@@ -1,306 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Cute Clean Soaps</title>
-    <link rel="icon" href="/favicon.png" type="image/png">
-    <link rel="icon" sizes="192x192" href="/favicon.png">
-    <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "Cute Clean Soaps",
-          "url": "https://cutecleansoaps.com",
-          "logo": "https://cutecleansoaps.com/logo.png"
-        }
-        </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Cute Clean Soaps</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="icon" sizes="192x192" href="/favicon.png">
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Cute Clean Soaps",
+      "url": "https://cutecleansoaps.com",
+      "logo": "https://cutecleansoaps.com/logo.png"
+    }
+  </script>
 </head>
 
-<body>
-    <main id="background">
-<!--
-        <button id="cart-btn" class="cart-btn">
-            🛒 Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
-        </button> -->
+<body class="home">
+  <main id="background">
 
-        <div class="header">
-            <img src="images/sticker.png" alt="Cute Clean Soaps logo" class="logo">
-            <h1>Cute Clean Soaps</h1>
-        </div>
+    <!-- CART (HOMEPAGE OFF) -->
+    <!--
+    <button id="cart-btn" class="cart-btn">
+      🛒 Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
+    </button>
+    -->
 
-        <!-- HOME PAGE -->
-<!-- =========================
-     HOME PAGE (matches your gallery vibe)
-     Paste into your index.html ABOVE your gallery (or make this the homepage)
-========================= -->
-
-<!-- Hero -->
-<header class="home-hero">
-
-    <h2 class="hero-title">From Our Kitchen to Your Home</h2>
-    <p class="hero-subtitle">
-      Organic, handmade soaps made with love, care, and the healthiest ingredients.
-    </p>
-  
-    <a href="/shop.html" class="hero-btn">Shop Soaps</a>
-  </header>
-  
-  <!-- Story -->
-  <section class="home-section">
-    <h2>Our Story</h2>
-    <p class="home-text">
-      Cute Clean Soaps started in our kitchen, just for fun. We loved experimenting with scents and creating soaps that
-      felt gentle and clean on our skin. When we shared them with friends and family, everyone loved the smells and how
-      soft they felt.
-    </p>
-    <p class="home-text">
-      What began as a small hobby quickly turned into something we wanted to share with others. Now, we make our soaps in
-      small batches and put care into every bar we create.
-    </p>
-  </section>
-  
-  <!-- Why -->
-  <section class="home-section" id="about">
-    <h2>Why Cute Clean Soaps?</h2>
-  
-    <!-- Uses your gallery layout so it matches perfectly -->
-    <div class="gallery home-cards">
-      <div class="gallery-item home-card">
-        <h3 class="card-title">🌿 Healthy Ingredients</h3>
-        <p class="card-text">We only use ingredients we trust and feel good about using every day.</p>
-      </div>
-  
-      <div class="gallery-item home-card">
-        <h3 class="card-title">🧼 Gentle &amp; Effective</h3>
-        <p class="card-text">Our soaps are made to cleanse without being harsh on your skin.</p>
-      </div>
-  
-      <div class="gallery-item home-card">
-        <h3 class="card-title">🖐️ Handmade in Small Batches</h3>
-        <p class="card-text">Each bar is crafted with attention and care — never mass-produced.</p>
-      </div>
-  
-      <div class="gallery-item home-card">
-        <h3 class="card-title">💛 Soaps We Use Ourselves</h3>
-        <p class="card-text">If we wouldn’t use it on our own skin, we wouldn’t sell it.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="home-section" id="featured">
-    <h2>Fan Favorites</h2>
-    <p class="home-text">A few best‑sellers to get you started. Tap any soap to view details.</p>
-  
-    <div class="gallery home-cards featured-row">
-      <div class="gallery-item" data-name="Honey Soap">
-        <img src="images/honey1.png" alt="Honey Soap">
-        <div class="overlay"></div>
-        <p class="caption">Honey Soap</p>
-        <div class="meta-line"></div>
-      </div>
-  
-      <div class="gallery-item" data-name="Coconut Soap">
-        <img src="images/coconut1.png" alt="Coconut Soap">
-        <div class="overlay"></div>
-        <p class="caption">Coconut Soap</p>
-        <div class="meta-line"></div>
-      </div>
-  
-      <div class="gallery-item" data-name="Lavender Soap">
-        <img src="images/lav2.png" alt="Lavender Soap">
-        <div class="overlay"></div>
-        <p class="caption">Lavender Soap</p>
-        <div class="meta-line"></div>
-      </div>
-    </div>
-  
-    <a class="hero-btn" href="/shop.html" style="margin-top:14px;">Shop All Soaps</a>
-  </section>
-  
-  <!-- Special -->
-  <section class="home-section">
-    <h2>What Makes Our Soaps Special</h2>
-  
-    <p class="tagline">
-      <strong>Gentle, Clean, Exfoliating, Smooth</strong>
-    </p>
-  
-    <p class="home-text">
-      Our soaps are made to feel good — from the first wash to the last. Whether you’re looking for something soothing,
-      refreshing, or lightly exfoliating, we make soaps that leave your skin clean and happy.
-    </p>
-  </section>
-  
-  <!-- Closing -->
-  <section class="home-section home-closing">
-    <h2>Made With Love, Meant to Be Shared</h2>
-    <p class="home-text">
-      Cute Clean Soaps is all about keeping things simple, honest, and handmade. We’re so happy you’re here and hope our
-      soaps bring a little joy to your daily routine.
-    </p>
-  </section>
-  
-  <!-- Put this right before your existing gallery section -->
-  <!-- <div id="shop"></div>
-        <br>
-
-        <div class="gallery">
-            <div class="gallery-item" data-name="Oatmeal Soap">
-                <img src="images/oat.jpg" alt="Oatmeal Soap">
-                <div class="overlay"></div>
-                <p class="caption">Oatmeal Soap</p>
-                <div class="meta-line"></div>
-            </div>
-
-            <div class="gallery-item" data-name="Lavender Soap">
-                <img src="images/lav2.png" alt="Lavender Soap">
-                <div class="overlay"></div>
-                <p class="caption">Lavender Soap</p>
-                <div class="meta-line"></div>
-            </div>
-
-            <div class="gallery-item" data-name="Cinnamon Soap">
-                <img src="images/cinnamon.jpg" alt="Cinnamon Soap">
-                <div class="overlay"></div>
-                <p class="caption">Cinnamon Soap</p>
-                <div class="meta-line"></div>
-            </div>
-
-            <div class="gallery-item" data-name="Coconut Soap">
-                <img src="images/coco.png" alt="Coconut Soap">
-                <div class="overlay"></div>
-                <p class="caption">Coconut Soap</p>
-                <div class="meta-line"></div>
-            </div>
-
-            <div class="gallery-item" data-name="Almond Shea Soap">
-                <img src="images/almo.png" alt="Almond Shea Soap">
-                <div class="overlay"></div>
-                <p class="caption">Almond Shea Soap</p>
-                <div class="meta-line"></div>
-            </div>
-
-            <div class="gallery-item" data-name="Honey Soap">
-                <img src="images/bee2.png" alt="Honey Soap">
-                <div class="overlay"></div>
-                <p class="caption">Honey Soap</p>
-                <div class="meta-line"></div>
-            </div>
-
-            <div class="gallery-item" data-name="Rose Pedal Soap">
-                <img src="images/rosie1.png" alt="Rose Pedal Soap">
-                <div class="overlay"></div>
-                <p class="caption">Rose Pedal Soap</p>
-                <div class="meta-line"></div>
-            </div>
-
-            <div class="gallery-item" data-name="Citrus Soap">
-                <img src="images/citrus.jpg" alt="Citrus Soap">
-                <div class="overlay"></div>
-                <p class="caption">Citrus Soap</p>
-            </div>
-
-        </div>-->
-    </main>
-
-    <!-- Modal -->
-    <!-- Soap Modal -->
-    <div id="soap-modal" class="modal hidden">
-        <div class="modal-content">
-            <button class="close-btn">&times;</button>
-
-            <h2 id="modal-name"></h2>
-            <p id="modal-ingredients"></p>
-
-            <div id="modal-rating" style="font-size:18px;margin:6px 0;"></div>
-            <div id="modal-stock" style="margin:6px 0;font-weight:bold;"></div>
-
-            <p>Price: $<span id="modal-price"></span></p>
-
-            <div class="quantity">
-                <button id="minus">−</button>
-                <span id="count">1</span>
-                <button id="plus">+</button>
-            </div>
-
-            <p>Total: $<span id="modal-total"></span></p>
-
-            <!-- <button id="add-to-cart">Add to Cart</button> -->
-
-            <!-- Review section (INSIDE modal-content) -->
-            <!--<div id="review-box" style="margin-top:16px; text-align:left;">
-                <div style="font-weight:bold; margin-bottom:6px;">Leave a review</div>
-
-                <select id="review-stars">
-                    <option value="5">★★★★★ (5)</option>
-                    <option value="4">★★★★☆ (4)</option>
-                    <option value="3">★★★☆☆ (3)</option>
-                    <option value="2">★★☆☆☆ (2)</option>
-                    <option value="1">★☆☆☆☆ (1)</option>
-                </select>
-
-                <textarea id="review-text" rows="3" placeholder="Write a quick review…"
-                    style="width:100%; margin-top:8px;"></textarea>
-
-                <button id="review-submit" style="margin-top:8px; width:100%;">
-                    Submit review
-                </button>
-            </div>-->
-        </div>
+    <div class="header">
+      <img src="images/sticker.png" alt="Cute Clean Soaps logo" class="logo">
+      <h1>Cute Clean Soaps</h1>
     </div>
 
-    <!-- Cart Modal -->
-    <!-- <div id="cart-modal" class="modal hidden">
-        <div class="modal-content">
-            <button class="close-btn" id="close-cart">&times;</button>
+    <!-- Hero -->
+    <header class="home-hero">
+      <h2 class="hero-title">From Our Kitchen to Your Home</h2>
+      <p class="hero-subtitle">
+        Organic, handmade soaps made with love, care, and the healthiest ingredients.
+      </p>
 
-            <h2>Your Cart</h2>
+      <a href="/shop.html" class="hero-btn">Shop Soaps</a>
+    </header>
 
-            <div id="cart-items"></div>
+    <!-- Story -->
+    <section class="home-section">
+      <h2>Our Story</h2>
+      <p class="home-text">
+        Cute Clean Soaps started in our kitchen, just for fun. We loved experimenting with scents and creating soaps that
+        felt gentle and clean on our skin. When we shared them with friends and family, everyone loved the smells and how
+        soft they felt.
+      </p>
+      <p class="home-text">
+        What began as a small hobby quickly turned into something we wanted to share with others. Now, we make our soaps in
+        small batches and put care into every bar we create.
+      </p>
+    </section>
 
-            <hr>
+    <!-- Why -->
+    <section class="home-section" id="about">
+      <h2>Why Cute Clean Soaps?</h2>
 
-            <p>
-                <strong>Total Items:</strong>
-                <span id="cart-items-total">0</span>
-            </p>
-
-            <p>
-                <strong>Total Price:</strong>
-                $<span id="cart-price-total">0.00</span>
-            </p>
-
-            <button id="checkout-btn">Checkout</button>
-        </div> -->
-    </div> 
-
-    <footer class="home-footer" id="closing">
-      <!-- <div class="footer-grid"> -->
-        <!-- <div class="footer-card">
-          <div class="footer-title">About</div>
-          <div class="footer-sub">Handmade soaps, cute designs, and clean ingredients.</div>
-          <a class="footer-cta" href="/about.html">Learn more</a>
-        </div> -->
-  
-        <div class="footer-card">
-          <div class="footer-title">Contact</div>
-          <div class="footer-sub">Questions about ingredients, orders, or shipping.</div>
-          <a class="footer-cta" href="/contact.html">Contact us</a>
+      <div class="gallery home-cards">
+        <div class="gallery-item home-card">
+          <h3 class="card-title">🌿 Healthy Ingredients</h3>
+          <p class="card-text">We only use ingredients we trust and feel good about using every day.</p>
         </div>
-      <!-- </div> -->
-  
-      <div style="opacity:.75;font-size:12px;margin-top:12px;">
-        © <span id="yr"></span> Cute Clean Soaps
-      </div>
-    </footer>
-     
-      <script>
-        document.getElementById("yr").textContent = new Date().getFullYear();
-      </script>
 
-    <script type="module" src="script.js"></script>
+        <div class="gallery-item home-card">
+          <h3 class="card-title">🧼 Gentle &amp; Effective</h3>
+          <p class="card-text">Our soaps are made to cleanse without being harsh on your skin.</p>
+        </div>
+
+        <div class="gallery-item home-card">
+          <h3 class="card-title">🖐️ Handmade in Small Batches</h3>
+          <p class="card-text">Each bar is crafted with attention and care — never mass-produced.</p>
+        </div>
+
+        <div class="gallery-item home-card">
+          <h3 class="card-title">💛 Soaps We Use Ourselves</h3>
+          <p class="card-text">If we wouldn’t use it on our own skin, we wouldn’t sell it.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured -->
+    <section class="home-section" id="featured">
+      <h2>Fan Favorites</h2>
+      <p class="home-text">A few best‑sellers to get you started. Tap any soap to view details.</p>
+
+      <div class="gallery home-cards featured-row">
+        <div class="gallery-item" data-name="Honey Soap">
+          <img src="images/honey1.png" alt="Honey Soap">
+          <div class="overlay"></div>
+          <p class="caption">Honey Soap</p>
+          <div class="meta-line"></div>
+        </div>
+
+        <div class="gallery-item" data-name="Coconut Soap">
+          <img src="images/coconut1.png" alt="Coconut Soap">
+          <div class="overlay"></div>
+          <p class="caption">Coconut Soap</p>
+          <div class="meta-line"></div>
+        </div>
+
+        <div class="gallery-item" data-name="Lavender Soap">
+          <img src="images/lav2.png" alt="Lavender Soap">
+          <div class="overlay"></div>
+          <p class="caption">Lavender Soap</p>
+          <div class="meta-line"></div>
+        </div>
+      </div>
+
+      <a class="hero-btn" href="/shop.html" style="margin-top:14px;">Shop All Soaps</a>
+    </section>
+
+    <!-- Special -->
+    <section class="home-section">
+      <h2>What Makes Our Soaps Special</h2>
+
+      <p class="tagline">
+        <strong>Gentle, Clean, Exfoliating, Smooth</strong>
+      </p>
+
+      <p class="home-text">
+        Our soaps are made to feel good — from the first wash to the last. Whether you’re looking for something soothing,
+        refreshing, or lightly exfoliating, we make soaps that leave your skin clean and happy.
+      </p>
+    </section>
+
+    <!-- Closing -->
+    <section class="home-section home-closing">
+      <h2>Made With Love, Meant to Be Shared</h2>
+      <p class="home-text">
+        Cute Clean Soaps is all about keeping things simple, honest, and handmade. We’re so happy you’re here and hope our
+        soaps bring a little joy to your daily routine.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- =========================
+       HOMEPAGE SOAP MODAL (VIEW-ONLY)
+       - Carousel + details + testimonials
+       - NO add-to-cart / NO quantity
+  ========================= -->
+  <div id="soap-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" id="close-modal">×</button>
+
+      <h2 id="modal-name"></h2>
+
+      <!-- Carousel (same IDs as shop modal) -->
+      <div class="modal-carousel">
+        <button class="mcar-btn prev" type="button" aria-label="Previous photo">‹</button>
+
+        <div class="mcar-track" id="modal-track">
+          <!-- JS injects images -->
+        </div>
+
+        <button class="mcar-btn next" type="button" aria-label="Next photo">›</button>
+
+        <div class="mcar-dots" id="modal-dots" aria-hidden="true"></div>
+      </div>
+
+      <p id="modal-ingredients"></p>
+
+      <div id="modal-rating" style="font-size:18px;margin:6px 0;"></div>
+      <div id="modal-stock" style="margin:6px 0;font-weight:bold;"></div>
+
+      <p><strong>Price:</strong> $<span id="modal-price"></span></p>
+
+      <!-- Testimonials (static from JS) -->
+      <div id="modal-testimonials" class="testimonials"></div>
+
+      <!-- Link out to full soap page (carousel + reviews live) -->
+      <a id="modal-shop-link" class="hero-btn" href="/shop.html" style="margin-top:12px; display:inline-block;">
+        View full details
+      </a>
+    </div>
+  </div>
+
+  <footer class="home-footer" id="closing">
+    <div class="footer-card">
+      <div class="footer-title">Contact</div>
+      <div class="footer-sub">Questions about ingredients, orders, or shipping.</div>
+      <a class="footer-cta" href="/contact.html">Contact us</a>
+    </div>
+
+    <div style="opacity:.75;font-size:12px;margin-top:12px;">
+      © <span id="yr"></span> Cute Clean Soaps
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("yr").textContent = new Date().getFullYear();
+  </script>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
