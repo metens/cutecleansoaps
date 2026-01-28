@@ -169,8 +169,8 @@ const soaps = {
 ========================= */
 const SOAP_PHOTOS = {
   "Almond Shea Soap": ["images/almond1.png", "images/almond2.JPG"],
-  "Honey Soap": ["images/honey1.png", "images/honey2.png", "images/bee.png"],
-  "Lavender Soap": ["images/lav1.png", "images/lav2.png", "images/lavender.png"],
+  "Honey Soap": ["images/honey1.png", "images/honey2.png"],
+  "Lavender Soap": ["images/lav1.png", "images/lav2.png"],
   "Oatmeal Soap": ["images/oat1.jpg", "images/oat2.png"],
   "Coconut Soap": ["images/coconut1.png", "images/coconut2.png", "images/coconut3.png"],
   "Cinnamon Soap": ["images/cinnamon.JPG"],
