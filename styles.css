@@ -249,50 +249,75 @@ h1, h2, h3,
   overflow:hidden;
 }
 
-/* ---------- Modal ---------- */
+/* ---------- Modal (mobile-friendly) ---------- */
 .modal{
-  position:fixed;
-  inset:0;
+  position: fixed;
+  inset: 0;
   background: rgba(0,0,0,0.5);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;              /* adds breathing room on mobile */
+  z-index: 1000;
 }
 
 .modal.hidden{ display:none; }
 
 .modal-content{
-  background:#fff;
-  padding:20px;
-  width:300px;
-  border-radius:10px;
-  text-align:center;
-  position:relative;
+  background: #fff;
+  width: min(520px, calc(100% - 16px));
+  max-height: 85vh;           /* prevents off-screen modal */
+  overflow-y: auto;           /* scroll inside modal on mobile */
+  padding: 18px 16px;
+  border-radius: 14px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.18);
 }
 
+/* Bigger tap target for mobile */
 .close-btn{
-  position:absolute;
-  top:8px;
-  right:10px;
-  font-size:22px;
-  background:none;
-  border:none;
-  cursor:pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  font-size: 24px;
+  background: rgba(0,0,0,0.06);
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.close-btn:active{
+  transform: scale(0.98);
 }
 
 .quantity{
   display:flex;
   justify-content:center;
   align-items:center;
-  gap:10px;
-  margin:10px 0;
+  gap: 12px;
+  margin: 12px 0;
 }
 
 .quantity button{
-  width:30px;
-  height:30px;
-  font-size:18px;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  border-radius: 10px;
+}
+
+@media (max-width: 480px){
+  .modal{ align-items: flex-end; } /* feels nicer on phones */
+  .modal-content{
+    width: 100%;
+    border-radius: 16px;
+    padding: 16px 14px;
+    max-height: 88vh;
+  }
 }
 
 /* ---------- Cart UI ---------- */
@@ -925,4 +950,120 @@ h1, h2, h3,
   background: rgb(186, 228, 250);
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
   text-align: left;
+}
+
+/* =========================
+   HOMEPAGE VIEW-ONLY SOAP MODAL
+   (carousel + testimonials)
+========================= */
+
+.home #soap-modal .modal-content{
+  max-width: 520px;
+  width: calc(100% - 28px);
+}
+
+/* Hide shop-only controls if they ever exist on homepage by accident */
+.home #soap-modal .quantity,
+.home #soap-modal #add-to-cart,
+.home #soap-modal #modal-total{
+  display:none !important;
+}
+
+/* ----- Modal carousel ----- */
+.modal-carousel{
+  position: relative;
+  margin: 10px 0 12px;
+}
+
+.mcar-track{
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.03);
+}
+
+.mcar-track::-webkit-scrollbar{
+  height: 8px;
+}
+.mcar-track::-webkit-scrollbar-thumb{
+  background: rgba(0,0,0,0.15);
+  border-radius: 999px;
+}
+
+.mcar-track img{
+  flex: 0 0 100%;
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  scroll-snap-align: start;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Buttons */
+.mcar-btn{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.14);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.mcar-btn.prev{ left: 10px; }
+.mcar-btn.next{ right: 10px; }
+
+.mcar-btn:active{
+  transform: translateY(-50%) scale(0.98);
+}
+
+/* Dots */
+.mcar-dots{
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.mcar-dots .dot{
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.22);
+}
+
+.mcar-dots .dot.is-active{
+  background: rgba(0,0,0,0.55);
+}
+
+/* ----- Testimonials inside modal ----- */
+.testimonials{
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.testimonials .quote{
+  background: #eaf4ff; /* same light-blue you used for review cards */
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-style: italic;
+  line-height: 1.35;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+}
+
+/* Mobile tweaks */
+@media (max-width: 520px){
+  .mcar-track img{ height: 240px; }
+  .mcar-btn{ width: 34px; height: 34px; }
 }
