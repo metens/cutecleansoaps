@@ -1111,3 +1111,17 @@ body.shop .gallery-item > img{
     max-width: 420px;        /* keeps it from getting too wide on large phones */
   }
 }
+
+/* =========================
+   SHOP DESKTOP – tighter spacing
+========================= */
+
+@media (min-width: 900px){
+  body.shop .gallery{
+    gap: 10px;              /* was larger before */
+  }
+
+  body.shop .gallery-item{
+    border-radius: 12px;    /* slightly tighter look */
+  }
+}
