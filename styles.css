@@ -901,22 +901,28 @@ h1, h2, h3,
   opacity: 0.75;
 }
 
-/* =========================
-   SOAP PAGE BACKGROUND
-========================= */
+/* rgb(186, 228, 250) */
 
-body {
-  background: #eaf4ff; /* light blue — match your homepage */
+/* Individual review card */
+.review-card {
+  background: #eaf4ff; /* soft light blue */
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+  margin-bottom: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Keep content looking like a centered card on top */
-.soap-page {
-  background: transparent;
+.review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
 }
 
-/* Optional: make nav blend nicely */
-.soap-nav a {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
+#review-wrap {
+  margin: 0 auto;
+  padding: 18px;
+  border-radius: 14px;
+  background: #eaf4ff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  text-align: left;
 }
