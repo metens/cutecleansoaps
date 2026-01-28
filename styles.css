@@ -1100,3 +1100,6 @@ body.shop .gallery-item > img{
   object-fit: cover;
   display: block;
 }
+@media (max-width: 520px){
+  body.shop .gallery{ grid-template-columns: 1fr; }
+}
