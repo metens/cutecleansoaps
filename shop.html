@@ -34,10 +34,26 @@
   <!-- Gallery items MUST keep .overlay + .meta-line -->
   <div class="gallery">
     <div class="gallery-item" data-name="Oatmeal Soap">
-      <img src="images/oat.jpg" alt="Oatmeal Soap">
-      <div class="overlay"></div>
-      <p class="caption">Oatmeal Soap</p>
-      <div class="meta-line"></div>
+            <div class="soap-carousel" data-index="0">
+              <button class="car-btn prev" type="button" aria-label="Previous photo">‹</button>
+          
+              <div class="car-track">
+                <img src="images/oat.jpg" alt="Oatmeal Soap photo 1" draggable="false">
+                <img src="images/goat.png" alt="Oatmeal Soap photo 2" draggable="false">
+              </div>
+          
+              <button class="car-btn next" type="button" aria-label="Next photo">›</button>
+          
+              <div class="car-dots" aria-hidden="true">
+                <span class="dot is-active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+              </div>
+            </div>
+          
+            <div class="overlay"></div>
+            <p class="caption">Oatmeal Soap</p>
+            <div class="meta-line"></div>
     </div>
 
     <div class="gallery-item" data-name="Lavender Soap">
