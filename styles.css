@@ -1101,5 +1101,13 @@ body.shop .gallery-item > img{
   display: block;
 }
 @media (max-width: 520px){
-  body.shop .gallery{ grid-template-columns: 1fr; }
+  body.shop .gallery{
+    grid-template-columns: 1fr;
+    justify-items: center;   /* center cards horizontally */
+  }
+
+  body.shop .gallery-item{
+    width: 100%;
+    max-width: 420px;        /* keeps it from getting too wide on large phones */
+  }
 }
