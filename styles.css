@@ -905,7 +905,7 @@ h1, h2, h3,
 
 /* Individual review card */
 .review-card {
-  background: #eaf4ff; /* soft light blue */
+  background: rgb(186, 228, 250); /* soft light blue */
   border-radius: 14px;
   padding: 16px 18px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.05);
