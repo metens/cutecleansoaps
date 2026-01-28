@@ -587,4 +587,56 @@ checkoutBtn?.addEventListener("click", async () => {
       updateOneCardUI(name); // ✅ live refresh on the gallery
     });
   }
+
+  function initCarousels() {
+    document.querySelectorAll(".soap-carousel").forEach((car) => {
+      const track = car.querySelector(".car-track");
+      const imgs = Array.from(track.querySelectorAll("img"));
+      const dots = Array.from(car.querySelectorAll(".dot"));
+      const prev = car.querySelector(".car-btn.prev");
+      const next = car.querySelector(".car-btn.next");
+  
+      if (!track || imgs.length < 2) return;
+  
+      // Prevent swipe/drag from triggering the soap card click
+      ["pointerdown", "pointermove", "touchstart", "touchmove"].forEach((evt) => {
+        track.addEventListener(evt, (e) => e.stopPropagation(), { passive: true });
+      });
+      track.addEventListener("click", (e) => e.stopPropagation());
+  
+      function setActiveDot(i){
+        dots.forEach((d, idx) => d.classList.toggle("is-active", idx === i));
+        car.dataset.index = String(i);
+      }
+  
+      function scrollToIndex(i){
+        const clamped = Math.max(0, Math.min(i, imgs.length - 1));
+        track.scrollTo({ left: clamped * track.clientWidth, behavior: "smooth" });
+        setActiveDot(clamped);
+      }
+  
+      // Update dot while swiping
+      track.addEventListener("scroll", () => {
+        const i = Math.round(track.scrollLeft / track.clientWidth);
+        setActiveDot(i);
+      }, { passive: true });
+  
+      if (prev) prev.addEventListener("click", (e) => {
+        e.stopPropagation();
+        scrollToIndex((parseInt(car.dataset.index || "0", 10) || 0) - 1);
+      });
+  
+      if (next) next.addEventListener("click", (e) => {
+        e.stopPropagation();
+        scrollToIndex((parseInt(car.dataset.index || "0", 10) || 0) + 1);
+      });
+  
+      // Start at first image
+      setActiveDot(0);
+    });
+  }
+  
+  // Call it after your page sets up the gallery
+  initCarousels();
+
 });

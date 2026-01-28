@@ -630,3 +630,73 @@ h1, h2, h3,
     margin: 0 auto;
   }
 }
+
+/* ---------- Gallery photo carousel (3 photos) ---------- */
+.soap-carousel{
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.car-track{
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+.car-track::-webkit-scrollbar{ display:none; }
+
+.car-track img{
+  flex: 0 0 100%;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  scroll-snap-align: start;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Dots */
+.car-dots{
+  position: absolute;
+  left: 0; right: 0; bottom: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+}
+.car-dots .dot{
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.55);
+}
+.car-dots .dot.is-active{
+  background: rgba(255,255,255,0.95);
+}
+
+/* Desktop arrows (hidden on touch devices) */
+.car-btn{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.75);
+  font-size: 22px;
+  line-height: 34px;
+  padding: 0;
+  z-index: 3;
+}
+
+.car-btn.prev{ left: 8px; }
+.car-btn.next{ right: 8px; }
+
+@media (hover:none){
+  .car-btn{ display:none; } /* mobile/iPad: swipe only */
+}
