@@ -95,7 +95,7 @@ export default async function handler(req, res) {
     }
 
     await resend.emails.send({
-      from: process.env.RESEND_FROM || "Cute Clean Soaps <orders@cutecleansoaps.com>",
+      from: process.env.RESEND_FROM || "Cute Clean Soaps <soaps@cutecleansoaps.com>",
       to: recipients,
       replyTo: cleanEmail,
       subject: cleanSubject,
