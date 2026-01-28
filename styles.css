@@ -1069,36 +1069,34 @@ h1, h2, h3,
 }
 
 /* =========================
-   Make ALL soap gallery cards the same shape
-   (home + shop, especially on mobile)
+   SHOP ONLY: make cards uniform
+   (does NOT touch homepage)
 ========================= */
 
-.gallery {
+body.shop .gallery{
   display: grid;
   gap: 14px;
 }
 
-/* Desktop */
-@media (min-width: 900px){
-  .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* Mobile: 2 columns that actually fill the screen */
+@media (max-width: 520px){
+  body.shop .gallery{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
 }
 
-/* Mobile/tablet */
-@media (max-width: 899px){
-  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Tablet+: 3 columns */
+@media (min-width: 521px){
+  body.shop .gallery{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-/* Each card stays a clean box */
-.gallery-item{
-  overflow: hidden;
-  border-radius: 14px;
-}
-
-/* This is the big fix: same proportions for every image */
-.gallery-item > img{
+/* Uniform image box size ONLY in shop */
+body.shop .gallery-item > img{
   width: 100%;
-  aspect-ratio: 1 / 1;   /* <- change to 4/5 if you want taller cards */
-  height: auto;
+  aspect-ratio: 1 / 1;     /* change to 4 / 5 if you want taller */
   object-fit: cover;
   display: block;
 }
