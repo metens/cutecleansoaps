@@ -1495,3 +1495,34 @@ body.shop .gallery-item > img{
     box-shadow: 0 6px 16px rgba(0,0,0,0.15);
   }
 }
+
+/* =========================
+   HOME HERO FEATURED SOAPS – MOBILE IMAGE EDGE-TO-EDGE
+========================= */
+@media (max-width: 639px){
+
+  /* Make sure the card clips the image to rounded corners */
+  .featured-row .gallery-item{
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 14px;
+  }
+
+  /* Image fills the full width of the card */
+  .featured-row .gallery-item > img{
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    border-radius: 0;
+  }
+
+  /* Keep caption spacing nice below the image */
+  .featured-row .caption{
+    padding: 10px 12px 12px;
+  }
+
+  /* Optional: tighten spacing between the 3 soaps */
+  .featured-row{
+    gap: 10px;
+  }
+}
