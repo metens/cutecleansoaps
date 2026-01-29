@@ -1415,3 +1415,15 @@ body.shop .gallery-item>img {
     width: 100%;
   }
 }
+
+/* Subtle floral background */
+#background {
+  background-color: #f8fbff; /* your light base color */
+
+  background-image:
+    radial-gradient(circle at 20px 20px, rgba(255, 182, 193, 0.15) 2px, transparent 3px),
+    radial-gradient(circle at 60px 40px, rgba(173, 216, 230, 0.15) 2px, transparent 3px),
+    radial-gradient(circle at 40px 70px, rgba(255, 192, 203, 0.12) 2px, transparent 3px);
+
+  background-size: 120px 120px;
+}
