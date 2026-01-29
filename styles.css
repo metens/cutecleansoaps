@@ -1416,22 +1416,50 @@ body.shop .gallery-item>img {
   }
 }
 
-/* Subtle floral background */
-#background {
-  background-color: #f8fbff; /* your light base color */
-
-  background-image:
-    radial-gradient(circle at 20px 20px, rgba(255, 182, 193, 0.15) 2px, transparent 3px),
-    radial-gradient(circle at 60px 40px, rgba(173, 216, 230, 0.15) 2px, transparent 3px),
-    radial-gradient(circle at 40px 70px, rgba(255, 192, 203, 0.12) 2px, transparent 3px);
-
-  background-size: 120px 120px;
-}
-
 /* Match footer width to hero section */
 .home-footer {
   max-width: 900px;   /* same visual width as hero content */
   margin: 0 auto;     /* center it */
   padding-left: 16px;
   padding-right: 16px;
+}
+footer .hero-btn{
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+/* Floral illustrated background */
+#background {
+  background-color: #f8fbff;
+
+  background-image:
+    url("images/flower1.png"),
+    url("images/flower2.png"),
+    url("images/flower3.png"),
+    url("images/flower4.png"),
+    url("images/flower2.png"),
+    url("images/flower3.png");
+
+  background-repeat: repeat;
+
+  /* Different sizes = visual randomness */
+  background-size:
+    140px,
+    110px,
+    160px,
+    120px,
+    100px,
+    150px;
+
+  /* Different starting positions */
+  background-position:
+    0px 0px,
+    200px 150px,
+    400px 50px,
+    100px 300px,
+    350px 400px,
+    600px 200px;
+
+  /* Soft, subtle look */
+  opacity: 1;
 }
