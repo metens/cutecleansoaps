@@ -1427,3 +1427,11 @@ body.shop .gallery-item>img {
 
   background-size: 120px 120px;
 }
+
+/* Match footer width to hero section */
+.home-footer {
+  max-width: 900px;   /* same visual width as hero content */
+  margin: 0 auto;     /* center it */
+  padding-left: 16px;
+  padding-right: 16px;
+}
