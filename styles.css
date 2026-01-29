@@ -1139,6 +1139,30 @@ body.shop .gallery-item > img{
 /* Slightly tighter on tablets too */
 @media (min-width: 600px) and (max-width: 899px){
   body.shop .gallery{
-    gap: 2px;
+    gap: 5px;
   }
 }
+
+/* =========================
+   SHOP – tighter horizontal spacing
+========================= */
+
+/* Bring columns closer together */
+@media (min-width: 900px){
+  body.shop .gallery{
+    gap: 8px; /* space BETWEEN cards */
+  }
+}
+
+/* Remove extra inner spacing that makes cards feel far apart */
+body.shop .gallery-item{
+  padding: 0;              /* important if padding was added earlier */
+}
+
+/* Make images fill the card edge-to-edge */
+body.shop .gallery-item img{
+  width: 100%;
+  display: block;
+  border-radius: 12px;     /* keeps nice rounded corners */
+}
+
