@@ -1526,3 +1526,36 @@ body.shop .gallery-item > img{
     gap: 10px;
   }
 }
+
+
+/* =========================
+   Cart Button – match hero / site buttons
+========================= */
+#cart-btn{
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Hover effect like other buttons */
+#cart-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+/* Keep mobile floating style */
+@media (max-width: 639px){
+  #cart-btn{
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    top: auto;
+    z-index: 1000;
+  }
+}
