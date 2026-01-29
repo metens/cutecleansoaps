@@ -1429,36 +1429,29 @@ footer .hero-btn{
 
 /* Floral illustrated background */
 #background {
-  background-color: #f8fbff;
-
+  /* no background-color so pattern shows through */
   background-image:
     url("images/flower1.png"),
     url("images/flower2.png"),
     url("images/flower3.png"),
     url("images/flower4.png"),
-    url("images/flower2.png"),
-    url("images/flower3.png");
+    url("images/bee.png"),
+    url("images/bee.png");
 
   background-repeat: repeat;
-
-  /* Different sizes = visual randomness */
   background-size:
     140px,
     110px,
     160px,
     120px,
-    100px,
-    150px;
+    70px,
+    60px;
 
-  /* Different starting positions */
   background-position:
     0px 0px,
-    200px 150px,
-    400px 50px,
-    100px 300px,
-    350px 400px,
-    600px 200px;
-
-  /* Soft, subtle look */
-  opacity: 1;
+    220px 140px,
+    420px 60px,
+    120px 320px,
+    300px 180px,
+    600px 260px;
 }
