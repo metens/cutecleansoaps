@@ -272,7 +272,7 @@ function fillAllCards(items) {
 
     // Keep overlay neat (no ingredients hover)
     const overlay = item.querySelector(".overlay");
-    if (overlay) overlay.innerHTML = `Tap to view details`;
+    //if (overlay) overlay.innerHTML = `Tap to view details`;
 
     updateOneCardUI(name);
   });
