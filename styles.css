@@ -1427,63 +1427,56 @@ footer .hero-btn{
   font-size: 14px;
 }
 
-#background {
-  position: relative;
-  /*background-color: #f8fbff; /* your soft base blue */
-  overflow: hidden;
+/* =========================
+   SHOP: smooth 3 → 2 → 1 columns + edge-to-edge images
+========================= */
+
+body.shop .gallery{
+  display: grid;
+  gap: 10px;
+  align-items: stretch;
 }
 
-/* 🌸 FLOWERS LAYER */
-#background::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-
-  background-image:
-    url("images/flower1.png"),
-    url("images/flower2.png"),
-    url("images/flower3.png"),
-    url("images/flower4.png");
-
-  /* LOTS of small flowers */
-  background-repeat: repeat;
-  background-size: 90px, 110px, 85px, 100px;
-
-  /* Offset each pattern so they don’t line up in a grid */
-  background-position:
-    0px 0px,
-    120px 60px,
-    60px 140px,
-    180px 200px;
-
-  opacity: 0.18; /* very faint */
+/* 3 per row (desktop) */
+@media (min-width: 900px){
+  body.shop .gallery{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-/* 🐝 BEES LAYER */
-#background::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+/* 2 per row (mid widths) */
+@media (min-width: 640px) and (max-width: 899px){
+  body.shop .gallery{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
-  background-image:
-    url("images/bee.png"),
-    url("images/bee.png"),
-    url("images/bee.png");
+/* 1 per row (mobile) */
+@media (max-width: 639px){
+  body.shop .gallery{
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  body.shop .gallery-item{
+    width: 100%;
+    max-width: 420px; /* optional: keeps it nicely centered on small phones */
+  }
+}
 
-  background-repeat: no-repeat;
+/* Card: no inner padding, image can hit edges */
+body.shop .gallery-item{
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100%;
+  max-width: none;
+  border-radius: 14px;
+  overflow: hidden; /* image follows rounded corners */
+}
 
-  /* Smaller bees */
-  background-size: 55px, 45px, 50px;
-
-  /* Spread them out */
-  background-position:
-    15% 25%,
-    70% 60%,
-    40% 85%;
-
-  opacity: 0.35; /* lighter + more subtle */
+/* Image: always fills the card edge-to-edge */
+body.shop .gallery-item > img{
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 0;
 }
