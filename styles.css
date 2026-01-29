@@ -1573,3 +1573,36 @@ body.shop .gallery-item > img{
 .home-footer .footer-card{
   margin-bottom: 14px;
 }
+
+/* =========================
+   Top Navigation – button style
+========================= */
+.shop-nav{
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.nav-btn{
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.12);
+  text-decoration: none;
+  color: var(--text);
+  background: var(--bg);
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+}
+
+.nav-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+/* Highlight current page */
+.nav-btn.active{
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
