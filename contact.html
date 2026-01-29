@@ -1,146 +1,193 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Contact Us • Cute Clean Soaps</title>
-    <link rel="stylesheet" href="/styles.css" />
-    <style>
-      .wrap { max-width: 920px; margin: 0 auto; padding: 28px 16px; }
-      .card {
-        background: rgb(186, 228, 250);
-        border: 1px solid #dbeafe;
-        border-radius: 16px;
-        padding: 18px;
-        margin-top: 18px;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact Us • Cute Clean Soaps</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 28px 16px;
+    }
+
+    .card {
+      background: rgb(186, 228, 250);
+      border: 1px solid #dbeafe;
+      border-radius: 16px;
+      padding: 18px;
+      margin-top: 18px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: #fff;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      box-sizing: border-box;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      opacity: .85;
+      margin: 10px 0 6px;
+    }
+
+    .muted {
+      opacity: .8;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 720px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
       }
-      .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-      .btn {
-        display:inline-block;
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        background: #fff;
-        text-decoration: none;
-        color: inherit;
-        cursor: pointer;
-      }
-      input, textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border-radius: 12px;
-        border: 1px solid #ddd;
-        background: #fff;
-        box-sizing: border-box;
-        font: inherit;
-      }
-      textarea { min-height: 120px; resize: vertical; }
-      label { display:block; font-size: 13px; opacity:.85; margin: 10px 0 6px; }
-      .muted { opacity:.8; }
-      .grid { display:grid; gap: 12px; grid-template-columns: 1fr; }
-      @media (min-width: 720px) {
-        .grid { grid-template-columns: 1fr 1fr; }
-      }
-    </style>
-  </head>
+    }
 
-  <body>
-    <main class="wrap">
-      <h1 style="margin:0;">Contact Us</h1>
+    input,
+    textarea {
+      border-radius: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
 
-      <nav class="shop-nav">
-        <a href="index.html" class="nav-btn">Home</a>
-        <a href="shop.html" class="nav-btn">Shop</a>
-        <a href="contact.html" class="nav-btn active">Contact</a>
-      </nav>
+    .card {
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
 
-      <p class="muted" style="margin:10px 0 0;">
-        Questions about an order, ingredients, or shipping? Send us a message.
-      </p>
+<body>
+  <main class="wrap">
+    <h1 style="margin:0;">Contact Us</h1>
+
+    <nav class="shop-nav">
+      <a href="index.html" class="nav-btn">Home</a>
+      <a href="shop.html" class="nav-btn">Shop</a>
+      <a href="contact.html" class="nav-btn active">Contact</a>
+    </nav>
+
+    <p class="muted" style="margin:10px 0 0;">
+      Questions about an order, ingredients, or shipping? Send us a message.
+    </p>
 
 
-      <div class="card">
-        <!-- Simple mailto form (no backend needed) -->
-        <form id="contactForm">
+    <div class="card">
+      <!-- Simple mailto form (no backend needed) -->
+      <form id="contactForm">
 
-      <input name="company" id="company" autocomplete="off"
-  style="position:absolute;left:-9999px;opacity:0;height:0;width:0;" tabindex="-1" />
-          <div class="grid">
-            <div>
-              <label for="name">Your name</label>
-              <input id="name" name="name" autocomplete="name" placeholder="Jane Doe" />
-            </div>
-            <div>
-              <label for="email">Your email</label>
-              <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
-            </div>
+        <input name="company" id="company" autocomplete="off"
+          style="position:absolute;left:-9999px;opacity:0;height:0;width:0;" tabindex="-1" />
+        <div class="grid">
+          <div>
+            <label for="name">Your name</label>
+            <input id="name" name="name" autocomplete="name" placeholder="Jane Doe" />
           </div>
-
-          <label for="subject" style="margin-top:12px;">Subject</label>
-          <input id="subject" name="subject" placeholder="Order question" />
-
-          <label for="message" style="margin-top:12px;">Message</label>
-          <textarea id="message" name="message" placeholder="Write your message..." required></textarea>
-
-          <div class="row" style="justify-content:space-between;margin-top:14px;">
-            <a class="btn" href="/">← Back to home</a>
-            <button class="btn" type="submit">Send email</button>
+          <div>
+            <label for="email">Your email</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
           </div>
-        </form>
-      </div>
-    </main>
+        </div>
 
-    <script>
-        const form = document.getElementById("contactForm");
-      
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-      
-          const name = document.getElementById("name").value.trim();
-          const email = document.getElementById("email").value.trim();
-          const subject = document.getElementById("subject").value.trim();
-          const message = document.getElementById("message").value.trim();
-          const company = document.getElementById("company").value.trim(); // honeypot
-      
-          if (!email || !message) {
-            alert("Please fill out your email and message.");
-            return;
-          }
-      
-          const btn = form.querySelector("button[type='submit']");
-          btn.disabled = true;
-          btn.textContent = "Sending…";
-      
-          try {
-            const res = await fetch("/api/contact", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, email, subject, message, company }),
-            });
-      
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || "Send failed");
-      
-            form.innerHTML = `
+        <label for="subject" style="margin-top:12px;">Subject</label>
+        <input id="subject" name="subject" placeholder="Order question" />
+
+        <label for="message" style="margin-top:12px;">Message</label>
+        <textarea id="message" name="message" placeholder="Write your message..." required></textarea>
+
+        <div class="row" style="justify-content:center;margin-top:18px;">
+          <button class="hero-btn" type="submit">Send message</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById("contactForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const subject = document.getElementById("subject").value.trim();
+      const message = document.getElementById("message").value.trim();
+      const company = document.getElementById("company").value.trim(); // honeypot
+
+      if (!email || !message) {
+        alert("Please fill out your email and message.");
+        return;
+      }
+
+      const btn = form.querySelector("button[type='submit']");
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+
+      try {
+        const res = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, subject, message, company }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Send failed");
+
+        form.innerHTML = `
               <div style="background:#ecfeff;border:1px solid #cffafe;border-radius:14px;padding:18px;">
                 <h3 style="margin:0 0 8px;">Thank you for your message 💙</h3>
                 <p style="margin:0;opacity:.9;">
                   We’ve received your message and will review it and reply as soon as possible.
                 </p>
                 <div style="margin-top:12px;">
-                  <a class="btn" href="/">← Back to shop</a>
+                  <a class="hero-btn" href="/shop.html">Back to shop</a>
                 </div>
               </div>
             `;
-          } catch (err) {
-            console.error(err);
-            btn.disabled = false;
-            btn.textContent = "Send email";
-            alert(err.message || "Sorry — something went wrong. Please try again.");
-          }
-        });
-      </script>
-      
-      
-  </body>
+      } catch (err) {
+        console.error(err);
+        btn.disabled = false;
+        btn.textContent = "Send email";
+        alert(err.message || "Sorry — something went wrong. Please try again.");
+      }
+    });
+  </script>
+
+
+</body>
+
 </html>
