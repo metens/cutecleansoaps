@@ -1125,3 +1125,20 @@ body.shop .gallery-item > img{
     border-radius: 12px;    /* slightly tighter look */
   }
 }
+
+/* =========================
+   SHOP – tighter card spacing
+========================= */
+
+@media (min-width: 900px){
+  body.shop .gallery{
+    gap: 8px;          /* default is larger — this brings soaps closer */
+  }
+}
+
+/* Slightly tighter on tablets too */
+@media (min-width: 600px) and (max-width: 899px){
+  body.shop .gallery{
+    gap: 10px;
+  }
+}
