@@ -572,6 +572,7 @@ h1, h2, h3,
   max-width: 1000px;
   margin: 0 auto;
   padding: 0 10px 24px;
+  background-color: rgb(186, 228, 250)
 }
 
 .footer-grid{
@@ -926,7 +927,7 @@ h1, h2, h3,
   opacity: 0.75;
 }
 
-/* rgb(186, 228, 250) */
+/* BLUE: rgb(186, 228, 250) */
 
 /* Individual review card */
 .review-card {
