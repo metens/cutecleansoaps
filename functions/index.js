@@ -1,36 +1,43 @@
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const admin = require("firebase-admin");
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { onDocumentWritten } from "firebase-functions/v2/firestore";
 
-admin.initializeApp();
-const db = admin.firestore();
+initializeApp();
+const db = getFirestore();
 
-exports.onReviewCreated = onDocumentCreated(
+/**
+ * Recompute rating aggregates whenever any review doc changes.
+ * Trigger: soaps/{soapId}/reviews/{reviewId}
+ */
+export const syncSoapRating = onDocumentWritten(
   "soaps/{soapId}/reviews/{reviewId}",
   async (event) => {
     const soapId = event.params.soapId;
-    const review = event.data?.data();
-    if (!review) return;
 
-    const stars = Number(review.stars);
-    if (!(stars >= 1 && stars <= 5)) return;
+    // Read all reviews for this soap
+    const reviewsSnap = await db.collection("soaps").doc(soapId).collection("reviews").get();
 
-    const soapRef = db.doc(`soaps/${soapId}`);
+    let count = 0;
+    let sum = 0;
 
-    await db.runTransaction(async (tx) => {
-      const snap = await tx.get(soapRef);
-      const soap = snap.exists ? snap.data() : {};
-
-      const oldCount = Number(soap.ratingCount || 0);
-      const oldAvg = Number(soap.ratingAvg || 0);
-
-      const newCount = oldCount + 1;
-      const newAvg = (oldAvg * oldCount + stars) / newCount;
-
-      tx.set(
-        soapRef,
-        { ratingCount: newCount, ratingAvg: newAvg },
-        { merge: true }
-      );
+    reviewsSnap.forEach((doc) => {
+      const d = doc.data() || {};
+      const stars = Number(d.stars || 0);
+      if (Number.isFinite(stars) && stars >= 1 && stars <= 5) {
+        count += 1;
+        sum += stars;
+      }
     });
+
+    const avg = count ? sum / count : 0;
+
+    // Write aggregates back to parent soap doc
+    await db.collection("soaps").doc(soapId).set(
+      {
+        ratingCount: count,
+        ratingAvg: avg,
+      },
+      { merge: true }
+    );
   }
 );
