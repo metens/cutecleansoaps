@@ -9,7 +9,7 @@
 :root {
   --bg: #fffaea;
   /* MAIN PAGE BACKGROUND */
-  /*--card: rgb(186, 228, 250);*/
+  --card: rgb(186, 228, 250);
   /* GALLERY / CARD BACKGROUND */
   --border: #ddd;
   --text: #333;
@@ -1369,7 +1369,6 @@ body.shop .gallery-item>img {
     max-width: 420px;
   }
 }
-
 
 /* =========================
    HOMEPAGE FEATURED SOAPS
