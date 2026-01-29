@@ -387,8 +387,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Carousel + ingredients + price
     setModalCarousel(name);
-    if (ingredientsEl) ingredientsEl.textContent = "Ingredients: " + soap.ingredients.join(", ");
-    if (priceEl) priceEl.textContent = soap.price.toFixed(2);
+    if (ingredientsEl) {
+      ingredientsEl.innerHTML = `<strong>Ingredients:</strong> ${soap.ingredients.join(", ")}`;
+    }
+    if (priceEl) priceEl.innerHTML = `<strong>Price:</strong> $${soap.price.toFixed(2)}`;
 
     // Homepage: testimonials + link to full soap page
     if (IS_HOME) {
@@ -411,21 +413,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (stockEl) {
         if (stock <= 0) {
-          stockEl.textContent = "Out of stock";
+          stockEl.innerHTML = `<strong>Out of stock</strong>`;
           stockEl.style.color = "#c0392b";
         } else if (stock <= 3) {
-          stockEl.textContent = `Only ${stock} left!`;
+          stockEl.innerHTML = `<strong>Only ${stock} left!</strong>`;
           stockEl.style.color = "#c0392b";
         } else {
-          stockEl.textContent = `${stock} in stock`;
+          stockEl.innerHTML = `<strong>Stock:</strong> ${stock} in stock`;
           stockEl.style.color = "#333";
         }
       }
 
+      function renderStars(avg){
+        const full = Math.round(avg);
+        return "★★★★★☆☆☆☆☆".slice(5 - full, 10 - full);
+      }
+      
       if (ratingEl) {
-        ratingEl.textContent = soap.ratingCount
-          ? `${(soap.ratingAvg || 0).toFixed(2)} (${soap.ratingCount})`
-          : "New";
+        const count = Number(soap.ratingCount || 0);
+        const avg = Number(soap.ratingAvg || 0);
+      
+        if (count === 0) {
+          ratingEl.textContent = "New";
+        } else {
+          ratingEl.innerHTML = `
+            <span style="color:#f5b301;font-size:18px;letter-spacing:1px;">
+              ${renderStars(avg)}
+            </span>
+            <span style="opacity:.8;"> (${count})</span>
+          `;
+        }
       }
 
       updateOneCardUI(name);
