@@ -1144,25 +1144,33 @@ body.shop .gallery-item > img{
 }
 
 /* =========================
-   SHOP – tighter horizontal spacing
+   SHOP: remove “empty space inside grid cells”
 ========================= */
 
-/* Bring columns closer together */
-@media (min-width: 900px){
-  body.shop .gallery{
-    gap: 8px; /* space BETWEEN cards */
-  }
+body.shop .gallery{
+  /* grid that auto-sizes nicely and avoids giant empty columns */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;                 /* controls space between soaps */
+  padding: 0;                /* remove inner padding that can look like spacing */
+  margin: 0 auto;            /* keep the whole grid centered */
+  align-items: stretch;
 }
 
-/* Remove extra inner spacing that makes cards feel far apart */
+/* Make each card actually fill its grid cell */
 body.shop .gallery-item{
-  padding: 0;              /* important if padding was added earlier */
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
 }
 
-/* Make images fill the card edge-to-edge */
-body.shop .gallery-item img{
+/* Ensure the image fills the card */
+body.shop .gallery-item > img{
   width: 100%;
   display: block;
-  border-radius: 12px;     /* keeps nice rounded corners */
 }
 
+/* Optional: tighter on big screens */
+@media (min-width: 900px){
+  body.shop .gallery{ gap: 8px; }
+}
