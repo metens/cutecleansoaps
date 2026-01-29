@@ -1428,37 +1428,62 @@ footer .hero-btn{
 }
 
 #background {
+  position: relative;
+  background-color: #f8fbff; /* your soft base blue */
+  overflow: hidden;
+}
+
+/* 🌸 FLOWERS LAYER */
+#background::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
   background-image:
     url("images/flower1.png"),
     url("images/flower2.png"),
     url("images/flower3.png"),
-    url("images/flower4.png"),
+    url("images/flower4.png");
+
+  /* LOTS of small flowers */
+  background-repeat: repeat;
+  background-size: 90px, 110px, 85px, 100px;
+
+  /* Offset each pattern so they don’t line up in a grid */
+  background-position:
+    0px 0px,
+    120px 60px,
+    60px 140px,
+    180px 200px;
+
+  opacity: 0.18; /* very faint */
+}
+
+/* 🐝 BEES LAYER */
+#background::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background-image:
+    url("images/bee.png"),
     url("images/bee.png"),
     url("images/bee.png");
 
-  /* Flowers repeat, bees do NOT */
-  background-repeat:
-    repeat,
-    repeat,
-    repeat,
-    repeat,
-    no-repeat,
-    no-repeat;
+  background-repeat: no-repeat;
 
-  background-size:
-    140px,
-    110px,
-    160px,
-    120px,
-    70px,
-    60px;
+  /* Smaller bees */
+  background-size: 55px, 45px, 50px;
 
-  /* Random-looking placement for bees */
+  /* Spread them out */
   background-position:
-    0px 0px,
-    220px 140px,
-    420px 60px,
-    120px 320px,
-    18% 22%,   /* bee 1 */
-    78% 68%;   /* bee 2 */
+    15% 25%,
+    70% 60%,
+    40% 85%;
+
+  opacity: 0.35; /* lighter + more subtle */
 }
