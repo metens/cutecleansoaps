@@ -1427,9 +1427,7 @@ footer .hero-btn{
   font-size: 14px;
 }
 
-/* Floral illustrated background */
 #background {
-  /* no background-color so pattern shows through */
   background-image:
     url("images/flower1.png"),
     url("images/flower2.png"),
@@ -1438,7 +1436,15 @@ footer .hero-btn{
     url("images/bee.png"),
     url("images/bee.png");
 
-  background-repeat: repeat;
+  /* Flowers repeat, bees do NOT */
+  background-repeat:
+    repeat,
+    repeat,
+    repeat,
+    repeat,
+    no-repeat,
+    no-repeat;
+
   background-size:
     140px,
     110px,
@@ -1447,11 +1453,12 @@ footer .hero-btn{
     70px,
     60px;
 
+  /* Random-looking placement for bees */
   background-position:
     0px 0px,
     220px 140px,
     420px 60px,
     120px 320px,
-    300px 180px,
-    600px 260px;
+    18% 22%,   /* bee 1 */
+    78% 68%;   /* bee 2 */
 }
