@@ -443,12 +443,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----- Gallery clicks -----
   items.forEach((item) => {
-    item.addEventListener("click", () => {
+    item.addEventListener("click", (e) => {
+      // If user clicked the rating link (stars), do NOT open modal
+      if (e.target.closest(".rating-link")) return;
+  
       const name = item.dataset.name;
       openModalFor(name);
     });
-  });
-
+  });  
+  
   // ----- Modal close -----
   if (closeModalBtn) {
     closeModalBtn.onclick = () => {
