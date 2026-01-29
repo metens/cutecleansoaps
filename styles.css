@@ -1144,33 +1144,46 @@ body.shop .gallery-item > img{
 }
 
 /* =========================
-   SHOP: remove “empty space inside grid cells”
+   SHOP GRID: 3 per row + 10px gap + edge-to-edge images
 ========================= */
 
-body.shop .gallery{
-  /* grid that auto-sizes nicely and avoids giant empty columns */
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 10px;                 /* controls space between soaps */
-  padding: 0;                /* remove inner padding that can look like spacing */
-  margin: 0 auto;            /* keep the whole grid centered */
-  align-items: stretch;
-}
-
-/* Make each card actually fill its grid cell */
-body.shop .gallery-item{
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-/* Ensure the image fills the card */
-body.shop .gallery-item > img{
-  width: 100%;
-  display: block;
-}
-
-/* Optional: tighter on big screens */
 @media (min-width: 900px){
-  body.shop .gallery{ gap: 8px; }
+  body.shop .gallery{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* EXACTLY 3 per row */
+    gap: 10px;                                       /* space between cards */
+    justify-items: stretch;
+    align-items: stretch;
+  }
+
+  /* Card fills the grid cell */
+  body.shop .gallery-item{
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;              /* IMPORTANT: no inner padding */
+    border-radius: 14px;
+    overflow: hidden;        /* makes image follow rounded corners */
+  }
+
+  /* Image goes to the edges of the card */
+  body.shop .gallery-item > img{
+    width: 100%;
+    display: block;
+    border-radius: 0;        /* let the container control rounding */
+    object-fit: cover;
+  }
+}
+
+/* Keep your mobile centered 1-column look (unchanged, but safe) */
+@media (max-width: 520px){
+  body.shop .gallery{
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 12px;
+  }
+  body.shop .gallery-item{
+    width: 100%;
+    max-width: 420px;
+  }
 }
