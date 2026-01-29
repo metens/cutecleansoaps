@@ -1139,6 +1139,6 @@ body.shop .gallery-item > img{
 /* Slightly tighter on tablets too */
 @media (min-width: 600px) and (max-width: 899px){
   body.shop .gallery{
-    gap: 10px;
+    gap: 2px;
   }
 }
