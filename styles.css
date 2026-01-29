@@ -1606,3 +1606,19 @@ body.shop .gallery-item > img{
   background: #ffffff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
+
+/* =========================
+   Fix: cart button overlapping modal close (iPhone landscape / 2-column)
+========================= */
+
+/* Make sure modal is always on top */
+.modal { z-index: 3000; }
+.modal .modal-content { position: relative; z-index: 3001; }
+
+/* On the 2-column range, push cart behind modal */
+@media (min-width: 640px) and (max-width: 899px){
+  #cart-btn{ z-index: 500; } /* behind the modal */
+}
+
+/* (Extra safe) ensure the close button stays clickable */
+.modal .close-btn { z-index: 4000; }
