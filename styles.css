@@ -1559,3 +1559,17 @@ body.shop .gallery-item > img{
     z-index: 1000;
   }
 }
+
+/* =========================
+   Footer spacing — match home page
+========================= */
+.home-footer{
+  max-width: 900px;
+  margin: 60px auto 40px;   /* more breathing room above, like home */
+  padding: 0 16px;
+  text-align: center;
+}
+
+.home-footer .footer-card{
+  margin-bottom: 14px;
+}
