@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (ingredientsEl) {
       ingredientsEl.innerHTML = `<strong>Ingredients:</strong> ${soap.ingredients.join(", ")}`;
     }
-    if (priceEl) priceEl.innerHTML = `<strong>Price:</strong> $${soap.price.toFixed(2)}`;
+    if (priceEl) priceEl.textContent = soap.price.toFixed(2);
 
     // Homepage: testimonials + link to full soap page
     if (IS_HOME) {
@@ -413,13 +413,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (stockEl) {
         if (stock <= 0) {
-          stockEl.innerHTML = `<strong>Out of stock</strong>`;
+          stockEl.textContent = "Out of stock";
           stockEl.style.color = "#c0392b";
         } else if (stock <= 3) {
-          stockEl.innerHTML = `<strong>Only ${stock} left!</strong>`;
+          stockEl.textContent = `Only ${stock} left!`;
           stockEl.style.color = "#c0392b";
         } else {
-          stockEl.innerHTML = `<strong>Stock:</strong> ${stock} in stock`;
+          stockEl.textContent = `${stock} in stock`;
           stockEl.style.color = "#333";
         }
       }
