@@ -1647,3 +1647,62 @@ body.shop .gallery-item > img{
 .modal-content strong {
   font-weight: 700;
 }
+
+/* =========================
+   HOME "Fan Favorites" (featured-row)
+   Fix: images always touch card edges at ALL widths
+========================= */
+
+/* Always: card clips, image fills */
+.featured-row .gallery-item{
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.featured-row .gallery-item > img{
+  width: 100% !important;
+  display: block;
+  object-fit: cover;
+  border-radius: 0 !important;   /* let the card round the corners */
+  margin: 0 !important;
+}
+
+/* Keep text nicely padded under the image */
+.featured-row .caption,
+.featured-row .meta-line{
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* Smooth layout: 3 → 2 → 1 columns like the shop */
+@media (min-width: 900px){
+  .featured-row{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 899px){
+  .featured-row{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 639px){
+  .featured-row{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    justify-items: center;
+  }
+
+  .featured-row .gallery-item{
+    width: 100%;
+    max-width: 420px;
+  }
+}
