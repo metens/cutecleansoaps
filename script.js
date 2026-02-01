@@ -108,7 +108,7 @@ const soaps = {
       "Vitamin-E Oil",
       "Brown Mica Powder",
     ],
-    6.0,
+    8.0,
     5
   ),
   "Coconut Soap": new Soap(
@@ -119,7 +119,7 @@ const soaps = {
       "Coconut Oil", 
       "Coconut Fragrance Oil"
     ],
-    6.0,
+    8.0,
     0
   ),
   "Almond Shea Soap": new Soap(
@@ -160,7 +160,7 @@ const soaps = {
       "Blended Oats & Whole Oat Topping", 
       "Vitamin-E Oil", 
       "Honey & Milk Fragrance Oil"],
-    6.0,
+    8.0,
     10
   ),
   "Rose Pedal Soap": new Soap(
@@ -172,7 +172,7 @@ const soaps = {
       "Vitamin-E Oil", 
       "Rose Water"
     ],
-    7.0,
+    8.0,
     0
   ),
   "Orange Soap": new Soap(
@@ -183,7 +183,7 @@ const soaps = {
       "Orange Essential Oil", 
       "Orange Mica Powder"
     ],
-    7.0,
+    8.0,
     0
   ),
 };
