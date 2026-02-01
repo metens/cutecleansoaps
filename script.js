@@ -102,45 +102,47 @@ class Soap {
 const soaps = {
   "Cinnamon Soap": new Soap(
     [
+      "Goat Milk",
+      "Cinnamon & Vanilla Fragrance Oil",
       "Cinnamon",
-      "Cinnamon Fragrance Oil",
-      "Vanilla Fragrance Oil",
-      "Shea Soap Base",
       "Vitamin-E Oil",
-      "Nutmeg",
-      "Cinnamon Topping",
-      "Vanilla Extract",
+      "Brown Mica Powder",
     ],
     6.0,
     5
   ),
   "Coconut Soap": new Soap(
-    ["Coconut Oil", "Shea Soap Base", "Coconut", "Vitamin-E Oil", "Organic Coconut Shreddings"],
+    ["Goat Milk", "Organic Coconut Shavings", "Vitamin-E Oil", "Coconut Oil", "Coconut Fragrance Oil"],
     6.0,
     0
   ),
   "Almond Shea Soap": new Soap(
-    ["Goat Soap Base", "Almonds", "Vitamin-E Oil", "Coconut Oil"],
+    ["Goat Milk", "Organic Blended Almonds & Whole Almond Topping", "Vitamin-E Oil", "Almond Fragrance Oil"],
     8.0,
     12
   ),
   "Honey Soap": new Soap(
-    ["Pure Organic Honey", "Goat Milk Soap Base", "Vitamin-E Oil", "Natural Coloring"],
+    ["Goat Milk", "Pure Organic Honey", "Nutmeg", "Honey & Milk Fragrance Oil", "Vitamin E Oil"],
     8.0,
     0
   ),
   "Lavender Soap": new Soap(
-    ["Dried Lavender Cloves", "Vitamin-E Oil", "Clear Soap Base", "Lavender Essential Oil", "Natural Coloring"],
+    ["Clear Glycerin & Goat Milk", "Lavender Cloves", "Vitamin-E Oil", "Lavender Essential Oil", "Lavender Mica Powder"],
     8.0,
     7
   ),
   "Oatmeal Soap": new Soap(
-    ["Goat Milk Soap Base", "Shredded Oats + Oat Topping", "Brown Sugar", "Vitamin-E Oil", "Oat Milk", "Honey Oil"],
+    ["Goat Milk", "Blended Oats & Whole Oat Topping", "Vitamin-E Oil", "Honey & Milk Fragrance Oil"],
     6.0,
     10
   ),
   "Rose Pedal Soap": new Soap(
-    ["Rose Petals", "Olive oil", "Rose Essential Oil", "Lye"],
+    ["Clear Glycerin", "Dried Rose Pedals", "Rose Essential Oil", "Pink Mica Powder", "Vitamin-E Oil", "Rose Water"],
+    7.0,
+    0
+  ),
+  "Orange Soap": new Soap(
+    ["Clear Glycerin & Goat Milk", "Organic Orange Shavings", "Orange Fragrance Oil", "Orange Essential Oil", "Orange Mica Powder"],
     7.0,
     0
   ),
