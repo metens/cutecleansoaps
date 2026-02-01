@@ -101,15 +101,15 @@ class Soap {
 
 const soaps = {
   "Cinnamon Soap": new Soap(
-    [
+    [ // ingredients
       "Goat Milk",
       "Cinnamon & Vanilla Fragrance Oil",
       "Cinnamon",
       "Vitamin-E Oil",
       "Brown Mica Powder",
     ],
-    8.0,
-    5
+    8.0, // price
+    5 // stock
   ),
   "Coconut Soap": new Soap(
     [
@@ -173,7 +173,7 @@ const soaps = {
       "Rose Water"
     ],
     8.0,
-    0
+    5
   ),
   "Orange Soap": new Soap(
     [
@@ -184,6 +184,17 @@ const soaps = {
       "Orange Mica Powder"
     ],
     8.0,
+    6
+  ),
+  "Honey Marble Soap": new Soap(
+    [
+      "Dried Lavender Cloves", 
+      "Vitamin‑E Oil", 
+      "Clear Soap Base", 
+      "Lavender Essential Oil", 
+      "Natural Coloring"
+    ],
+    20.0,
     0
   ),
 };
@@ -200,6 +211,7 @@ const SOAP_PHOTOS = {
   "Cinnamon Soap": ["images/cinnamon.JPG", "images/cinnamon2.png"],
   "Rose Pedal Soap": ["images/rose1.png", "images/rose2.png"],
   "Orange Soap": ["images/orange1.png", "images/orange2.png"],
+  "Honey Marble Soap": ["images/ball_soap.mp4"],
 };
 
 function setModalCarousel(soapName) {
