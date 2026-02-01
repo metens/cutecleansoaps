@@ -188,11 +188,10 @@ const soaps = {
   ),
   "Honey Marble Soap": new Soap(
     [
-      "Dried Lavender Cloves", 
+      "Goat Milk", 
       "Vitamin‑E Oil", 
-      "Clear Soap Base", 
-      "Lavender Essential Oil", 
-      "Natural Coloring"
+      "Organic Raw Honey",
+      "Nutmeg"
     ],
     20.0,
     0
@@ -211,7 +210,7 @@ const SOAP_PHOTOS = {
   "Cinnamon Soap": ["images/cinnamon.JPG", "images/cinnamon2.png"],
   "Rose Pedal Soap": ["images/rose1.png", "images/rose2.png"],
   "Orange Soap": ["images/orange1.png", "images/orange2.png"],
-  "Honey Marble Soap": ["images/ball_soap.mp4"],
+  "Honey Marble Soap": ["images/honey-marble.png", "images/ball_soap.mp4"],
 };
 
 function setModalCarousel(soapName) {
