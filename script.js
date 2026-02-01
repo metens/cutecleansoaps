@@ -112,37 +112,77 @@ const soaps = {
     5
   ),
   "Coconut Soap": new Soap(
-    ["Goat Milk", "Organic Coconut Shavings", "Vitamin-E Oil", "Coconut Oil", "Coconut Fragrance Oil"],
+    [
+      "Goat Milk", 
+      "Organic Coconut Shavings", 
+      "Vitamin-E Oil", 
+      "Coconut Oil", 
+      "Coconut Fragrance Oil"
+    ],
     6.0,
     0
   ),
   "Almond Shea Soap": new Soap(
-    ["Goat Milk", "Organic Blended Almonds & Whole Almond Topping", "Vitamin-E Oil", "Almond Fragrance Oil"],
+    [
+      "Goat Milk", 
+      "Organic Blended Almonds & Whole Almond Topping", 
+      "Vitamin-E Oil", 
+      "Almond Fragrance Oil"
+    ],
     8.0,
     12
   ),
   "Honey Soap": new Soap(
-    ["Goat Milk", "Pure Organic Honey", "Nutmeg", "Honey & Milk Fragrance Oil", "Vitamin E Oil"],
+    [
+      "Goat Milk", 
+      "Pure Organic Honey", 
+      "Nutmeg", 
+      "Honey & Milk Fragrance Oil", 
+      "Vitamin E Oil"
+    ],
     8.0,
     0
   ),
   "Lavender Soap": new Soap(
-    ["Clear Glycerin & Goat Milk", "Lavender Cloves", "Vitamin-E Oil", "Lavender Essential Oil", "Lavender Mica Powder"],
+    [
+      "Clear Glycerin & Goat Milk", 
+      "Lavender Cloves", 
+      "Vitamin-E Oil", 
+      "Lavender Essential Oil", 
+      "Lavender Mica Powder"
+    ],
     8.0,
     7
   ),
   "Oatmeal Soap": new Soap(
-    ["Goat Milk", "Blended Oats & Whole Oat Topping", "Vitamin-E Oil", "Honey & Milk Fragrance Oil"],
+    [
+      "Goat Milk", 
+      "Blended Oats & Whole Oat Topping", 
+      "Vitamin-E Oil", 
+      "Honey & Milk Fragrance Oil"],
     6.0,
     10
   ),
   "Rose Pedal Soap": new Soap(
-    ["Clear Glycerin", "Dried Rose Pedals", "Rose Essential Oil", "Pink Mica Powder", "Vitamin-E Oil", "Rose Water"],
+    [
+      "Clear Glycerin", 
+      "Dried Rose Pedals", 
+      "Rose Essential Oil", 
+      "Pink Mica Powder", 
+      "Vitamin-E Oil", 
+      "Rose Water"
+    ],
     7.0,
     0
   ),
   "Orange Soap": new Soap(
-    ["Clear Glycerin & Goat Milk", "Organic Orange Shavings", "Orange Fragrance Oil", "Orange Essential Oil", "Orange Mica Powder"],
+    [
+      "Clear Glycerin & Goat Milk", 
+      "Organic Orange Shavings", 
+      "Orange Fragrance Oil", 
+      "Orange Essential Oil", 
+      "Orange Mica Powder"
+    ],
     7.0,
     0
   ),
@@ -157,8 +197,9 @@ const SOAP_PHOTOS = {
   "Lavender Soap": ["images/lav1.png", "images/lav2.png"],
   "Oatmeal Soap": ["images/oat1.jpg", "images/oat2.png"],
   "Coconut Soap": ["images/coconut1.png", "images/coconut2.png", "images/coconut3.png"],
-  "Cinnamon Soap": ["images/cinnamon.JPG"],
+  "Cinnamon Soap": ["images/cinnamon.JPG", "images/cinnamon2.png"],
   "Rose Pedal Soap": ["images/rose1.png", "images/rose2.png"],
+  "Orange Soap": ["images/orange1.png", "images/orange2.png"],
 };
 
 function setModalCarousel(soapName) {
