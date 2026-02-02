@@ -209,7 +209,7 @@ const SOAP_PHOTOS = {
   "Coconut Soap": ["images/coconut1.png", "images/coconut2.png", "images/coconut3.png"],
   "Cinnamon Soap": ["images/cinnamon.JPG", "images/cinnamon2.png"],
   "Rose Pedal Soap": ["images/rose1.png", "images/rose2.png"],
-  "Orange Soap": ["images/orange1.png", "images/orange2.png"],
+  "Orange Soap": ["images/orange1.png", "images/orange2.png", "images/orange3.png"],
   "Honey Marble Soap": ["images/honey-marble.png", "images/ball_soap.mp4"],
 };
 
