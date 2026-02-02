@@ -184,7 +184,7 @@ const soaps = {
       "Orange Mica Powder"
     ],
     8.0,
-    6
+    5 
   ),
   "Honey Marble Soap": new Soap(
     [
