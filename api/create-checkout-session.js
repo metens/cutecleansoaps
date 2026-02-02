@@ -32,14 +32,15 @@ export default async function handler(req, res) {
     const { items } = req.body || {};
 
     const PRICE_LOOKUP = {
-      "Cinnamon Soap": 600,
-      "Coconut Soap": 600,
+      "Cinnamon Soap": 800,
+      "Coconut Soap": 800,
       "Honey Soap": 800,
       "Lavender Soap": 800,
-      "Citrus Soap": 600,
-      "Rose Pedal Soap": 700,
-      "Almond Shea Soap": 600,
-      "Oatmeal Soap": 600,
+      "Citrus Soap": 800,
+      "Rose Pedal Soap": 800,
+      "Almond Shea Soap": 800,
+      "Oatmeal Soap": 800,
+      "Orange Soap": 800,
     };
 
     const SOAP_ID_LOOKUP = {
@@ -51,6 +52,7 @@ export default async function handler(req, res) {
       "Rose Pedal Soap": "rose-pedal-soap",
       "Almond Shea Soap": "almond-shea-soap",
       "Oatmeal Soap": "oatmeal-soap",
+      "Orange Soap": "orange-soap",
     };
 
     // ---- Stock validation (server-side) ----
